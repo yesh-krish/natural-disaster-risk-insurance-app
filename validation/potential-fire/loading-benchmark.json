@@ -1,0 +1,16 @@
+{
+  "sequential_cached_weather_seconds": 35.98356630001217,
+  "parallel_first_result_seconds": 9.082960200001253,
+  "completed_cache_seconds": 0.023410099995089695,
+  "workers": 4,
+  "annual_maxima_identical": true,
+  "curve_identical": true,
+  "scientific_identity": {
+    "method": "potential-surface-v1",
+    "engine_sha256": "1d79429c87325f45d0c56b2c0a82ae1930ffb3ff93db3cb52a340e1d59fb9c1f",
+    "start_year": 1991,
+    "end_year": 2020,
+    "minimum_years": 20
+  },
+  "note": "Weather was already downloaded. First-result timing uses any existing yearly/result caches; none are deleted."
+}

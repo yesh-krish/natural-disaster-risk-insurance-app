@@ -1,0 +1,908 @@
+{
+  "source_url": "https://usfs-public.box.com/shared/static/h55qel755s97nagdu97ebd4z6fzpp3w1.zip",
+  "retrieved_at": "2026-11-04T00:41:43.681971+00:00",
+  "archive_size": 1709275509,
+  "range_bytes_read": 19075,
+  "entries": [
+    {
+      "name": "Data/",
+      "bytes": 0,
+      "compressed_bytes": 0,
+      "crc32": "00000000"
+    },
+    {
+      "name": "Data/2011ClimateRun/",
+      "bytes": 0,
+      "compressed_bytes": 0,
+      "crc32": "00000000"
+    },
+    {
+      "name": "Data/2011ClimateRun/BP.tfw",
+      "bytes": 96,
+      "compressed_bytes": 42,
+      "crc32": "b54369e4"
+    },
+    {
+      "name": "Data/2011ClimateRun/BP.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 105974288,
+      "crc32": "c6e2e7ae"
+    },
+    {
+      "name": "Data/2011ClimateRun/BP.tif.aux.xml",
+      "bytes": 2247,
+      "compressed_bytes": 1049,
+      "crc32": "7e816729"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP1.tfw",
+      "bytes": 96,
+      "compressed_bytes": 42,
+      "crc32": "b54369e4"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP1.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 115673051,
+      "crc32": "d9960d70"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP1.tif.aux.xml",
+      "bytes": 2473,
+      "compressed_bytes": 1207,
+      "crc32": "2930426f"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP2.tfw",
+      "bytes": 96,
+      "compressed_bytes": 42,
+      "crc32": "b54369e4"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP2.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 167688356,
+      "crc32": "a092a701"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP2.tif.aux.xml",
+      "bytes": 2578,
+      "compressed_bytes": 1231,
+      "crc32": "1022aa0a"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP3.tfw",
+      "bytes": 96,
+      "compressed_bytes": 42,
+      "crc32": "b54369e4"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP3.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 151238432,
+      "crc32": "69adf584"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP3.tif.aux.xml",
+      "bytes": 2400,
+      "compressed_bytes": 1154,
+      "crc32": "65b115bf"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP4.tfw",
+      "bytes": 96,
+      "compressed_bytes": 42,
+      "crc32": "b54369e4"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP4.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 119559924,
+      "crc32": "9f4b4f5b"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP4.tif.aux.xml",
+      "bytes": 2157,
+      "compressed_bytes": 1014,
+      "crc32": "2e06f022"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP5.tfw",
+      "bytes": 96,
+      "compressed_bytes": 42,
+      "crc32": "b54369e4"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP5.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 89137946,
+      "crc32": "45738bec"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP5.tif.aux.xml",
+      "bytes": 2188,
+      "compressed_bytes": 1028,
+      "crc32": "19df76ad"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP6.tfw",
+      "bytes": 96,
+      "compressed_bytes": 42,
+      "crc32": "b54369e4"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP6.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 43491821,
+      "crc32": "cc30ff85"
+    },
+    {
+      "name": "Data/2011ClimateRun/FLP6.tif.aux.xml",
+      "bytes": 2337,
+      "compressed_bytes": 1092,
+      "crc32": "58ca0df8"
+    },
+    {
+      "name": "Data/2047ClimateRun/",
+      "bytes": 0,
+      "compressed_bytes": 0,
+      "crc32": "00000000"
+    },
+    {
+      "name": "Data/2047ClimateRun/BP.tfw",
+      "bytes": 96,
+      "compressed_bytes": 43,
+      "crc32": "939b382b"
+    },
+    {
+      "name": "Data/2047ClimateRun/BP.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 113584663,
+      "crc32": "4cb1c1a1"
+    },
+    {
+      "name": "Data/2047ClimateRun/BP.tif.aux.xml",
+      "bytes": 2194,
+      "compressed_bytes": 1027,
+      "crc32": "5155ec0d"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP1.tfw",
+      "bytes": 96,
+      "compressed_bytes": 43,
+      "crc32": "939b382b"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP1.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 124362901,
+      "crc32": "ecc54e37"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP1.tif.aux.xml",
+      "bytes": 2479,
+      "compressed_bytes": 1203,
+      "crc32": "be937486"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP2.tfw",
+      "bytes": 96,
+      "compressed_bytes": 43,
+      "crc32": "939b382b"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP2.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 178063909,
+      "crc32": "5f60d704"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP2.tif.aux.xml",
+      "bytes": 2578,
+      "compressed_bytes": 1231,
+      "crc32": "36d49b2c"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP3.tfw",
+      "bytes": 96,
+      "compressed_bytes": 43,
+      "crc32": "939b382b"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP3.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 161104723,
+      "crc32": "943a7fc3"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP3.tif.aux.xml",
+      "bytes": 2395,
+      "compressed_bytes": 1149,
+      "crc32": "7b65c7b5"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP4.tfw",
+      "bytes": 96,
+      "compressed_bytes": 43,
+      "crc32": "939b382b"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP4.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 129146271,
+      "crc32": "3523d887"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP4.tif.aux.xml",
+      "bytes": 2154,
+      "compressed_bytes": 1002,
+      "crc32": "27b9f9b3"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP5.tfw",
+      "bytes": 96,
+      "compressed_bytes": 43,
+      "crc32": "939b382b"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP5.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 97722150,
+      "crc32": "3d9dc762"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP5.tif.aux.xml",
+      "bytes": 2190,
+      "compressed_bytes": 1023,
+      "crc32": "f7e3c4e2"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP6.tfw",
+      "bytes": 96,
+      "compressed_bytes": 43,
+      "crc32": "939b382b"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP6.tif",
+      "bytes": 778760620,
+      "compressed_bytes": 47632080,
+      "crc32": "83c1e12b"
+    },
+    {
+      "name": "Data/2047ClimateRun/FLP6.tif.aux.xml",
+      "bytes": 2330,
+      "compressed_bytes": 1088,
+      "crc32": "200889b3"
+    },
+    {
+      "name": "Data/CountyChange/",
+      "bytes": 0,
+      "compressed_bytes": 0,
+      "crc32": "00000000"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/",
+      "bytes": 0,
+      "compressed_bytes": 0,
+      "crc32": "00000000"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000001.freelist",
+      "bytes": 8536,
+      "compressed_bytes": 66,
+      "crc32": "a79791af"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000001.gdbindexes",
+      "bytes": 110,
+      "compressed_bytes": 82,
+      "crc32": "96cbdec4"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000001.gdbtable",
+      "bytes": 412,
+      "compressed_bytes": 252,
+      "crc32": "6b6924c6"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000001.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 68,
+      "crc32": "16704cad"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000001.TablesByName.atx",
+      "bytes": 4118,
+      "compressed_bytes": 205,
+      "crc32": "5f559d75"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000002.gdbtable",
+      "bytes": 2055,
+      "compressed_bytes": 642,
+      "crc32": "6f6586b3"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000002.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 133,
+      "crc32": "81192413"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000003.gdbindexes",
+      "bytes": 42,
+      "compressed_bytes": 40,
+      "crc32": "10a41729"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000003.gdbtable",
+      "bytes": 1037,
+      "compressed_bytes": 510,
+      "crc32": "29315720"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000003.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 41,
+      "crc32": "2f01a881"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000004.CatItemsByPhysicalName.atx",
+      "bytes": 4118,
+      "compressed_bytes": 106,
+      "crc32": "c0536b61"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000004.CatItemsByType.atx",
+      "bytes": 4118,
+      "compressed_bytes": 131,
+      "crc32": "c95dd593"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000004.FDO_UUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 129,
+      "crc32": "513aabab"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000004.freelist",
+      "bytes": 24920,
+      "compressed_bytes": 357,
+      "crc32": "918d4440"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000004.gdbindexes",
+      "bytes": 310,
+      "compressed_bytes": 132,
+      "crc32": "20b0d3a9"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000004.gdbtable",
+      "bytes": 86704,
+      "compressed_bytes": 6813,
+      "crc32": "7665f2ea"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000004.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 50,
+      "crc32": "274e1c5f"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000004.horizon",
+      "bytes": 32,
+      "compressed_bytes": 30,
+      "crc32": "3050f004"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000004.spx",
+      "bytes": 4118,
+      "compressed_bytes": 33,
+      "crc32": "863010df"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000005.CatItemTypesByName.atx",
+      "bytes": 12310,
+      "compressed_bytes": 590,
+      "crc32": "749a5532"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000005.CatItemTypesByParentTypeID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 285,
+      "crc32": "f5a8f26d"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000005.CatItemTypesByUUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 981,
+      "crc32": "92e0538a"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000005.gdbindexes",
+      "bytes": 296,
+      "compressed_bytes": 119,
+      "crc32": "81a6dd1a"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000005.gdbtable",
+      "bytes": 2071,
+      "compressed_bytes": 1255,
+      "crc32": "10236021"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000005.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 137,
+      "crc32": "e7e94313"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000006.CatRelsByDestinationID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 77,
+      "crc32": "f7d4199f"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000006.CatRelsByOriginID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 77,
+      "crc32": "63c9a293"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000006.CatRelsByType.atx",
+      "bytes": 4118,
+      "compressed_bytes": 76,
+      "crc32": "d282581f"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000006.FDO_UUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 77,
+      "crc32": "dab2efae"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000006.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 50,
+      "crc32": "2a3f1c61"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000006.gdbindexes",
+      "bytes": 318,
+      "compressed_bytes": 129,
+      "crc32": "11bee99e"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000006.gdbtable",
+      "bytes": 409,
+      "compressed_bytes": 312,
+      "crc32": "b0c02a66"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000006.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 36,
+      "crc32": "a2124fbf"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000007.CatRelTypesByBackwardLabel.atx",
+      "bytes": 12310,
+      "compressed_bytes": 449,
+      "crc32": "d331f37f"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000007.CatRelTypesByDestItemTypeID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 318,
+      "crc32": "223fd0ce"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000007.CatRelTypesByForwardLabel.atx",
+      "bytes": 12310,
+      "compressed_bytes": 337,
+      "crc32": "9c9fad34"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000007.CatRelTypesByName.atx",
+      "bytes": 12310,
+      "compressed_bytes": 483,
+      "crc32": "5a48956d"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000007.CatRelTypesByOriginItemTypeID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 491,
+      "crc32": "fb54d603"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000007.CatRelTypesByUUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 670,
+      "crc32": "3c438ecc"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000007.gdbindexes",
+      "bytes": 602,
+      "compressed_bytes": 172,
+      "crc32": "c1cd0064"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000007.gdbtable",
+      "bytes": 3626,
+      "compressed_bytes": 1662,
+      "crc32": "b9c695df"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a00000007.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 121,
+      "crc32": "25b309e7"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a0000000d.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 70,
+      "crc32": "673aef5b"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a0000000d.gdbtable",
+      "bytes": 52292546,
+      "compressed_bytes": 49693406,
+      "crc32": "4dcbc99f"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a0000000d.gdbtablx",
+      "bytes": 20512,
+      "compressed_bytes": 9239,
+      "crc32": "2c1aa634"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a0000000d.horizon",
+      "bytes": 32,
+      "compressed_bytes": 32,
+      "crc32": "ed995596"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/a0000000d.spx",
+      "bytes": 90134,
+      "compressed_bytes": 12545,
+      "crc32": "80d1c8cf"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/gdb",
+      "bytes": 4,
+      "compressed_bytes": 4,
+      "crc32": "169a2f2e"
+    },
+    {
+      "name": "Data/CountyChange/counties.gdb/timestamps",
+      "bytes": 400,
+      "compressed_bytes": 33,
+      "crc32": "cae2573f"
+    },
+    {
+      "name": "Data/CountyChange/county_change.csv",
+      "bytes": 426563,
+      "compressed_bytes": 151776,
+      "crc32": "5c2eee3b"
+    },
+    {
+      "name": "Data/PyromeChange/",
+      "bytes": 0,
+      "compressed_bytes": 0,
+      "crc32": "00000000"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/",
+      "bytes": 0,
+      "compressed_bytes": 0,
+      "crc32": "00000000"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000001.freelist",
+      "bytes": 8536,
+      "compressed_bytes": 71,
+      "crc32": "20a0251a"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000001.gdbindexes",
+      "bytes": 110,
+      "compressed_bytes": 82,
+      "crc32": "96cbdec4"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000001.gdbtable",
+      "bytes": 409,
+      "compressed_bytes": 248,
+      "crc32": "b86f65df"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000001.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 68,
+      "crc32": "6b935f96"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000001.TablesByName.atx",
+      "bytes": 4118,
+      "compressed_bytes": 204,
+      "crc32": "b546dc3e"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000002.gdbtable",
+      "bytes": 2055,
+      "compressed_bytes": 642,
+      "crc32": "6f6586b3"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000002.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 133,
+      "crc32": "81192413"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000003.gdbindexes",
+      "bytes": 42,
+      "compressed_bytes": 40,
+      "crc32": "10a41729"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000003.gdbtable",
+      "bytes": 1037,
+      "compressed_bytes": 510,
+      "crc32": "29315720"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000003.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 41,
+      "crc32": "2f01a881"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000004.CatItemsByPhysicalName.atx",
+      "bytes": 4118,
+      "compressed_bytes": 104,
+      "crc32": "6d3dec7f"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000004.CatItemsByType.atx",
+      "bytes": 4118,
+      "compressed_bytes": 131,
+      "crc32": "8666d92a"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000004.FDO_UUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 129,
+      "crc32": "ccb3d181"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000004.freelist",
+      "bytes": 20824,
+      "compressed_bytes": 144,
+      "crc32": "1ce6e737"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000004.gdbindexes",
+      "bytes": 310,
+      "compressed_bytes": 132,
+      "crc32": "20b0d3a9"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000004.gdbtable",
+      "bytes": 65222,
+      "compressed_bytes": 5905,
+      "crc32": "85f9142d"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000004.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 50,
+      "crc32": "2e777bf9"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000004.horizon",
+      "bytes": 32,
+      "compressed_bytes": 30,
+      "crc32": "3050f004"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000004.spx",
+      "bytes": 4118,
+      "compressed_bytes": 33,
+      "crc32": "863010df"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000005.CatItemTypesByName.atx",
+      "bytes": 12310,
+      "compressed_bytes": 590,
+      "crc32": "749a5532"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000005.CatItemTypesByParentTypeID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 285,
+      "crc32": "f5a8f26d"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000005.CatItemTypesByUUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 981,
+      "crc32": "92e0538a"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000005.gdbindexes",
+      "bytes": 296,
+      "compressed_bytes": 119,
+      "crc32": "81a6dd1a"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000005.gdbtable",
+      "bytes": 2071,
+      "compressed_bytes": 1255,
+      "crc32": "10236021"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000005.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 137,
+      "crc32": "e7e94313"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000006.CatRelsByDestinationID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 76,
+      "crc32": "e5e678ff"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000006.CatRelsByOriginID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 77,
+      "crc32": "2cf2ae2a"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000006.CatRelsByType.atx",
+      "bytes": 4118,
+      "compressed_bytes": 76,
+      "crc32": "9db954a6"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000006.FDO_UUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 77,
+      "crc32": "96601531"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000006.freelist",
+      "bytes": 4440,
+      "compressed_bytes": 51,
+      "crc32": "971c019f"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000006.gdbindexes",
+      "bytes": 318,
+      "compressed_bytes": 129,
+      "crc32": "11bee99e"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000006.gdbtable",
+      "bytes": 409,
+      "compressed_bytes": 318,
+      "crc32": "e6931333"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000006.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 36,
+      "crc32": "2663399f"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000007.CatRelTypesByBackwardLabel.atx",
+      "bytes": 12310,
+      "compressed_bytes": 449,
+      "crc32": "d331f37f"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000007.CatRelTypesByDestItemTypeID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 318,
+      "crc32": "223fd0ce"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000007.CatRelTypesByForwardLabel.atx",
+      "bytes": 12310,
+      "compressed_bytes": 337,
+      "crc32": "9c9fad34"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000007.CatRelTypesByName.atx",
+      "bytes": 12310,
+      "compressed_bytes": 483,
+      "crc32": "5a48956d"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000007.CatRelTypesByOriginItemTypeID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 491,
+      "crc32": "fb54d603"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000007.CatRelTypesByUUID.atx",
+      "bytes": 4118,
+      "compressed_bytes": 670,
+      "crc32": "3c438ecc"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000007.gdbindexes",
+      "bytes": 602,
+      "compressed_bytes": 172,
+      "crc32": "c1cd0064"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000007.gdbtable",
+      "bytes": 3626,
+      "compressed_bytes": 1662,
+      "crc32": "b9c695df"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a00000007.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 121,
+      "crc32": "25b309e7"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a0000000c.gdbindexes",
+      "bytes": 116,
+      "compressed_bytes": 70,
+      "crc32": "673aef5b"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a0000000c.gdbtable",
+      "bytes": 16223286,
+      "compressed_bytes": 14934128,
+      "crc32": "d8517ee4"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a0000000c.gdbtablx",
+      "bytes": 5152,
+      "compressed_bytes": 552,
+      "crc32": "53ab3c87"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a0000000c.horizon",
+      "bytes": 32,
+      "compressed_bytes": 32,
+      "crc32": "ed995596"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/a0000000c.spx",
+      "bytes": 4118,
+      "compressed_bytes": 555,
+      "crc32": "fb7aa202"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/gdb",
+      "bytes": 4,
+      "compressed_bytes": 4,
+      "crc32": "169a2f2e"
+    },
+    {
+      "name": "Data/PyromeChange/pyromes.gdb/timestamps",
+      "bytes": 400,
+      "compressed_bytes": 33,
+      "crc32": "6981d3bc"
+    },
+    {
+      "name": "Data/PyromeChange/pyrome_change.csv",
+      "bytes": 21048,
+      "compressed_bytes": 9130,
+      "crc32": "0f4763a2"
+    },
+    {
+      "name": "Data/_variable_descriptions.csv",
+      "bytes": 6463,
+      "compressed_bytes": 675,
+      "crc32": "9f609644"
+    }
+  ]
+}

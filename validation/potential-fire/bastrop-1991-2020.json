@@ -1,0 +1,1497 @@
+{
+  "purpose": "Software integration evidence, not independent scientific validation",
+  "point": {
+    "latitude": 30.08,
+    "longitude": -97.3
+  },
+  "baseline": {
+    "start_year": 1991,
+    "end_year": 2020,
+    "complete_years": 30,
+    "minimum_complete_years": 20,
+    "excluded_years": []
+  },
+  "quantity": "Potential heading surface-fire intensity",
+  "units": "kW/m",
+  "actual_wildfire_probability_available": false,
+  "scenario": {
+    "live_herbaceous_moisture_fraction": 0.6,
+    "live_woody_moisture_fraction": 0.9,
+    "snow_cover_rule": "No surface spread when ERA5 snow_depth > 0",
+    "wind_limit": true,
+    "spinup_days_per_year": 31,
+    "calendar": "UTC",
+    "crown_fire": false
+  },
+  "landscape": {
+    "fuel_model": 188,
+    "canopy_cover_fraction": 0.75,
+    "canopy_height_m": 23.0,
+    "slope_degrees": 9.0,
+    "aspect_degrees": 310.0,
+    "region": "CONUS",
+    "fuel_vintage": "LANDFIRE 2023",
+    "terrain_vintage": "LANDFIRE 2020",
+    "nominal_resolution_m": 30,
+    "sources": [
+      {
+        "url": "https://edcintl.cr.usgs.gov/arcgis/rest/services/Landfire_LF2023/LF2023_FBFM40_CONUS/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-97.3%2C+%22y%22%3A+30.08%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+        "sha256": "fbb36ec9229c0d458061991160fc7474eecca8c01a5105f76b31810bff8482cb",
+        "retrieved_at": "2026-11-04T02:42:29.391882+00:00"
+      },
+      {
+        "url": "https://edcintl.cr.usgs.gov/arcgis/rest/services/Landfire_LF2023/LF2023_CC_CONUS/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-97.3%2C+%22y%22%3A+30.08%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+        "sha256": "d89cd648010cca85dca31ff941f8a9aa48185a7f09152b46dde9b0c18c7ea07c",
+        "retrieved_at": "2026-11-04T02:42:29.398470+00:00"
+      },
+      {
+        "url": "https://edcintl.cr.usgs.gov/arcgis/rest/services/Landfire_LF2023/LF2023_CH_CONUS/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-97.3%2C+%22y%22%3A+30.08%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+        "sha256": "7e32ddba72feb60e5e571d9d15e663dc06496f1fc7d97955aae9cda7bd23d1a9",
+        "retrieved_at": "2026-11-04T02:42:29.379719+00:00"
+      },
+      {
+        "url": "https://edcintl.cr.usgs.gov/arcgis/rest/services/Landfire_Topo/LF2020_SlpD_CONUS/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-97.3%2C+%22y%22%3A+30.08%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+        "sha256": "774f8dff6f4e50130163e6fbe68949f104973242a039d5b9dbfa6d2e1dc5bd18",
+        "retrieved_at": "2026-11-04T02:42:29.605317+00:00"
+      },
+      {
+        "url": "https://edcintl.cr.usgs.gov/arcgis/rest/services/Landfire_Topo/LF2020_Asp_CONUS/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-97.3%2C+%22y%22%3A+30.08%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+        "sha256": "addce8bc44dba7b8603f7c4223388cf2c969335e843239edc4481c86d67708e5",
+        "retrieved_at": "2026-11-04T02:42:29.606069+00:00"
+      }
+    ]
+  },
+  "annual_maxima": [
+    {
+      "year": 1991,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 89.46532766694392,
+      "peak": {
+        "time_utc": "1991-03-12T23:00Z",
+        "intensity_kw_m": 89.46532766694392,
+        "spread_rate_m_s": 0.009802296574180658,
+        "areal_heat_release_kj_m2": 9126.976213165844,
+        "dead_fuel_moisture_fraction": [
+          0.034409411285451816,
+          0.12301546635166433,
+          0.1457640381204089
+        ],
+        "weather": {
+          "temperature_2m": 27.3,
+          "relative_humidity_2m": 8,
+          "rain": 0.0,
+          "wind_speed_10m": 4.99,
+          "wind_direction_10m": 303,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 1992,
+      "complete": true,
+      "expected_hours": 8784,
+      "valid_hours": 8784,
+      "maximum_kw_m": 67.75641647796326,
+      "peak": {
+        "time_utc": "1992-09-30T21:00Z",
+        "intensity_kw_m": 67.75641647796326,
+        "spread_rate_m_s": 0.00814951589687659,
+        "areal_heat_release_kj_m2": 8314.164587853838,
+        "dead_fuel_moisture_fraction": [
+          0.05177764324480802,
+          0.09656648306606266,
+          0.1372949366492276
+        ],
+        "weather": {
+          "temperature_2m": 28.5,
+          "relative_humidity_2m": 15,
+          "rain": 0.0,
+          "wind_speed_10m": 5.76,
+          "wind_direction_10m": 20,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 1993,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 63.509506240282214,
+      "peak": {
+        "time_utc": "1993-12-13T21:00Z",
+        "intensity_kw_m": 63.509506240282214,
+        "spread_rate_m_s": 0.008948831022806981,
+        "areal_heat_release_kj_m2": 7096.961164918854,
+        "dead_fuel_moisture_fraction": [
+          0.09014556758528024,
+          0.15824865590425516,
+          0.18669387331167522
+        ],
+        "weather": {
+          "temperature_2m": 20.7,
+          "relative_humidity_2m": 31,
+          "rain": 0.0,
+          "wind_speed_10m": 9.57,
+          "wind_direction_10m": 304,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 1994,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 63.66633012417586,
+      "peak": {
+        "time_utc": "1994-09-18T21:00Z",
+        "intensity_kw_m": 63.66633012417586,
+        "spread_rate_m_s": 0.007871576021848773,
+        "areal_heat_release_kj_m2": 8088.12999422989,
+        "dead_fuel_moisture_fraction": [
+          0.05726316293740913,
+          0.09726002500453092,
+          0.16767976996073974
+        ],
+        "weather": {
+          "temperature_2m": 33.1,
+          "relative_humidity_2m": 19,
+          "rain": 0.0,
+          "wind_speed_10m": 5.54,
+          "wind_direction_10m": 7,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 1995,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 70.31525207405345,
+      "peak": {
+        "time_utc": "1995-10-14T21:00Z",
+        "intensity_kw_m": 70.31525207405345,
+        "spread_rate_m_s": 0.009033350368416468,
+        "areal_heat_release_kj_m2": 7783.961565345505,
+        "dead_fuel_moisture_fraction": [
+          0.0653830191288399,
+          0.11795579614942679,
+          0.16525195376872895
+        ],
+        "weather": {
+          "temperature_2m": 25.5,
+          "relative_humidity_2m": 19,
+          "rain": 0.0,
+          "wind_speed_10m": 8.3,
+          "wind_direction_10m": 13,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 1996,
+      "complete": true,
+      "expected_hours": 8784,
+      "valid_hours": 8784,
+      "maximum_kw_m": 100.59177454675334,
+      "peak": {
+        "time_utc": "1996-04-15T00:00Z",
+        "intensity_kw_m": 100.59177454675334,
+        "spread_rate_m_s": 0.01121645745107647,
+        "areal_heat_release_kj_m2": 8968.230386956917,
+        "dead_fuel_moisture_fraction": [
+          0.03749546306240997,
+          0.11289592393724295,
+          0.16673607053766026
+        ],
+        "weather": {
+          "temperature_2m": 29.4,
+          "relative_humidity_2m": 12,
+          "rain": 0.0,
+          "wind_speed_10m": 7.2,
+          "wind_direction_10m": 335,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 1997,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 60.83035503051322,
+      "peak": {
+        "time_utc": "1997-11-01T19:00Z",
+        "intensity_kw_m": 60.83035503051322,
+        "spread_rate_m_s": 0.008463680363865146,
+        "areal_heat_release_kj_m2": 7187.222628376002,
+        "dead_fuel_moisture_fraction": [
+          0.08657508806511574,
+          0.12106402978020776,
+          0.18204315627254677
+        ],
+        "weather": {
+          "temperature_2m": 24.9,
+          "relative_humidity_2m": 28,
+          "rain": 0.0,
+          "wind_speed_10m": 9.01,
+          "wind_direction_10m": 357,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 1998,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 70.93086992710373,
+      "peak": {
+        "time_utc": "1998-05-09T21:00Z",
+        "intensity_kw_m": 70.93086992710373,
+        "spread_rate_m_s": 0.008551138894272494,
+        "areal_heat_release_kj_m2": 8294.903264243881,
+        "dead_fuel_moisture_fraction": [
+          0.0518005879664878,
+          0.11974737927499259,
+          0.16771049994617634
+        ],
+        "weather": {
+          "temperature_2m": 33.1,
+          "relative_humidity_2m": 19,
+          "rain": 0.0,
+          "wind_speed_10m": 5.28,
+          "wind_direction_10m": 307,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 1999,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 66.17389819395709,
+      "peak": {
+        "time_utc": "1999-11-02T21:00Z",
+        "intensity_kw_m": 66.17389819395709,
+        "spread_rate_m_s": 0.008639524811457596,
+        "areal_heat_release_kj_m2": 7659.437253562644,
+        "dead_fuel_moisture_fraction": [
+          0.06929076570192957,
+          0.11236248648454875,
+          0.16293421913461675
+        ],
+        "weather": {
+          "temperature_2m": 18.5,
+          "relative_humidity_2m": 16,
+          "rain": 0.0,
+          "wind_speed_10m": 7.8,
+          "wind_direction_10m": 1,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2000,
+      "complete": true,
+      "expected_hours": 8784,
+      "valid_hours": 8784,
+      "maximum_kw_m": 75.31493282712789,
+      "peak": {
+        "time_utc": "2000-01-03T21:00Z",
+        "intensity_kw_m": 75.31493282712789,
+        "spread_rate_m_s": 0.009251413970117469,
+        "areal_heat_release_kj_m2": 8140.910467351142,
+        "dead_fuel_moisture_fraction": [
+          0.055417777169585,
+          0.13414139262644068,
+          0.15373239522676968
+        ],
+        "weather": {
+          "temperature_2m": 22.5,
+          "relative_humidity_2m": 14,
+          "rain": 0.0,
+          "wind_speed_10m": 6.8,
+          "wind_direction_10m": 287,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2001,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 49.9770005343876,
+      "peak": {
+        "time_utc": "2001-08-06T19:00Z",
+        "intensity_kw_m": 49.9770005343876,
+        "spread_rate_m_s": 0.006292079058132885,
+        "areal_heat_release_kj_m2": 7942.843704385654,
+        "dead_fuel_moisture_fraction": [
+          0.06131039477381211,
+          0.09545043096519558,
+          0.12153270971276607
+        ],
+        "weather": {
+          "temperature_2m": 37.7,
+          "relative_humidity_2m": 27,
+          "rain": 0.0,
+          "wind_speed_10m": 4.46,
+          "wind_direction_10m": 48,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2002,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 57.8489422735567,
+      "peak": {
+        "time_utc": "2002-03-09T21:00Z",
+        "intensity_kw_m": 57.8489422735567,
+        "spread_rate_m_s": 0.008190841687876463,
+        "areal_heat_release_kj_m2": 7062.637086391358,
+        "dead_fuel_moisture_fraction": [
+          0.09144494718249452,
+          0.1834432821380799,
+          0.18627295825576526
+        ],
+        "weather": {
+          "temperature_2m": 16.0,
+          "relative_humidity_2m": 22,
+          "rain": 0.0,
+          "wind_speed_10m": 9.55,
+          "wind_direction_10m": 18,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2003,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 77.16077151334004,
+      "peak": {
+        "time_utc": "2003-12-09T21:00Z",
+        "intensity_kw_m": 77.16077151334004,
+        "spread_rate_m_s": 0.010156981313502539,
+        "areal_heat_release_kj_m2": 7596.8212534529,
+        "dead_fuel_moisture_fraction": [
+          0.07029712577339832,
+          0.17859566171119928,
+          0.17726225978229015
+        ],
+        "weather": {
+          "temperature_2m": 21.3,
+          "relative_humidity_2m": 18,
+          "rain": 0.0,
+          "wind_speed_10m": 9.55,
+          "wind_direction_10m": 293,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2004,
+      "complete": true,
+      "expected_hours": 8784,
+      "valid_hours": 8784,
+      "maximum_kw_m": 54.228399646320234,
+      "peak": {
+        "time_utc": "2004-01-26T21:00Z",
+        "intensity_kw_m": 54.228399646320234,
+        "spread_rate_m_s": 0.0077459055922378854,
+        "areal_heat_release_kj_m2": 7000.9115139051155,
+        "dead_fuel_moisture_fraction": [
+          0.0948222249627633,
+          0.153884174000969,
+          0.2515980068826868
+        ],
+        "weather": {
+          "temperature_2m": 18.9,
+          "relative_humidity_2m": 26,
+          "rain": 0.0,
+          "wind_speed_10m": 8.02,
+          "wind_direction_10m": 310,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2005,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 70.85621585865003,
+      "peak": {
+        "time_utc": "2005-12-24T21:00Z",
+        "intensity_kw_m": 70.85621585865003,
+        "spread_rate_m_s": 0.009231376287960403,
+        "areal_heat_release_kj_m2": 7675.585270103329,
+        "dead_fuel_moisture_fraction": [
+          0.06826269884469577,
+          0.1438663124287618,
+          0.18123375300283995
+        ],
+        "weather": {
+          "temperature_2m": 22.3,
+          "relative_humidity_2m": 17,
+          "rain": 0.0,
+          "wind_speed_10m": 7.99,
+          "wind_direction_10m": 317,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2006,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 115.34081758868328,
+      "peak": {
+        "time_utc": "2006-04-08T02:00Z",
+        "intensity_kw_m": 115.34081758868328,
+        "spread_rate_m_s": 0.011398955300763909,
+        "areal_heat_release_kj_m2": 10118.542844093234,
+        "dead_fuel_moisture_fraction": [
+          0.018354760132832004,
+          0.09360484548851404,
+          0.1552362362367437
+        ],
+        "weather": {
+          "temperature_2m": 27.7,
+          "relative_humidity_2m": 3,
+          "rain": 0.0,
+          "wind_speed_10m": 4.88,
+          "wind_direction_10m": 332,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2007,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 84.7304591361338,
+      "peak": {
+        "time_utc": "2007-03-01T21:00Z",
+        "intensity_kw_m": 84.7304591361338,
+        "spread_rate_m_s": 0.01019158312147498,
+        "areal_heat_release_kj_m2": 8313.768148306204,
+        "dead_fuel_moisture_fraction": [
+          0.050935065833726346,
+          0.14755016133511523,
+          0.1709945910169397
+        ],
+        "weather": {
+          "temperature_2m": 22.2,
+          "relative_humidity_2m": 12,
+          "rain": 0.0,
+          "wind_speed_10m": 7.44,
+          "wind_direction_10m": 311,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2008,
+      "complete": true,
+      "expected_hours": 8784,
+      "valid_hours": 8784,
+      "maximum_kw_m": 76.74046402627708,
+      "peak": {
+        "time_utc": "2008-01-31T19:00Z",
+        "intensity_kw_m": 76.74046402627708,
+        "spread_rate_m_s": 0.010245236256573635,
+        "areal_heat_release_kj_m2": 7490.355722840282,
+        "dead_fuel_moisture_fraction": [
+          0.07303158374244637,
+          0.23225012029995626,
+          0.2061406851492308
+        ],
+        "weather": {
+          "temperature_2m": 16.3,
+          "relative_humidity_2m": 12,
+          "rain": 0.0,
+          "wind_speed_10m": 9.95,
+          "wind_direction_10m": 300,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2009,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 85.30463299761107,
+      "peak": {
+        "time_utc": "2009-01-19T20:00Z",
+        "intensity_kw_m": 85.30463299761107,
+        "spread_rate_m_s": 0.010409623732390638,
+        "areal_heat_release_kj_m2": 8194.7854399556,
+        "dead_fuel_moisture_fraction": [
+          0.054793202529719656,
+          0.08694887812521444,
+          0.14279306865752114
+        ],
+        "weather": {
+          "temperature_2m": 21.7,
+          "relative_humidity_2m": 15,
+          "rain": 0.0,
+          "wind_speed_10m": 8.23,
+          "wind_direction_10m": 336,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2010,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 101.39458251595106,
+      "peak": {
+        "time_utc": "2010-10-28T20:00Z",
+        "intensity_kw_m": 101.39458251595106,
+        "spread_rate_m_s": 0.011461890009321025,
+        "areal_heat_release_kj_m2": 8846.23586803704,
+        "dead_fuel_moisture_fraction": [
+          0.04042818587028722,
+          0.08098024699587326,
+          0.14502791826743944
+        ],
+        "weather": {
+          "temperature_2m": 25.8,
+          "relative_humidity_2m": 10,
+          "rain": 0.0,
+          "wind_speed_10m": 8.61,
+          "wind_direction_10m": 15,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2011,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 107.05350705971995,
+      "peak": {
+        "time_utc": "2011-09-04T21:00Z",
+        "intensity_kw_m": 107.05350705971995,
+        "spread_rate_m_s": 0.01254779371014276,
+        "areal_heat_release_kj_m2": 8531.659790771453,
+        "dead_fuel_moisture_fraction": [
+          0.04719626944706733,
+          0.07897264485201543,
+          0.0980811464162302
+        ],
+        "weather": {
+          "temperature_2m": 37.8,
+          "relative_humidity_2m": 19,
+          "rain": 0.0,
+          "wind_speed_10m": 10.55,
+          "wind_direction_10m": 13,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2012,
+      "complete": true,
+      "expected_hours": 8784,
+      "valid_hours": 8784,
+      "maximum_kw_m": 65.67334730101618,
+      "peak": {
+        "time_utc": "2012-12-20T21:00Z",
+        "intensity_kw_m": 65.67334730101618,
+        "spread_rate_m_s": 0.008679843041368148,
+        "areal_heat_release_kj_m2": 7566.190654372076,
+        "dead_fuel_moisture_fraction": [
+          0.07204164529389936,
+          0.12806351970299296,
+          0.18022360295852569
+        ],
+        "weather": {
+          "temperature_2m": 13.3,
+          "relative_humidity_2m": 14,
+          "rain": 0.0,
+          "wind_speed_10m": 7.73,
+          "wind_direction_10m": 339,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2013,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 75.45582181694363,
+      "peak": {
+        "time_utc": "2013-02-25T20:00Z",
+        "intensity_kw_m": 75.45582181694363,
+        "spread_rate_m_s": 0.010327765344040942,
+        "areal_heat_release_kj_m2": 7306.113113857798,
+        "dead_fuel_moisture_fraction": [
+          0.08087391868155208,
+          0.1725160888320195,
+          0.1761247769189143
+        ],
+        "weather": {
+          "temperature_2m": 18.3,
+          "relative_humidity_2m": 27,
+          "rain": 0.0,
+          "wind_speed_10m": 10.99,
+          "wind_direction_10m": 277,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2014,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 76.96370617054895,
+      "peak": {
+        "time_utc": "2014-04-28T19:00Z",
+        "intensity_kw_m": 76.96370617054895,
+        "spread_rate_m_s": 0.008606331325978078,
+        "areal_heat_release_kj_m2": 8942.684548785055,
+        "dead_fuel_moisture_fraction": [
+          0.037850711081286834,
+          0.123442114239167,
+          0.16228877044205223
+        ],
+        "weather": {
+          "temperature_2m": 31.8,
+          "relative_humidity_2m": 12,
+          "rain": 0.0,
+          "wind_speed_10m": 3.75,
+          "wind_direction_10m": 312,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2015,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 81.98837819322405,
+      "peak": {
+        "time_utc": "2015-10-13T22:00Z",
+        "intensity_kw_m": 81.98837819322405,
+        "spread_rate_m_s": 0.008647373359676223,
+        "areal_heat_release_kj_m2": 9481.304297041926,
+        "dead_fuel_moisture_fraction": [
+          0.028655512799162258,
+          0.09044318218922658,
+          0.12566387771703455
+        ],
+        "weather": {
+          "temperature_2m": 33.8,
+          "relative_humidity_2m": 9,
+          "rain": 0.0,
+          "wind_speed_10m": 3.76,
+          "wind_direction_10m": 25,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2016,
+      "complete": true,
+      "expected_hours": 8784,
+      "valid_hours": 8784,
+      "maximum_kw_m": 61.91990344492263,
+      "peak": {
+        "time_utc": "2016-02-08T21:00Z",
+        "intensity_kw_m": 61.91990344492263,
+        "spread_rate_m_s": 0.008107043216124842,
+        "areal_heat_release_kj_m2": 7637.791213665231,
+        "dead_fuel_moisture_fraction": [
+          0.06984731695893695,
+          0.12187027018538957,
+          0.16125797388416446
+        ],
+        "weather": {
+          "temperature_2m": 16.8,
+          "relative_humidity_2m": 16,
+          "rain": 0.0,
+          "wind_speed_10m": 6.47,
+          "wind_direction_10m": 321,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2017,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 65.2481939382264,
+      "peak": {
+        "time_utc": "2017-01-22T18:00Z",
+        "intensity_kw_m": 65.2481939382264,
+        "spread_rate_m_s": 0.009598478846433011,
+        "areal_heat_release_kj_m2": 6797.763998039537,
+        "dead_fuel_moisture_fraction": [
+          0.1073405516390152,
+          0.13583190949891585,
+          0.24824453793778825
+        ],
+        "weather": {
+          "temperature_2m": 19.1,
+          "relative_humidity_2m": 41,
+          "rain": 0.0,
+          "wind_speed_10m": 11.89,
+          "wind_direction_10m": 312,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2018,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 82.37722696238686,
+      "peak": {
+        "time_utc": "2018-03-19T21:00Z",
+        "intensity_kw_m": 82.37722696238686,
+        "spread_rate_m_s": 0.00943303534482254,
+        "areal_heat_release_kj_m2": 8732.844090062783,
+        "dead_fuel_moisture_fraction": [
+          0.041578239908746595,
+          0.15137004577886318,
+          0.18445398433378096
+        ],
+        "weather": {
+          "temperature_2m": 27.7,
+          "relative_humidity_2m": 11,
+          "rain": 0.0,
+          "wind_speed_10m": 5.4,
+          "wind_direction_10m": 309,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2019,
+      "complete": true,
+      "expected_hours": 8760,
+      "valid_hours": 8760,
+      "maximum_kw_m": 51.3458067334657,
+      "peak": {
+        "time_utc": "2019-11-27T12:00Z",
+        "intensity_kw_m": 51.3458067334657,
+        "spread_rate_m_s": 0.0070983188409816786,
+        "areal_heat_release_kj_m2": 7233.516538736476,
+        "dead_fuel_moisture_fraction": [
+          0.08422805252899965,
+          0.14385858474703966,
+          0.18889702602337294
+        ],
+        "weather": {
+          "temperature_2m": 13.8,
+          "relative_humidity_2m": 23,
+          "rain": 0.0,
+          "wind_speed_10m": 7.06,
+          "wind_direction_10m": 16,
+          "snow_depth": 0.0
+        }
+      }
+    },
+    {
+      "year": 2020,
+      "complete": true,
+      "expected_hours": 8784,
+      "valid_hours": 8784,
+      "maximum_kw_m": 69.9192559776323,
+      "peak": {
+        "time_utc": "2020-11-15T17:00Z",
+        "intensity_kw_m": 69.9192559776323,
+        "spread_rate_m_s": 0.008811606663423037,
+        "areal_heat_release_kj_m2": 7934.904342458568,
+        "dead_fuel_moisture_fraction": [
+          0.06062587497118658,
+          0.1461185336172316,
+          0.1729819108677294
+        ],
+        "weather": {
+          "temperature_2m": 21.2,
+          "relative_humidity_2m": 14,
+          "rain": 0.0,
+          "wind_speed_10m": 7.65,
+          "wind_direction_10m": 17,
+          "snow_depth": 0.0
+        }
+      }
+    }
+  ],
+  "curve": [
+    {
+      "severity": 49.9770005343876,
+      "frequency_pct": 100.0,
+      "exceedance_years": 30,
+      "complete_years": 30
+    },
+    {
+      "severity": 51.3458067334657,
+      "frequency_pct": 96.66666666666667,
+      "exceedance_years": 29,
+      "complete_years": 30
+    },
+    {
+      "severity": 54.228399646320234,
+      "frequency_pct": 93.33333333333333,
+      "exceedance_years": 28,
+      "complete_years": 30
+    },
+    {
+      "severity": 57.8489422735567,
+      "frequency_pct": 90.0,
+      "exceedance_years": 27,
+      "complete_years": 30
+    },
+    {
+      "severity": 60.83035503051322,
+      "frequency_pct": 86.66666666666667,
+      "exceedance_years": 26,
+      "complete_years": 30
+    },
+    {
+      "severity": 61.91990344492263,
+      "frequency_pct": 83.33333333333333,
+      "exceedance_years": 25,
+      "complete_years": 30
+    },
+    {
+      "severity": 63.509506240282214,
+      "frequency_pct": 80.0,
+      "exceedance_years": 24,
+      "complete_years": 30
+    },
+    {
+      "severity": 63.66633012417586,
+      "frequency_pct": 76.66666666666667,
+      "exceedance_years": 23,
+      "complete_years": 30
+    },
+    {
+      "severity": 65.2481939382264,
+      "frequency_pct": 73.33333333333333,
+      "exceedance_years": 22,
+      "complete_years": 30
+    },
+    {
+      "severity": 65.67334730101618,
+      "frequency_pct": 70.0,
+      "exceedance_years": 21,
+      "complete_years": 30
+    },
+    {
+      "severity": 66.17389819395709,
+      "frequency_pct": 66.66666666666667,
+      "exceedance_years": 20,
+      "complete_years": 30
+    },
+    {
+      "severity": 67.75641647796326,
+      "frequency_pct": 63.333333333333336,
+      "exceedance_years": 19,
+      "complete_years": 30
+    },
+    {
+      "severity": 69.9192559776323,
+      "frequency_pct": 60.0,
+      "exceedance_years": 18,
+      "complete_years": 30
+    },
+    {
+      "severity": 70.31525207405345,
+      "frequency_pct": 56.666666666666664,
+      "exceedance_years": 17,
+      "complete_years": 30
+    },
+    {
+      "severity": 70.85621585865003,
+      "frequency_pct": 53.333333333333336,
+      "exceedance_years": 16,
+      "complete_years": 30
+    },
+    {
+      "severity": 70.93086992710373,
+      "frequency_pct": 50.0,
+      "exceedance_years": 15,
+      "complete_years": 30
+    },
+    {
+      "severity": 75.31493282712789,
+      "frequency_pct": 46.666666666666664,
+      "exceedance_years": 14,
+      "complete_years": 30
+    },
+    {
+      "severity": 75.45582181694363,
+      "frequency_pct": 43.333333333333336,
+      "exceedance_years": 13,
+      "complete_years": 30
+    },
+    {
+      "severity": 76.74046402627708,
+      "frequency_pct": 40.0,
+      "exceedance_years": 12,
+      "complete_years": 30
+    },
+    {
+      "severity": 76.96370617054895,
+      "frequency_pct": 36.666666666666664,
+      "exceedance_years": 11,
+      "complete_years": 30
+    },
+    {
+      "severity": 77.16077151334004,
+      "frequency_pct": 33.333333333333336,
+      "exceedance_years": 10,
+      "complete_years": 30
+    },
+    {
+      "severity": 81.98837819322405,
+      "frequency_pct": 30.0,
+      "exceedance_years": 9,
+      "complete_years": 30
+    },
+    {
+      "severity": 82.37722696238686,
+      "frequency_pct": 26.666666666666668,
+      "exceedance_years": 8,
+      "complete_years": 30
+    },
+    {
+      "severity": 84.7304591361338,
+      "frequency_pct": 23.333333333333332,
+      "exceedance_years": 7,
+      "complete_years": 30
+    },
+    {
+      "severity": 85.30463299761107,
+      "frequency_pct": 20.0,
+      "exceedance_years": 6,
+      "complete_years": 30
+    },
+    {
+      "severity": 89.46532766694392,
+      "frequency_pct": 16.666666666666668,
+      "exceedance_years": 5,
+      "complete_years": 30
+    },
+    {
+      "severity": 100.59177454675334,
+      "frequency_pct": 13.333333333333334,
+      "exceedance_years": 4,
+      "complete_years": 30
+    },
+    {
+      "severity": 101.39458251595106,
+      "frequency_pct": 10.0,
+      "exceedance_years": 3,
+      "complete_years": 30
+    },
+    {
+      "severity": 107.05350705971995,
+      "frequency_pct": 6.666666666666667,
+      "exceedance_years": 2,
+      "complete_years": 30
+    },
+    {
+      "severity": 115.34081758868328,
+      "frequency_pct": 3.3333333333333335,
+      "exceedance_years": 1,
+      "complete_years": 30
+    }
+  ],
+  "provenance": {
+    "engine": "Pyretechnics",
+    "engine_version": "2026.10.20",
+    "engine_archive_sha256": "1d79429c87325f45d0c56b2c0a82ae1930ffb3ff93db3cb52a340e1d59fb9c1f",
+    "weather": [
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1990-12-01&end_date=1991-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "bf4ab5f5219e51e6fd6e86c20cf979c9c653ee73e4e39112b59a090e5fc6711e",
+        "retrieved_at": "2026-11-04T02:44:19.642017+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1990-12-01&end_date=1991-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "a4056a1732e18f8c1545dae054f298ba2e01ca0c829c482f701e219a47c66cba",
+          "retrieved_at": "2026-11-04T02:44:20.769099+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 1991,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1991-12-01&end_date=1992-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "350b6c73982da80ee4b9b836e2833c7a2c35faa93afd25444c23cfe130af4f65",
+        "retrieved_at": "2026-11-04T02:44:23.565038+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1991-12-01&end_date=1992-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "abdf5cec52d4de697f5d56e7b7149d54af48e75777694550f833c7953e003324",
+          "retrieved_at": "2026-11-04T02:44:24.692249+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 1992,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1992-12-01&end_date=1993-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "58f17ff216191cb9f4ec4298dc4acc4e140afe94598c9ff5a36034354b56626e",
+        "retrieved_at": "2026-11-04T02:44:27.646577+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1992-12-01&end_date=1993-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "d39b2fa27b9b4c50446ff0783c8b8383417be13daf7d9b2bce4c6e915e6306b4",
+          "retrieved_at": "2026-11-04T02:44:28.840476+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 1993,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1993-12-01&end_date=1994-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "d072c54b0a22c13b7d8836a430f4d5822cbb7b5d61757ea0ec96256d8463c892",
+        "retrieved_at": "2026-11-04T02:44:31.596533+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1993-12-01&end_date=1994-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "8bfc1d10e52d280beb9f57d7e6e9504487a89729ab1ce00807317921b7d85d7a",
+          "retrieved_at": "2026-11-04T02:44:32.775990+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 1994,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1994-12-01&end_date=1995-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "691adc03ba28f7ffca1c6501643788599c1fff174a6c72ec21fcd6a94291fd2d",
+        "retrieved_at": "2026-11-04T02:44:35.400836+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1994-12-01&end_date=1995-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "99b5fa2db08ae5af411217c9926a45571ae315420fb97931b64caa47e78b4f3c",
+          "retrieved_at": "2026-11-04T02:44:36.462105+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 1995,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1995-12-01&end_date=1996-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "fe408c460c9d32d8ad7dfa795a63a4e98810e2e64c3f08d975f6cfae560f58b2",
+        "retrieved_at": "2026-11-04T02:44:38.952127+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1995-12-01&end_date=1996-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "196f9fe2fa2f678af6cbe9789e9018145b6b51967e7262c18aca13c8db2a45c2",
+          "retrieved_at": "2026-11-04T02:44:40.038451+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 1996,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1996-12-01&end_date=1997-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "d2a15f8a6f78c617f09bcf72a0b0c9ec7c0a551b3495e0d35648455c9a86cb25",
+        "retrieved_at": "2026-11-04T02:44:42.886110+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1996-12-01&end_date=1997-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "caf4191e6d95287310384aa3f40146c98cfb68568d2651121909fbaa163bbe62",
+          "retrieved_at": "2026-11-04T02:44:44.499234+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 1997,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1997-12-01&end_date=1998-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "acb039d45de1edc8f8ef8d0fcda995927b408f4bb6f358455bf48eae780b5288",
+        "retrieved_at": "2026-11-04T02:44:47.819433+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1997-12-01&end_date=1998-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "9f42ae84b8e203932cea984bfe13b937e566f46356c7b6dd4ebf1bdcbebb8dfc",
+          "retrieved_at": "2026-11-04T02:44:48.922173+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 1998,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1998-12-01&end_date=1999-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "872d228057a234cef3336c65f3876e7b6d4996b2fda322e20464c4d026833f11",
+        "retrieved_at": "2026-11-04T02:44:51.981741+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1998-12-01&end_date=1999-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "4284f314d8d7e4cecc711659c47b123e12d55283414801072d85831f80c6e156",
+          "retrieved_at": "2026-11-04T02:44:53.232671+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 1999,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1999-12-01&end_date=2000-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "2a4291a738bfc15702dbf1f7bdbe1a7f62d3ad1776e9ca8bf638ba6d846adb37",
+        "retrieved_at": "2026-11-04T02:44:56.641097+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=1999-12-01&end_date=2000-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "796b5d65746c970c5db4c2179e15ab8817abaa67003bc9e521987bc1f2c0322b",
+          "retrieved_at": "2026-11-04T02:44:57.728569+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2000,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2000-12-01&end_date=2001-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "d661467b810de669044c86a6a79b72f836034c07c1126c0ecf35290616869950",
+        "retrieved_at": "2026-11-04T02:45:00.384392+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2000-12-01&end_date=2001-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "17464642e2bcb0028df2848516d2d08dc649ab5affde95949908760c0c771b3d",
+          "retrieved_at": "2026-11-04T02:45:01.507226+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2001,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2001-12-01&end_date=2002-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "193d68aa6a68cd1ca603cb89907f9deaae25d312da8028b0aac6bd74dba139da",
+        "retrieved_at": "2026-11-04T02:45:04.112061+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2001-12-01&end_date=2002-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "574bde96bc00c5f4ac545ac448dda5ef2c625d6566c152ff6bb64db4d746b5c6",
+          "retrieved_at": "2026-11-04T02:45:05.207377+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2002,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2002-12-01&end_date=2003-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "1136a89a859691ab99993f7dad1999e0978c2bb1b7786c9eda4aaec1e1e47550",
+        "retrieved_at": "2026-11-04T02:45:07.893885+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2002-12-01&end_date=2003-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "65f798c6145e3a9c628eb635ec74617cf7ec3850d72331f3ad7a86f20b819086",
+          "retrieved_at": "2026-11-04T02:45:08.945061+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2003,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2003-12-01&end_date=2004-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "6503e2a46f2e92cf956ab2552c43385d3df1351ab553de0d6657cfae52edbb2e",
+        "retrieved_at": "2026-11-04T02:45:13.098779+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2003-12-01&end_date=2004-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "860f7ad17a02d1dc62b95c19d84abc4c14ca9844b42bfbaffd132f236adb317d",
+          "retrieved_at": "2026-11-04T02:45:14.271025+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2004,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2004-12-01&end_date=2005-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "6ebd46f56a27537466bb266ef1483f7dc75c0e91fe1a603eda16708eb3bbed6c",
+        "retrieved_at": "2026-11-04T02:45:18.934636+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2004-12-01&end_date=2005-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "9e7d3b84af218b5ee636ceba1958b4f5fae76dcfbcc26059e62f5bdc3c2d60b3",
+          "retrieved_at": "2026-11-04T02:45:19.987418+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2005,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2005-12-01&end_date=2006-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "3e635e3527d9a4a4be3bd817ee975c299700ed5a9dfc00bf285c731547a25881",
+        "retrieved_at": "2026-11-04T02:45:23.982981+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2005-12-01&end_date=2006-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "2017907f953eb64b59480d5cd964f95518e427690b91b3a045f481d451e8d2bc",
+          "retrieved_at": "2026-11-04T02:45:25.038666+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2006,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2006-12-01&end_date=2007-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "a2c4afa53e45d9e57499898c93e0e7fba18dd4f48972ab4bfa39487594f31855",
+        "retrieved_at": "2026-11-04T02:45:29.188476+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2006-12-01&end_date=2007-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "3468c7896648e80dd44ba314b8881efe9310987e6cde72347b30ac53a75e496d",
+          "retrieved_at": "2026-11-04T02:45:30.288343+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2007,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2007-12-01&end_date=2008-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "ea936b9778999cda5a57c7fbcee270a985a487015b25c2d717b8b83ec2a93695",
+        "retrieved_at": "2026-11-04T02:45:34.191210+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2007-12-01&end_date=2008-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "2770fb25a4ea8b16093df42365d9e900e573eb91ddc8fe5fe68d2b1b46d8a01c",
+          "retrieved_at": "2026-11-04T02:45:35.256834+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2008,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2008-12-01&end_date=2009-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "171a1bc2c1d0550a2af0f08d6e4e51b16f92d407b3cbdf3954888bb542d3605f",
+        "retrieved_at": "2026-11-04T02:45:38.980812+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2008-12-01&end_date=2009-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "21f3e54a73527771b402eb16e18b5679789dd1628300042abd1f498b081dee76",
+          "retrieved_at": "2026-11-04T02:45:40.084486+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2009,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2009-12-01&end_date=2010-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "4ccd490a2dae85c516d8324da18a4dedae57a70f8866ac4363e74a1a3783e5d8",
+        "retrieved_at": "2026-11-04T02:45:43.981060+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2009-12-01&end_date=2010-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "5e5b81df86410d7f42cecdafbee7fdd682e71ee3868c0280bdbdf359b937376b",
+          "retrieved_at": "2026-11-04T02:45:45.088974+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2010,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2010-12-01&end_date=2011-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "d601c83f4d0b32e2ea78bf9df86adb57995fb006fd2a2c87e12d3ae3f99d09d8",
+        "retrieved_at": "2026-11-04T02:45:49.943335+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2010-12-01&end_date=2011-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "8537e3ab70845fe311c5ea4f109801b66432de482dcb9dc681024f8def9f97d3",
+          "retrieved_at": "2026-11-04T02:45:51.006958+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2011,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2011-12-01&end_date=2012-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "3251b85bbf2801e8cf769cbe2657e64349c107f93ae192bd6a49f1701d5add6b",
+        "retrieved_at": "2026-11-04T02:45:55.430078+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2011-12-01&end_date=2012-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "0a76dcddcb53e347187573e8780691f5a3c4c3e228828faf7b9e7a8b70719b00",
+          "retrieved_at": "2026-11-04T02:45:56.591688+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2012,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2012-12-01&end_date=2013-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "da6db8b19bd2715a3d03f27a9e6ee0b29317e816c9c7050e0a677557525e9b54",
+        "retrieved_at": "2026-11-04T02:46:01.667231+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2012-12-01&end_date=2013-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "ab203fc8380fa666bc94e86f3664683041a3fbddc76891acedcbb8cfadb6609c",
+          "retrieved_at": "2026-11-04T02:46:02.753432+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2013,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2013-12-01&end_date=2014-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "d4b96edf1213e4b1cdd928789e30333390712987407632c296a3ed4b42d7dcb4",
+        "retrieved_at": "2026-11-04T02:46:07.269740+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2013-12-01&end_date=2014-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "6a59d3b238678a1d356951b50a5497bdcdea66c9774ad213b9225ec7db469a99",
+          "retrieved_at": "2026-11-04T02:46:08.372635+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2014,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2014-12-01&end_date=2015-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "deaa113150a0ba2afd4318173366a80716e5c22340d99852c99ec0f10ff2e7dd",
+        "retrieved_at": "2026-11-04T02:46:13.168627+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2014-12-01&end_date=2015-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "83c47a1284769cb4c2c35262aea7182301e58b2de5826d76b852b0bd51170979",
+          "retrieved_at": "2026-11-04T02:46:14.303859+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2015,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2015-12-01&end_date=2016-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "e3cabd07a7d43ab3a93600d1867ebb20f72e9f21eebf3281c2fc5a9dd462be3d",
+        "retrieved_at": "2026-11-04T02:46:19.248320+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2015-12-01&end_date=2016-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "6fcb90cf361cb0ed0b04d3e7e46cc7a8b0dfc6dd140de9f25f73cddb689a0d3f",
+          "retrieved_at": "2026-11-04T02:46:20.292624+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2016,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2016-12-01&end_date=2017-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "e8fd35c393debce7bc3fad6566cc45f5c4ced5d6b384bdc1f44007a3c2709de5",
+        "retrieved_at": "2026-11-04T02:46:24.833871+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2016-12-01&end_date=2017-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "dc8f83f415f28425fee1a684ab3c2c48279800dd484f4a7575551b7aa7054fb2",
+          "retrieved_at": "2026-11-04T02:46:25.980970+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2017,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2017-12-01&end_date=2018-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "f5872a885e0c663bed0e95ed8527610e282bfd62973b4829f1a2591bf35e1731",
+        "retrieved_at": "2026-11-04T02:46:30.981930+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2017-12-01&end_date=2018-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "729e5d6c6f0b95e72ec2495179c4620467ba26c00af8b038714fca845bef46d3",
+          "retrieved_at": "2026-11-04T02:46:32.042771+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2018,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2018-12-01&end_date=2019-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "7eef8404c9a4e5cfea473bdb9084d9e5e1c18ca0bafee43150d4a81c7e2034e4",
+        "retrieved_at": "2026-11-04T02:46:35.765512+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2018-12-01&end_date=2019-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "6be71992e2c31a16d92ef88bac6343b4c902bfd6dc1aa63d55f30dd6792bc822",
+          "retrieved_at": "2026-11-04T02:46:36.829507+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2019,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      },
+      {
+        "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2019-12-01&end_date=2020-12-31&hourly=temperature_2m%2Crelative_humidity_2m%2Crain%2Cwind_speed_10m%2Cwind_direction_10m&wind_speed_unit=ms&timezone=GMT&models=era5&elevation=nan",
+        "sha256": "a36f448a17333cb2b9f6abd503f1d2f79ab9a7d606405822dd7fc4df7af1be75",
+        "retrieved_at": "2026-11-04T02:43:31.831143+00:00",
+        "snow_source": {
+          "url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.08&longitude=-97.3&start_date=2019-12-01&end_date=2020-12-31&hourly=snow_depth&timezone=GMT&models=era5_land&elevation=nan",
+          "sha256": "bf9120800c60d6dfa2c3623bb2e863a0fefc3f2d2c941e44bfe5231018a3e3b2",
+          "retrieved_at": "2026-11-04T02:43:32.922816+00:00",
+          "grid_latitude": 30.099998,
+          "grid_longitude": -97.299995
+        },
+        "year": 2020,
+        "grid_latitude": 30.0,
+        "grid_longitude": -97.25
+      }
+    ],
+    "method_version": "potential-surface-v1"
+  },
+  "software_checks": {
+    "python_tests_passed": 55,
+    "ui_flow_tests_passed": true,
+    "browser_pilot_verified": true,
+    "browser_threshold_kw_m": 107.05350705971995,
+    "browser_frequency_pct": 6.666666666666667,
+    "browser_annual_rows": 30,
+    "browser_curve_svg_rendered": true,
+    "browser_console_errors": 0
+  },
+  "full_result_sha256": "c1d5506fc0217289736b9ff5bcbf002dd73ab7e1e0a5d82cc530c7b96372ab26"
+}

@@ -1,0 +1,19 @@
+.venv/
+data/
+__pycache__/
+.api-build/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Reports, presentations, and temporary document builds
+.document-build/
+.presentation-build/
+presentations/
+*.docx
+*.pptx
+*.pdf
+docs/weekly-update.md

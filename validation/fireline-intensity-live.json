@@ -1,0 +1,1171 @@
+{
+  "verified_at": "2026-10-29T23:38:52.608061+00:00",
+  "scope": "Live data flow and source/API contracts; not observed-fire or damage calibration.",
+  "checks_passed": [
+    "native positive value",
+    "native zero",
+    "NoData outside Texas",
+    "probability and contribution unavailable",
+    "25-point mean",
+    "legacy map route"
+  ],
+  "records": {
+    "positive_point": {
+      "url": "http://127.0.0.1:8001/api/v1/hazards/fireline_intensity?lat=29.62&lon=-98.6",
+      "response": {
+        "api_version": "1.2.0",
+        "status": "available",
+        "data": {
+          "peril": "fireline_intensity",
+          "metric": "Fireline intensity",
+          "unit": "kW/m",
+          "hazard_kind": "scenario_intensity",
+          "status": "available",
+          "source_name": "Texas A&M Forest Service / TxWRAP (WildEST)",
+          "source_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer",
+          "source_references": [
+            {
+              "title": "TxWRAP native fireline-intensity dataset and methodology",
+              "url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer"
+            },
+            {
+              "title": "Federal fireline-intensity definition and kW/m units",
+              "url": "https://iftdss.firenet.gov/firenetHelp/help/pageHelp/content/20-models/lfb/out/firelintensitylfb.htm"
+            }
+          ],
+          "points": [],
+          "frequency_label": "Annual exceedance probability unavailable",
+          "annual_probability_available": false,
+          "trigger_unavailable_reason": "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+          "hazard_value": {
+            "value": 71.296150208,
+            "unit": "kW/m",
+            "statistic": "weather_weighted_mean_heading_fireline_intensity"
+          },
+          "provenance": {
+            "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6%2C+%22y%22%3A+29.62%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+            "sample_sha256": "9c3672366a00a1fb76ee0889de485e2676622b4809b8252f22c217484659dc96",
+            "retrieved_at": "2026-10-29T23:38:48.482617+00:00",
+            "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+            "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+            "service_pixel_size": {
+              "x": 10,
+              "y": 10,
+              "crs": {
+                "wkid": 102100,
+                "latestWkid": 3857
+              }
+            },
+            "model_version": "Service does not publish an immutable model version; response hashes retained."
+          },
+          "details": [
+            [
+              "Metric",
+              "Heat release rate per unit fire-front length (kW/m)"
+            ],
+            [
+              "Statistic",
+              "Weather-weighted mean; heading-only modeled fire behavior"
+            ],
+            [
+              "Coverage",
+              "Texas assessment raster; missing cells remain unavailable"
+            ],
+            [
+              "Sampling",
+              "Nearest native raster pixel; no rendering or flame-length conversion"
+            ],
+            [
+              "Annual probability",
+              "Not supplied by this source"
+            ]
+          ],
+          "notes": [
+            "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+            "WildEST weights deterministic fire-behavior simulations by weather-type probabilities, including temporal frequencies and high-spread conditions. These weights are not annual wildfire occurrence probabilities.",
+            "Modeled potential fire behavior, not a live reading, a forecast, or heat flux received by a building. Embers and building vulnerability are separate.",
+            "A native zero is retained; it does not establish no fire, structure-to-structure, or ember exposure. NoData is never converted to zero.",
+            "Live service values can change. Sample retrieval time and metadata/sample SHA256 hashes accompany this result."
+          ],
+          "latitude": 29.62,
+          "longitude": -98.6
+        },
+        "meta": {
+          "generated_at": "2026-10-29T23:38:48.482657+00:00",
+          "request": {
+            "peril": "fireline_intensity",
+            "lat": 29.62,
+            "lon": -98.6,
+            "site_class": "BC"
+          },
+          "purpose": "Research estimates; not a binding insurance quote or live forecast."
+        }
+      }
+    },
+    "native_zero": {
+      "url": "http://127.0.0.1:8001/api/v1/hazards/fireline_intensity?lat=29.4241&lon=-98.4936",
+      "response": {
+        "api_version": "1.2.0",
+        "status": "available",
+        "data": {
+          "peril": "fireline_intensity",
+          "metric": "Fireline intensity",
+          "unit": "kW/m",
+          "hazard_kind": "scenario_intensity",
+          "status": "available",
+          "source_name": "Texas A&M Forest Service / TxWRAP (WildEST)",
+          "source_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer",
+          "source_references": [
+            {
+              "title": "TxWRAP native fireline-intensity dataset and methodology",
+              "url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer"
+            },
+            {
+              "title": "Federal fireline-intensity definition and kW/m units",
+              "url": "https://iftdss.firenet.gov/firenetHelp/help/pageHelp/content/20-models/lfb/out/firelintensitylfb.htm"
+            }
+          ],
+          "points": [],
+          "frequency_label": "Annual exceedance probability unavailable",
+          "annual_probability_available": false,
+          "trigger_unavailable_reason": "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+          "hazard_value": {
+            "value": 0.0,
+            "unit": "kW/m",
+            "statistic": "weather_weighted_mean_heading_fireline_intensity"
+          },
+          "provenance": {
+            "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.4936%2C+%22y%22%3A+29.4241%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+            "sample_sha256": "3c9040b40619d4b647bc0f8aa30deea7c87e7b7e2ebe200ee5f0f5aeefee73bb",
+            "retrieved_at": "2026-10-29T23:38:48.731093+00:00",
+            "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+            "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+            "service_pixel_size": {
+              "x": 10,
+              "y": 10,
+              "crs": {
+                "wkid": 102100,
+                "latestWkid": 3857
+              }
+            },
+            "model_version": "Service does not publish an immutable model version; response hashes retained."
+          },
+          "details": [
+            [
+              "Metric",
+              "Heat release rate per unit fire-front length (kW/m)"
+            ],
+            [
+              "Statistic",
+              "Weather-weighted mean; heading-only modeled fire behavior"
+            ],
+            [
+              "Coverage",
+              "Texas assessment raster; missing cells remain unavailable"
+            ],
+            [
+              "Sampling",
+              "Nearest native raster pixel; no rendering or flame-length conversion"
+            ],
+            [
+              "Annual probability",
+              "Not supplied by this source"
+            ]
+          ],
+          "notes": [
+            "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+            "WildEST weights deterministic fire-behavior simulations by weather-type probabilities, including temporal frequencies and high-spread conditions. These weights are not annual wildfire occurrence probabilities.",
+            "Modeled potential fire behavior, not a live reading, a forecast, or heat flux received by a building. Embers and building vulnerability are separate.",
+            "A native zero is retained; it does not establish no fire, structure-to-structure, or ember exposure. NoData is never converted to zero.",
+            "Live service values can change. Sample retrieval time and metadata/sample SHA256 hashes accompany this result."
+          ],
+          "latitude": 29.4241,
+          "longitude": -98.4936
+        },
+        "meta": {
+          "generated_at": "2026-10-29T23:38:48.731147+00:00",
+          "request": {
+            "peril": "fireline_intensity",
+            "lat": 29.4241,
+            "lon": -98.4936,
+            "site_class": "BC"
+          },
+          "purpose": "Research estimates; not a binding insurance quote or live forecast."
+        }
+      }
+    },
+    "outside_coverage": {
+      "url": "http://127.0.0.1:8001/api/v1/hazards/fireline_intensity?lat=40.7&lon=-74",
+      "response": {
+        "api_version": "1.2.0",
+        "status": "unavailable",
+        "data": {
+          "peril": "fireline_intensity",
+          "metric": "Fireline intensity",
+          "unit": "kW/m",
+          "hazard_kind": "scenario_intensity",
+          "status": "unavailable",
+          "source_name": "Texas A&M Forest Service / TxWRAP (WildEST)",
+          "source_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer",
+          "source_references": [
+            {
+              "title": "TxWRAP native fireline-intensity dataset and methodology",
+              "url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer"
+            },
+            {
+              "title": "Federal fireline-intensity definition and kW/m units",
+              "url": "https://iftdss.firenet.gov/firenetHelp/help/pageHelp/content/20-models/lfb/out/firelintensitylfb.htm"
+            }
+          ],
+          "points": [],
+          "frequency_label": "Annual exceedance probability unavailable",
+          "annual_probability_available": false,
+          "trigger_unavailable_reason": "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+          "hazard_value": {
+            "value": null,
+            "unit": "kW/m",
+            "statistic": "weather_weighted_mean_heading_fireline_intensity"
+          },
+          "provenance": {
+            "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-74.0%2C+%22y%22%3A+40.7%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+            "sample_sha256": "fef76d1b2584ce307da2f20ab413339ed10d453ce8a728933967508ef323677a",
+            "retrieved_at": "2026-10-29T23:38:48.941901+00:00",
+            "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+            "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+            "service_pixel_size": {
+              "x": 10,
+              "y": 10,
+              "crs": {
+                "wkid": 102100,
+                "latestWkid": 3857
+              }
+            },
+            "model_version": "Service does not publish an immutable model version; response hashes retained."
+          },
+          "details": [
+            [
+              "Metric",
+              "Heat release rate per unit fire-front length (kW/m)"
+            ],
+            [
+              "Statistic",
+              "Weather-weighted mean; heading-only modeled fire behavior"
+            ],
+            [
+              "Coverage",
+              "Texas assessment raster; missing cells remain unavailable"
+            ],
+            [
+              "Sampling",
+              "Nearest native raster pixel; no rendering or flame-length conversion"
+            ],
+            [
+              "Annual probability",
+              "Not supplied by this source"
+            ]
+          ],
+          "notes": [
+            "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+            "WildEST weights deterministic fire-behavior simulations by weather-type probabilities, including temporal frequencies and high-spread conditions. These weights are not annual wildfire occurrence probabilities.",
+            "Modeled potential fire behavior, not a live reading, a forecast, or heat flux received by a building. Embers and building vulnerability are separate.",
+            "A native zero is retained; it does not establish no fire, structure-to-structure, or ember exposure. NoData is never converted to zero.",
+            "Live service values can change. Sample retrieval time and metadata/sample SHA256 hashes accompany this result."
+          ],
+          "reason": "No native TxWRAP fireline-intensity value at this point (Texas coverage or NoData).",
+          "latitude": 40.7,
+          "longitude": -74.0
+        },
+        "meta": {
+          "generated_at": "2026-10-29T23:38:48.941973+00:00",
+          "request": {
+            "peril": "fireline_intensity",
+            "lat": 40.7,
+            "lon": -74.0,
+            "site_class": "BC"
+          },
+          "purpose": "Research estimates; not a binding insurance quote or live forecast."
+        }
+      }
+    },
+    "no_invented_probability": {
+      "url": "http://127.0.0.1:8001/api/v1/trigger-comparisons/fireline_intensity?lat=29.62&lon=-98.6&payout_usd=50000",
+      "response": {
+        "api_version": "1.2.0",
+        "status": "unavailable",
+        "data": {
+          "peril": "fireline_intensity",
+          "metric": "Fireline intensity",
+          "unit": "kW/m",
+          "hazard_kind": "scenario_intensity",
+          "status": "unavailable",
+          "source_name": "Texas A&M Forest Service / TxWRAP (WildEST)",
+          "source_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer",
+          "source_references": [
+            {
+              "title": "TxWRAP native fireline-intensity dataset and methodology",
+              "url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer"
+            },
+            {
+              "title": "Federal fireline-intensity definition and kW/m units",
+              "url": "https://iftdss.firenet.gov/firenetHelp/help/pageHelp/content/20-models/lfb/out/firelintensitylfb.htm"
+            }
+          ],
+          "points": [],
+          "frequency_label": "Annual exceedance probability unavailable",
+          "annual_probability_available": false,
+          "trigger_unavailable_reason": "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+          "hazard_value": {
+            "value": 71.296150208,
+            "unit": "kW/m",
+            "statistic": "weather_weighted_mean_heading_fireline_intensity"
+          },
+          "provenance": {
+            "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6%2C+%22y%22%3A+29.62%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+            "sample_sha256": "9c3672366a00a1fb76ee0889de485e2676622b4809b8252f22c217484659dc96",
+            "retrieved_at": "2026-10-29T23:38:48.482617+00:00",
+            "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+            "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+            "service_pixel_size": {
+              "x": 10,
+              "y": 10,
+              "crs": {
+                "wkid": 102100,
+                "latestWkid": 3857
+              }
+            },
+            "model_version": "Service does not publish an immutable model version; response hashes retained."
+          },
+          "details": [
+            [
+              "Metric",
+              "Heat release rate per unit fire-front length (kW/m)"
+            ],
+            [
+              "Statistic",
+              "Weather-weighted mean; heading-only modeled fire behavior"
+            ],
+            [
+              "Coverage",
+              "Texas assessment raster; missing cells remain unavailable"
+            ],
+            [
+              "Sampling",
+              "Nearest native raster pixel; no rendering or flame-length conversion"
+            ],
+            [
+              "Annual probability",
+              "Not supplied by this source"
+            ]
+          ],
+          "notes": [
+            "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+            "WildEST weights deterministic fire-behavior simulations by weather-type probabilities, including temporal frequencies and high-spread conditions. These weights are not annual wildfire occurrence probabilities.",
+            "Modeled potential fire behavior, not a live reading, a forecast, or heat flux received by a building. Embers and building vulnerability are separate.",
+            "A native zero is retained; it does not establish no fire, structure-to-structure, or ember exposure. NoData is never converted to zero.",
+            "Live service values can change. Sample retrieval time and metadata/sample SHA256 hashes accompany this result."
+          ],
+          "latitude": 29.62,
+          "longitude": -98.6,
+          "payout_usd": 50000.0,
+          "comparisons": [],
+          "frequency_basis": "unavailable",
+          "calculation": "Unavailable: source supplies no annual probabilities.",
+          "assumptions": [
+            "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard."
+          ],
+          "reason": "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard."
+        },
+        "meta": {
+          "generated_at": "2026-10-29T23:38:48.965204+00:00",
+          "request": {
+            "peril": "fireline_intensity",
+            "lat": 29.62,
+            "lon": -98.6,
+            "site_class": "BC",
+            "payout_usd": 50000.0
+          },
+          "purpose": "Research estimates; not a binding insurance quote or live forecast."
+        }
+      }
+    },
+    "area": {
+      "url": "http://127.0.0.1:8001/api/v1/areas/fireline_intensity?south=29.619&west=-98.601&north=29.621&east=-98.599",
+      "response": {
+        "api_version": "1.2.0",
+        "status": "available",
+        "data": {
+          "peril": "fireline_intensity",
+          "metric": "Fireline intensity",
+          "unit": "kW/m",
+          "hazard_kind": "scenario_intensity",
+          "status": "available",
+          "source_name": "Texas A&M Forest Service / TxWRAP (WildEST)",
+          "source_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer",
+          "source_references": [
+            {
+              "title": "TxWRAP native fireline-intensity dataset and methodology",
+              "url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer"
+            },
+            {
+              "title": "Federal fireline-intensity definition and kW/m units",
+              "url": "https://iftdss.firenet.gov/firenetHelp/help/pageHelp/content/20-models/lfb/out/firelintensitylfb.htm"
+            }
+          ],
+          "points": [],
+          "frequency_label": "Annual exceedance probability unavailable",
+          "annual_probability_available": false,
+          "trigger_unavailable_reason": "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+          "hazard_value": {
+            "value": 513.64660638816,
+            "unit": "kW/m",
+            "statistic": "spatial_mean_of_weather_weighted_mean_heading_fireline_intensity"
+          },
+          "provenance": {
+            "sample_provenance_location": "area.samples[].provenance"
+          },
+          "details": [
+            [
+              "Statistic",
+              "Spatial mean of weather-weighted heading fireline intensity"
+            ],
+            [
+              "Grid coverage",
+              "25/25 samples"
+            ],
+            [
+              "Annual probability",
+              "Not supplied by this source"
+            ]
+          ],
+          "notes": [
+            "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+            "WildEST weights deterministic fire-behavior simulations by weather-type probabilities, including temporal frequencies and high-spread conditions. These weights are not annual wildfire occurrence probabilities.",
+            "Modeled potential fire behavior, not a live reading, a forecast, or heat flux received by a building. Embers and building vulnerability are separate.",
+            "A native zero is retained; it does not establish no fire, structure-to-structure, or ember exposure. NoData is never converted to zero.",
+            "Live service values can change. Sample retrieval time and metadata/sample SHA256 hashes accompany this result.",
+            "Equal-weight arithmetic mean of available native fireline intensities across a 5\u00d75 grid including edges and center. No interpolation. Missing samples excluded; native zero values included.",
+            "This is a grid-point spatial mean of intensity, not an exceedance probability, an area-wide maximum, or an exhaustive raster-cell average."
+          ],
+          "latitude": 29.619999999999997,
+          "longitude": -98.6,
+          "area": {
+            "bounds": {
+              "south": 29.619,
+              "west": -98.601,
+              "north": 29.621,
+              "east": -98.599
+            },
+            "centroid": {
+              "latitude": 29.619999999999997,
+              "longitude": -98.6
+            },
+            "grid_size": 5,
+            "sample_count": 25,
+            "aggregation": "arithmetic_mean",
+            "method": "Equal-weight arithmetic mean of available native fireline intensities across a 5\u00d75 grid including edges and center. No interpolation. Missing samples excluded; native zero values included.",
+            "samples": [
+              {
+                "latitude": 29.619,
+                "longitude": -98.601,
+                "status": "available",
+                "value": 0.0,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.601%2C+%22y%22%3A+29.619%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "fdc6e73d43efea23614254b53485277573c8ec5c0fdca4d10a8a0b13fd4a00b9",
+                  "retrieved_at": "2026-10-29T23:38:49.166872+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.619,
+                "longitude": -98.6005,
+                "status": "available",
+                "value": 0.0,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6005%2C+%22y%22%3A+29.619%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "417b7656f7fc880bd49ba3baae1376f1a08c7ed599db8bd5c05a4b8c88ad4f43",
+                  "retrieved_at": "2026-10-29T23:38:49.183230+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.619,
+                "longitude": -98.6,
+                "status": "available",
+                "value": 10861.8515625,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6%2C+%22y%22%3A+29.619%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "e60a890f15ecf72bf750b4cb874bfd6d4c3a5f72de04a7317b9690cb30013517",
+                  "retrieved_at": "2026-10-29T23:38:49.176806+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.619,
+                "longitude": -98.5995,
+                "status": "available",
+                "value": 53.28282547,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.5995%2C+%22y%22%3A+29.619%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "79ccee92c93136c6ddc3341e7ce12f7e3dcf8f85648483ef27419d0a32583ae7",
+                  "retrieved_at": "2026-10-29T23:38:52.590044+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.619,
+                "longitude": -98.599,
+                "status": "available",
+                "value": 41.026542664,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.599%2C+%22y%22%3A+29.619%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "51106c11d244e3db3e1153a89ecf053ab297ec542c19cfc2f0cafcff0220358f",
+                  "retrieved_at": "2026-10-29T23:38:49.195412+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6195,
+                "longitude": -98.601,
+                "status": "available",
+                "value": 0.0,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.601%2C+%22y%22%3A+29.6195%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "b29afe321b3d8dbd8975255ebfcf8e7fc68d20fd62b167656fc083012f5d75a2",
+                  "retrieved_at": "2026-10-29T23:38:49.199836+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6195,
+                "longitude": -98.6005,
+                "status": "available",
+                "value": 96.801773071,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6005%2C+%22y%22%3A+29.6195%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "3a0fa2e9bfcb4e2ce3b8a874f0fec11cc336d2f37952045c3f1dcad201bdca2d",
+                  "retrieved_at": "2026-10-29T23:38:50.098940+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6195,
+                "longitude": -98.6,
+                "status": "available",
+                "value": 39.371120453,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6%2C+%22y%22%3A+29.6195%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "c18894e52770e4ec130738869bfc7557c84db25e8665c92c3dbacf8945c59507",
+                  "retrieved_at": "2026-10-29T23:38:50.116423+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6195,
+                "longitude": -98.5995,
+                "status": "available",
+                "value": 71.581665039,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.5995%2C+%22y%22%3A+29.6195%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "831e81178f85258602bbebf7f2d3c0cbbcf80b5c0a6d5ef7a89d512f177720e4",
+                  "retrieved_at": "2026-10-29T23:38:50.116079+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6195,
+                "longitude": -98.599,
+                "status": "available",
+                "value": 71.565155029,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.599%2C+%22y%22%3A+29.6195%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "60a96c8e0765e85d50ba5cd19b0e8ec326f958a8a15061df3b169585b15a63a6",
+                  "retrieved_at": "2026-10-29T23:38:50.115606+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.619999999999997,
+                "longitude": -98.601,
+                "status": "available",
+                "value": 29.532184601,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.601%2C+%22y%22%3A+29.619999999999997%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "b49baf04b48071441e0acb2e2e7196cad99c2570c77be53163987af32caa70e2",
+                  "retrieved_at": "2026-10-29T23:38:50.103069+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.619999999999997,
+                "longitude": -98.6005,
+                "status": "available",
+                "value": 38.752033234,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6005%2C+%22y%22%3A+29.619999999999997%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "63c1042fa5a32952877aeaad0e1029b5e6a5ebef0dfff061e10aa394a8f13883",
+                  "retrieved_at": "2026-10-29T23:38:50.302201+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.619999999999997,
+                "longitude": -98.6,
+                "status": "available",
+                "value": 71.296150208,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6%2C+%22y%22%3A+29.619999999999997%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "0fc3a78f31348e7fab66ae60d880cf1d944f27195b18909e1bfed366480c8a8f",
+                  "retrieved_at": "2026-10-29T23:38:50.288062+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.619999999999997,
+                "longitude": -98.5995,
+                "status": "available",
+                "value": 34.692150116,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.5995%2C+%22y%22%3A+29.619999999999997%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "1414c50751b552becb18a9a9f80c3b7d83c29c3895c529fb1365141134bfd908",
+                  "retrieved_at": "2026-10-29T23:38:50.309273+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.619999999999997,
+                "longitude": -98.599,
+                "status": "available",
+                "value": 71.354118347,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.599%2C+%22y%22%3A+29.619999999999997%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "279029acc6fb9dce55a436fa39a563ea59a24e30f388ee147fe0a5c841c16373",
+                  "retrieved_at": "2026-10-29T23:38:50.310514+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6205,
+                "longitude": -98.601,
+                "status": "available",
+                "value": 571.813110352,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.601%2C+%22y%22%3A+29.6205%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "cdba5391eeb0aef2fad4f17b8e76d6557041aa8ebf20fd19b906406ede966b19",
+                  "retrieved_at": "2026-10-29T23:38:50.320258+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6205,
+                "longitude": -98.6005,
+                "status": "available",
+                "value": 0.0,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6005%2C+%22y%22%3A+29.6205%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "ba6dafac9364f024aa3ab16d47e2ab3ca9c63cc8ee0a5851a575a40549f887b2",
+                  "retrieved_at": "2026-10-29T23:38:50.502620+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6205,
+                "longitude": -98.6,
+                "status": "available",
+                "value": 71.063323975,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6%2C+%22y%22%3A+29.6205%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "5fa87fd4a536e5c1361ce6ed4680f0b8d3c48fcbacfdda547cf88fdb0baed9fd",
+                  "retrieved_at": "2026-10-29T23:38:50.528578+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6205,
+                "longitude": -98.5995,
+                "status": "available",
+                "value": 0.0,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.5995%2C+%22y%22%3A+29.6205%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "e9616c66cb4969cd405b720815fdca02ab33a576557354ae3ffc2e67d8eefa28",
+                  "retrieved_at": "2026-10-29T23:38:50.536136+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.6205,
+                "longitude": -98.599,
+                "status": "available",
+                "value": 0.0,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.599%2C+%22y%22%3A+29.6205%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "31cae96b560421d6898adacb79e775ae3d3dd8678ba5424afaf7337bbb8bfd20",
+                  "retrieved_at": "2026-10-29T23:38:50.561334+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.621,
+                "longitude": -98.601,
+                "status": "available",
+                "value": 70.856567383,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.601%2C+%22y%22%3A+29.621%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "3fbe0960b838f019e80c2e910fedb568610a0ba90f8cbd0716d9d4a0b401974a",
+                  "retrieved_at": "2026-10-29T23:38:50.566603+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.621,
+                "longitude": -98.6005,
+                "status": "available",
+                "value": 571.176269531,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6005%2C+%22y%22%3A+29.621%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "15e10fd7d93fbcd25e9a9b648d56352d3aff4157922d9b7384c96c72345597d9",
+                  "retrieved_at": "2026-10-29T23:38:50.699128+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.621,
+                "longitude": -98.6,
+                "status": "available",
+                "value": 70.957641602,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6%2C+%22y%22%3A+29.621%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "daa3580b9bf2645dc473d95a1afd46c600cbc0c00ac80953829e448420c751fe",
+                  "retrieved_at": "2026-10-29T23:38:50.723644+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.621,
+                "longitude": -98.5995,
+                "status": "available",
+                "value": 0.0,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.5995%2C+%22y%22%3A+29.621%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "7572071a92bef2f7a044678d2337e24b4494da68e74f5411ced9ea47795f5ff6",
+                  "retrieved_at": "2026-10-29T23:38:50.749265+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              },
+              {
+                "latitude": 29.621,
+                "longitude": -98.599,
+                "status": "available",
+                "value": 4.190966129,
+                "unit": "kW/m",
+                "provenance": {
+                  "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.599%2C+%22y%22%3A+29.621%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+                  "sample_sha256": "692eb4adea03f678f925d05e4602acc85224bdd88e771fc583045636007af471",
+                  "retrieved_at": "2026-10-29T23:38:50.771796+00:00",
+                  "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+                  "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+                  "service_pixel_size": {
+                    "x": 10,
+                    "y": 10,
+                    "crs": {
+                      "wkid": 102100,
+                      "latestWkid": 3857
+                    }
+                  },
+                  "model_version": "Service does not publish an immutable model version; response hashes retained."
+                },
+                "reason": null
+              }
+            ],
+            "available_samples": 25,
+            "quantity": "fireline_intensity_kw_per_m",
+            "summary": {
+              "minimum": 0.0,
+              "maximum": 10861.8515625,
+              "sum": 12841.165159704,
+              "missing_samples": 0
+            }
+          }
+        },
+        "meta": {
+          "generated_at": "2026-10-29T23:38:52.591069+00:00",
+          "request": {
+            "south": 29.619,
+            "west": -98.601,
+            "north": 29.621,
+            "east": -98.599,
+            "peril": "fireline_intensity",
+            "site_class": "BC"
+          },
+          "purpose": "Research estimates; not a binding insurance quote or live forecast."
+        }
+      }
+    },
+    "legacy_map_route": {
+      "url": "http://127.0.0.1:8001/api/disaster?peril=fireline_intensity&lat=29.62&lon=-98.6",
+      "response": {
+        "peril": "fireline_intensity",
+        "metric": "Fireline intensity",
+        "unit": "kW/m",
+        "hazard_kind": "scenario_intensity",
+        "status": "available",
+        "source_name": "Texas A&M Forest Service / TxWRAP (WildEST)",
+        "source_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer",
+        "source_references": [
+          {
+            "title": "TxWRAP native fireline-intensity dataset and methodology",
+            "url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer"
+          },
+          {
+            "title": "Federal fireline-intensity definition and kW/m units",
+            "url": "https://iftdss.firenet.gov/firenetHelp/help/pageHelp/content/20-models/lfb/out/firelintensitylfb.htm"
+          }
+        ],
+        "points": [],
+        "frequency_label": "Annual exceedance probability unavailable",
+        "annual_probability_available": false,
+        "trigger_unavailable_reason": "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+        "hazard_value": {
+          "value": 71.296150208,
+          "unit": "kW/m",
+          "statistic": "weather_weighted_mean_heading_fireline_intensity"
+        },
+        "provenance": {
+          "sample_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer/getSamples?f=json&geometryType=esriGeometryPoint&geometry=%7B%22x%22%3A+-98.6%2C+%22y%22%3A+29.62%2C+%22spatialReference%22%3A+%7B%22wkid%22%3A+4326%7D%7D&returnFirstValueOnly=true&interpolation=RSP_NearestNeighbor&renderingRule=%7B%22rasterFunction%22%3A+%22None%22%7D",
+          "sample_sha256": "9c3672366a00a1fb76ee0889de485e2676622b4809b8252f22c217484659dc96",
+          "retrieved_at": "2026-10-29T23:38:48.482617+00:00",
+          "metadata_url": "https://gis.texaswildfirerisk.com/server/rest/services/TxWRAP/characteristic_fire_intensity_scale_img/ImageServer?f=json",
+          "metadata_sha256": "42f6a30985ce574aa2bdbadea46389b027c98c2e0bd8c27e78991e3bfc7a1a4f",
+          "service_pixel_size": {
+            "x": 10,
+            "y": 10,
+            "crs": {
+              "wkid": 102100,
+              "latestWkid": 3857
+            }
+          },
+          "model_version": "Service does not publish an immutable model version; response hashes retained."
+        },
+        "details": [
+          [
+            "Metric",
+            "Heat release rate per unit fire-front length (kW/m)"
+          ],
+          [
+            "Statistic",
+            "Weather-weighted mean; heading-only modeled fire behavior"
+          ],
+          [
+            "Coverage",
+            "Texas assessment raster; missing cells remain unavailable"
+          ],
+          [
+            "Sampling",
+            "Nearest native raster pixel; no rendering or flame-length conversion"
+          ],
+          [
+            "Annual probability",
+            "Not supplied by this source"
+          ]
+        ],
+        "notes": [
+          "This source provides weather-weighted fireline intensity, not annual exceedance probabilities. Trigger probabilities and annual pool contributions are unavailable for this hazard.",
+          "WildEST weights deterministic fire-behavior simulations by weather-type probabilities, including temporal frequencies and high-spread conditions. These weights are not annual wildfire occurrence probabilities.",
+          "Modeled potential fire behavior, not a live reading, a forecast, or heat flux received by a building. Embers and building vulnerability are separate.",
+          "A native zero is retained; it does not establish no fire, structure-to-structure, or ember exposure. NoData is never converted to zero.",
+          "Live service values can change. Sample retrieval time and metadata/sample SHA256 hashes accompany this result."
+        ],
+        "latitude": 29.62,
+        "longitude": -98.6
+      }
+    }
+  }
+}

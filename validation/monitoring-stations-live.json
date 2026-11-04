@@ -1,0 +1,428 @@
+{
+  "verified_at": "2026-11-03T01:56:49.627527+00:00",
+  "response": {
+    "api_version": "1.3.0",
+    "status": "available",
+    "data": {
+      "status": "available",
+      "network": "NOAA Aviation Weather Center METAR stations",
+      "network_id": "awc_metar",
+      "requested_count": 5,
+      "returned_count": 5,
+      "fewer_than_requested": false,
+      "stations": [
+        {
+          "id": "KSKF",
+          "name": "Lackland AFB/Kelly Fld",
+          "network": "NOAA Aviation Weather Center METAR stations",
+          "latitude": 29.392,
+          "longitude": -98.581,
+          "distance_km": 9.222645149334792,
+          "measured_variables": [
+            "Air temperature",
+            "Dew point",
+            "Wind speed and direction",
+            "Visibility",
+            "Altimeter pressure",
+            "Cloud cover and ceiling"
+          ],
+          "variables_note": "METAR report variables; availability varies by station and report.",
+          "url": "https://aviationweather.gov/data/metar/?id=KSKF",
+          "observation": {
+            "status": "available",
+            "observed_at": "2026-11-03T01:30:00+00:00",
+            "age_minutes": 26.8,
+            "values": [
+              {
+                "variable": "Air temperature",
+                "value": 27,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Dew point",
+                "value": 21,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Wind speed",
+                "value": 11,
+                "unit": "kn"
+              },
+              {
+                "variable": "Wind direction",
+                "value": 140,
+                "unit": "\u00b0"
+              },
+              {
+                "variable": "Altimeter pressure",
+                "value": 1009.2,
+                "unit": "hPa"
+              },
+              {
+                "variable": "Visibility",
+                "value": "10+",
+                "unit": "statute mi"
+              }
+            ],
+            "message": "Fields absent from the report are not available. Reports older than 2 hours are stale; no values are filled in."
+          }
+        },
+        {
+          "id": "KSSF",
+          "name": "San Antonio/Stinson Muni",
+          "network": "NOAA Aviation Weather Center METAR stations",
+          "latitude": 29.33896,
+          "longitude": -98.47198,
+          "distance_km": 9.700632378590278,
+          "measured_variables": [
+            "Air temperature",
+            "Dew point",
+            "Wind speed and direction",
+            "Visibility",
+            "Altimeter pressure",
+            "Cloud cover and ceiling"
+          ],
+          "variables_note": "METAR report variables; availability varies by station and report.",
+          "url": "https://aviationweather.gov/data/metar/?id=KSSF",
+          "observation": {
+            "status": "available",
+            "observed_at": "2026-11-03T00:53:00+00:00",
+            "age_minutes": 63.8,
+            "values": [
+              {
+                "variable": "Air temperature",
+                "value": 26.7,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Dew point",
+                "value": 21.1,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Wind speed",
+                "value": 7,
+                "unit": "kn"
+              },
+              {
+                "variable": "Wind direction",
+                "value": 140,
+                "unit": "\u00b0"
+              },
+              {
+                "variable": "Altimeter pressure",
+                "value": 1009.6,
+                "unit": "hPa"
+              },
+              {
+                "variable": "Visibility",
+                "value": "10+",
+                "unit": "statute mi"
+              }
+            ],
+            "message": "Fields absent from the report are not available. Reports older than 2 hours are stale; no values are filled in."
+          }
+        },
+        {
+          "id": "KSAT",
+          "name": "San Antonio Intl",
+          "network": "NOAA Aviation Weather Center METAR stations",
+          "latitude": 29.54429,
+          "longitude": -98.48394,
+          "distance_km": 13.383188976646789,
+          "measured_variables": [
+            "Air temperature",
+            "Dew point",
+            "Wind speed and direction",
+            "Visibility",
+            "Altimeter pressure",
+            "Cloud cover and ceiling"
+          ],
+          "variables_note": "METAR report variables; availability varies by station and report.",
+          "url": "https://aviationweather.gov/data/metar/?id=KSAT",
+          "observation": {
+            "status": "available",
+            "observed_at": "2026-11-03T01:51:00+00:00",
+            "age_minutes": 5.8,
+            "values": [
+              {
+                "variable": "Air temperature",
+                "value": 25.6,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Dew point",
+                "value": 21.1,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Wind speed",
+                "value": 13,
+                "unit": "kn"
+              },
+              {
+                "variable": "Wind direction",
+                "value": 130,
+                "unit": "\u00b0"
+              },
+              {
+                "variable": "Altimeter pressure",
+                "value": 1010.9,
+                "unit": "hPa"
+              },
+              {
+                "variable": "Visibility",
+                "value": "10+",
+                "unit": "statute mi"
+              }
+            ],
+            "message": "Fields absent from the report are not available. Reports older than 2 hours are stale; no values are filled in."
+          }
+        },
+        {
+          "id": "KRND",
+          "name": "Randolph AFB",
+          "network": "NOAA Aviation Weather Center METAR stations",
+          "latitude": 29.537,
+          "longitude": -98.268,
+          "distance_km": 25.154607808940728,
+          "measured_variables": [
+            "Air temperature",
+            "Dew point",
+            "Wind speed and direction",
+            "Visibility",
+            "Altimeter pressure",
+            "Cloud cover and ceiling"
+          ],
+          "variables_note": "METAR report variables; availability varies by station and report.",
+          "url": "https://aviationweather.gov/data/metar/?id=KRND",
+          "observation": {
+            "status": "available",
+            "observed_at": "2026-11-03T00:55:00+00:00",
+            "age_minutes": 61.8,
+            "values": [
+              {
+                "variable": "Air temperature",
+                "value": 26.1,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Dew point",
+                "value": 20.6,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Wind speed",
+                "value": 9,
+                "unit": "kn"
+              },
+              {
+                "variable": "Wind direction",
+                "value": 140,
+                "unit": "\u00b0"
+              },
+              {
+                "variable": "Altimeter pressure",
+                "value": 1010.2,
+                "unit": "hPa"
+              },
+              {
+                "variable": "Visibility",
+                "value": "10+",
+                "unit": "statute mi"
+              }
+            ],
+            "message": "Fields absent from the report are not available. Reports older than 2 hours are stale; no values are filled in."
+          }
+        },
+        {
+          "id": "KCVB",
+          "name": "Castroville Muni",
+          "network": "NOAA Aviation Weather Center METAR stations",
+          "latitude": 29.34304,
+          "longitude": -98.84969,
+          "distance_km": 35.69430819219892,
+          "measured_variables": [
+            "Air temperature",
+            "Dew point",
+            "Wind speed and direction",
+            "Visibility",
+            "Altimeter pressure",
+            "Cloud cover and ceiling"
+          ],
+          "variables_note": "METAR report variables; availability varies by station and report.",
+          "url": "https://aviationweather.gov/data/metar/?id=KCVB",
+          "observation": {
+            "status": "available",
+            "observed_at": "2026-11-03T01:35:00+00:00",
+            "age_minutes": 21.8,
+            "values": [
+              {
+                "variable": "Air temperature",
+                "value": 26,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Dew point",
+                "value": 22,
+                "unit": "\u00b0C"
+              },
+              {
+                "variable": "Wind speed",
+                "value": 11,
+                "unit": "kn"
+              },
+              {
+                "variable": "Wind direction",
+                "value": 130,
+                "unit": "\u00b0"
+              },
+              {
+                "variable": "Altimeter pressure",
+                "value": 1010.2,
+                "unit": "hPa"
+              },
+              {
+                "variable": "Visibility",
+                "value": "10+",
+                "unit": "statute mi"
+              }
+            ],
+            "message": "Fields absent from the report are not available. Reports older than 2 hours are stale; no values are filled in."
+          }
+        }
+      ],
+      "search_radius_km": 200,
+      "catalog_fetched_at": "2026-11-03T01:56:08.604261+00:00",
+      "skipped_catalog_rows": 13,
+      "coverage": "Worldwide NOAA AWC catalog entries marked METAR with valid coordinates, within 200 km of the selection. US street addresses via Census; coordinates worldwide.",
+      "message": "Sorted by great-circle distance from the exact selection (area center for rectangles). METAR weather stations only, independent of the selected hazard. Catalog membership does not guarantee live telemetry. Station observations do not change hazard curves, probabilities or payouts."
+    },
+    "meta": {
+      "generated_at": "2026-11-03T01:56:46.256824+00:00",
+      "request": {
+        "network": "awc_metar",
+        "n": 5,
+        "lat": 29.424206087348,
+        "lon": -98.493261420826,
+        "address": "100 Dolorosa St, San Antonio, TX"
+      },
+      "purpose": "Research estimates; not a binding insurance quote or live forecast.",
+      "location": {
+        "status": "matched",
+        "input_address": "100 Dolorosa St, San Antonio, TX",
+        "normalized_address": "100 Dolorosa St, San Antonio, TX",
+        "source_name": "US Census Geocoding Services",
+        "source_url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress",
+        "benchmark": "Public_AR_Current",
+        "approximate": true,
+        "note": "Approximate Census address-range point, not a surveyed property location. Check the matched address and coordinates; spelling corrections are not guaranteed.",
+        "matched_address": "100 DOLOROSA, SAN ANTONIO, TX, 78205",
+        "latitude": 29.424206087348,
+        "longitude": -98.493261420826
+      }
+    }
+  },
+  "station_links": [
+    {
+      "id": "KSKF",
+      "url": "https://aviationweather.gov/data/metar/?id=KSKF",
+      "status": 200
+    },
+    {
+      "id": "KSSF",
+      "url": "https://aviationweather.gov/data/metar/?id=KSSF",
+      "status": 200
+    },
+    {
+      "id": "KSAT",
+      "url": "https://aviationweather.gov/data/metar/?id=KSAT",
+      "status": 200
+    },
+    {
+      "id": "KRND",
+      "url": "https://aviationweather.gov/data/metar/?id=KRND",
+      "status": 200
+    },
+    {
+      "id": "KCVB",
+      "url": "https://aviationweather.gov/data/metar/?id=KCVB",
+      "status": 200
+    }
+  ],
+  "edge_cases": [
+    {
+      "case": "invalid n=0",
+      "http_status": 400
+    },
+    {
+      "case": "invalid n=-1",
+      "http_status": 400
+    },
+    {
+      "case": "invalid n=1.5",
+      "http_status": 400
+    },
+    {
+      "case": "invalid n=51",
+      "http_status": 400
+    },
+    {
+      "case": "invalid n=NaN",
+      "http_status": 400
+    },
+    {
+      "case": "nonfinite coordinates",
+      "http_status": 400
+    },
+    {
+      "case": "missing longitude",
+      "http_status": 400
+    },
+    {
+      "case": "no stations within 200 km at 0,-140",
+      "http_status": 200,
+      "data": {
+        "status": "not_found",
+        "network": "NOAA Aviation Weather Center METAR stations",
+        "network_id": "awc_metar",
+        "requested_count": 5,
+        "returned_count": 0,
+        "fewer_than_requested": true,
+        "stations": [],
+        "search_radius_km": 200,
+        "catalog_fetched_at": "2026-11-03T01:56:08.604261+00:00",
+        "skipped_catalog_rows": 13,
+        "coverage": "Worldwide NOAA AWC catalog entries marked METAR with valid coordinates, within 200 km of the selection. US street addresses via Census; coordinates worldwide.",
+        "message": "Sorted by great-circle distance from the exact selection (area center for rectangles). METAR weather stations only, independent of the selected hazard. Catalog membership does not guarantee live telemetry. Station observations do not change hazard curves, probabilities or payouts."
+      }
+    },
+    {
+      "case": "request 50",
+      "http_status": 200,
+      "returned_count": 44,
+      "fewer_than_requested": true
+    },
+    {
+      "case": "unmatched real-service address",
+      "http_status": 422,
+      "error": {
+        "code": "address_not_found",
+        "message": "No address matched. Check the street number, spelling, city, state and ZIP code, or use coordinates.",
+        "details": {
+          "status": "no_match",
+          "input_address": "999999999 Imaginary Avenue, San Antonio, TX 78205",
+          "normalized_address": "999999999 Imaginary Avenue, San Antonio, TX 78205",
+          "source_name": "US Census Geocoding Services",
+          "source_url": "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress",
+          "benchmark": "Public_AR_Current",
+          "approximate": true,
+          "note": "Approximate Census address-range point, not a surveyed property location. Check the matched address and coordinates; spelling corrections are not guaranteed.",
+          "candidates": [],
+          "candidate_count": 0,
+          "message": "No address matched. Check the street number, spelling, city, state and ZIP code, or use coordinates."
+        }
+      }
+    }
+  ]
+}

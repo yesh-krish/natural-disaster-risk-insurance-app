@@ -1,0 +1,44 @@
+[
+  {
+    "file": "fsim-2023-metadata.html",
+    "url": "https://www.fs.usda.gov/rds/archive/products/RDS-2016-0034-3/_metadata_RDS-2016-0034-3.html",
+    "bytes": 78516,
+    "sha256": "42cdbf73adb0269082eacf8efc32a79c6396b85bd74c3ed4cbb38dbc7825e3de",
+    "retrieved_at": "2026-11-04T00:38:59.564245+00:00"
+  },
+  {
+    "file": "fsim-2023-file-index.html",
+    "url": "https://www.fs.usda.gov/rds/archive/products/RDS-2016-0034-3/_fileindex_RDS-2016-0034-3.html",
+    "bytes": 5631,
+    "sha256": "6cf7230ae15310afacd43f0c61681dcb2fa9a983b3c8f5c8ca3b180681a33c74",
+    "retrieved_at": "2026-11-04T00:39:00.033017+00:00"
+  },
+  {
+    "file": "fsim-2025-catalog.html",
+    "url": "https://www.fs.usda.gov/rds/archive/catalog/RDS-2025-0006",
+    "bytes": 36589,
+    "sha256": "a248fff750264a047488f877da4546a6abc17ef5c00e770dcd31a2933612aeff",
+    "retrieved_at": "2026-11-04T00:39:00.458663+00:00"
+  },
+  {
+    "file": "wrc-2024-catalog.html",
+    "url": "https://www.fs.usda.gov/rds/archive/catalog/RDS-2020-0016-2",
+    "bytes": 60300,
+    "sha256": "d4f42c72ba8549462d4d7e409b4aa5d4d48118a6e8305b9069045f20eb4f219d",
+    "retrieved_at": "2026-11-04T00:39:00.782618+00:00"
+  },
+  {
+    "file": "fsim-2025-metadata.html",
+    "url": "https://www.fs.usda.gov/rds/archive/products/RDS-2025-0006/_metadata_RDS-2025-0006.html",
+    "bytes": 99997,
+    "sha256": "c0e9246ac8765349ff8d22e0f456a99f5b62908b65ddde906fd7189e2b6c5369",
+    "retrieved_at": "2026-11-04T00:39:24.513277+00:00"
+  },
+  {
+    "file": "fsim-2025-file-index.html",
+    "url": "https://www.fs.usda.gov/rds/archive/products/RDS-2025-0006/_fileindex_RDS-2025-0006.html",
+    "bytes": 7810,
+    "sha256": "04e7d3bb4475c639b573e208a8362f8342707342f238640661766cfa98c9e38d",
+    "retrieved_at": "2026-11-04T00:39:24.666802+00:00"
+  }
+]

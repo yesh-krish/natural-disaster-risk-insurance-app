@@ -1,0 +1,565 @@
+{
+  "missing_flood": {
+    "peril": "rainfall",
+    "metric": "Maximum 24-hour rainfall",
+    "unit": "mm",
+    "source_name": "NOAA Atlas 14",
+    "source_url": "https://hdsc.nws.noaa.gov/cgi-bin/hdsc/new/fe_text_mean.csv?lat=29.4241&lon=-98.4936&data=depth&units=metric&series=ams",
+    "frequency_label": "Annual exceedance probability (%)",
+    "points": [
+      {
+        "frequency_pct": 0.1,
+        "severity": 501.0,
+        "return_period": 1000
+      },
+      {
+        "frequency_pct": 0.2,
+        "severity": 431.0,
+        "return_period": 500
+      },
+      {
+        "frequency_pct": 0.5,
+        "severity": 350.0,
+        "return_period": 200
+      },
+      {
+        "frequency_pct": 1.0,
+        "severity": 296.0,
+        "return_period": 100
+      },
+      {
+        "frequency_pct": 2.0,
+        "severity": 250.0,
+        "return_period": 50
+      },
+      {
+        "frequency_pct": 4.0,
+        "severity": 209.0,
+        "return_period": 25
+      },
+      {
+        "frequency_pct": 10.0,
+        "severity": 161.0,
+        "return_period": 10
+      },
+      {
+        "frequency_pct": 20.0,
+        "severity": 129.0,
+        "return_period": 5
+      },
+      {
+        "frequency_pct": 50.0,
+        "severity": 89.0,
+        "return_period": 2
+      }
+    ],
+    "details": [
+      [
+        "Model",
+        "NOAA Atlas 14 Volume 11 Version 2"
+      ],
+      [
+        "Duration",
+        "24 hours"
+      ],
+      [
+        "Series",
+        "Annual maximum (AMS)"
+      ],
+      [
+        "Intensity",
+        "Accumulation depth in millimeters"
+      ]
+    ],
+    "notes": [
+      "Point precipitation-frequency estimates under the Atlas 14 stationary historical-climate model.",
+      "Rainfall is a separate disaster selection. Cyclone wind is shown under Cyclone."
+    ],
+    "status": "available",
+    "latitude": 29.4241,
+    "longitude": -98.4936,
+    "selection": {
+      "mode": "most_relevant",
+      "method": "inland_flood_rainfall_context",
+      "source_url": "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Counties/FeatureServer/0",
+      "county": {
+        "name": "Bexar",
+        "state": "Texas",
+        "fips": "48029",
+        "model_version": "December 2025"
+      },
+      "rankings": [
+        {
+          "peril": "flood",
+          "annual_loss_total": 364763480.6498223,
+          "components": {
+            "IFLD_EALT": 364763480.6498223
+          }
+        },
+        {
+          "peril": "cyclone",
+          "annual_loss_total": 2714222.204643485,
+          "components": {
+            "HRCN_EALT": 2714222.204643485
+          }
+        },
+        {
+          "peril": "wildfire",
+          "annual_loss_total": 1747812.9944921013,
+          "components": {
+            "WFIR_EALT": 1747812.9944921013
+          }
+        },
+        {
+          "peril": "earthquake",
+          "annual_loss_total": 436781.903983169,
+          "components": {
+            "ERQK_EALT": 436781.903983169
+          }
+        }
+      ],
+      "checks": [
+        {
+          "peril": "flood",
+          "usable": false,
+          "status": "unavailable",
+          "reason": "No mapped depths for this point in the installed Texas model."
+        },
+        {
+          "peril": "rainfall",
+          "usable": true,
+          "status": "available",
+          "reason": "Local curve available."
+        }
+      ],
+      "notes": [
+        "County-level expected annual loss is regional context, not property risk or a premium. Only supported disasters with usable local curves are considered.",
+        "A missing flood curve can mean missing coverage or NoData; it does not establish low flood risk.",
+        "FEMA NRI has no standalone rainfall category. Rainfall can be shown as related inland-flood context or as an available-data fallback."
+      ],
+      "artifact_sha256": "c799b1c476c14204dc20c3ddf975988c2a5c82f4ecd3fe21fd9db555adce9e31",
+      "chosen_peril": "rainfall",
+      "explanation": "Flooding is the highest remaining county-ranked choice for Bexar, Texas, mainly from inland flooding, but no usable flood-depth curve is available at this coordinate. Showing Rainfall as related context; rainfall depth does not measure local inundation."
+    }
+  },
+  "mapped_flood": {
+    "peril": "flood",
+    "metric": "Peak inundation depth",
+    "unit": "m",
+    "source_name": "TWDB 2025 flood-depth model",
+    "source_url": "https://twdb-flood-planning-resources-twdb.hub.arcgis.com/pages/cursory-floodplain-data-2025",
+    "frequency_label": "Annual exceedance probability (%)",
+    "points": [
+      {
+        "frequency_pct": 0.2,
+        "severity": 0.5791199927330017,
+        "status": "Modeled depth"
+      },
+      {
+        "frequency_pct": 1.0,
+        "severity": 0.46939198837280277,
+        "status": "Modeled depth"
+      },
+      {
+        "frequency_pct": 10.0,
+        "severity": 0.28041600508689885,
+        "status": "Modeled depth"
+      },
+      {
+        "frequency_pct": 20.0,
+        "severity": null,
+        "status": "No mapped depth / NoData"
+      }
+    ],
+    "details": [
+      [
+        "Model",
+        "2025 existing conditions, scenario 5"
+      ],
+      [
+        "Tile",
+        "n29w99"
+      ],
+      [
+        "Coverage",
+        "Installed Texas tiles"
+      ],
+      [
+        "Intensity",
+        "Depth above ground, meters"
+      ]
+    ],
+    "notes": [
+      "Missing or zero/NoData raster cells remain blank; they do not establish no flood risk.",
+      "FEMA flood zones are regulatory context; TWDB supplies the frequency-depth points."
+    ],
+    "status": "available",
+    "latitude": 29.39741277,
+    "longitude": -98.47084089,
+    "selection": {
+      "mode": "most_relevant",
+      "method": "fema_county_expected_annual_loss",
+      "source_url": "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Counties/FeatureServer/0",
+      "county": {
+        "name": "Bexar",
+        "state": "Texas",
+        "fips": "48029",
+        "model_version": "December 2025"
+      },
+      "rankings": [
+        {
+          "peril": "flood",
+          "annual_loss_total": 364763480.6498223,
+          "components": {
+            "IFLD_EALT": 364763480.6498223
+          }
+        },
+        {
+          "peril": "cyclone",
+          "annual_loss_total": 2714222.204643485,
+          "components": {
+            "HRCN_EALT": 2714222.204643485
+          }
+        },
+        {
+          "peril": "wildfire",
+          "annual_loss_total": 1747812.9944921013,
+          "components": {
+            "WFIR_EALT": 1747812.9944921013
+          }
+        },
+        {
+          "peril": "earthquake",
+          "annual_loss_total": 436781.903983169,
+          "components": {
+            "ERQK_EALT": 436781.903983169
+          }
+        }
+      ],
+      "checks": [
+        {
+          "peril": "flood",
+          "usable": true,
+          "status": "available",
+          "reason": "Local curve available."
+        }
+      ],
+      "notes": [
+        "County-level expected annual loss is regional context, not property risk or a premium. Only supported disasters with usable local curves are considered.",
+        "A missing flood curve can mean missing coverage or NoData; it does not establish low flood risk.",
+        "FEMA NRI has no standalone rainfall category. Rainfall can be shown as related inland-flood context or as an available-data fallback."
+      ],
+      "artifact_sha256": "c799b1c476c14204dc20c3ddf975988c2a5c82f4ecd3fe21fd9db555adce9e31",
+      "chosen_peril": "flood",
+      "explanation": "Flood is the highest-ranked supported disaster with a usable local curve, based on FEMA's county expected annual loss for Bexar, Texas."
+    }
+  },
+  "earthquake_area": {
+    "peril": "earthquake",
+    "metric": "Peak ground acceleration",
+    "unit": "%g",
+    "source_name": "USGS National Seismic Hazard Model",
+    "source_url": "https://earthquake.usgs.gov/ws/nshmp/conus-2023.R2/static/hazard?latitude=37.7749&longitude=-122.4194&siteClass=BC&imt=PGA&format=JSON",
+    "frequency_label": "Annual exceedance probability (%)",
+    "points": [
+      {
+        "frequency_pct": 2.6795845799640992e-09,
+        "severity": 517.0,
+        "annual_rate": 2.67958458e-11
+      },
+      {
+        "frequency_pct": 2.4144251408527558e-06,
+        "severity": 344.0,
+        "annual_rate": 2.41442517e-08
+      },
+      {
+        "frequency_pct": 0.00019427565528460438,
+        "severity": 229.99999999999997,
+        "annual_rate": 1.94275844e-06
+      },
+      {
+        "frequency_pct": 0.002736062179136003,
+        "severity": 153.0,
+        "annual_rate": 2.73609961e-05
+      },
+      {
+        "frequency_pct": 0.017902903638909777,
+        "severity": 102.0,
+        "annual_rate": 0.000179045064
+      },
+      {
+        "frequency_pct": 0.07605830779446819,
+        "severity": 68.0,
+        "annual_rate": 0.000760872468
+      },
+      {
+        "frequency_pct": 0.23770220282321491,
+        "severity": 45.4,
+        "annual_rate": 0.00237985163
+      },
+      {
+        "frequency_pct": 0.5925144025871711,
+        "severity": 30.2,
+        "annual_rate": 0.00594276734
+      },
+      {
+        "frequency_pct": 1.2223360328843134,
+        "severity": 20.200000000000003,
+        "annual_rate": 0.01229868
+      },
+      {
+        "frequency_pct": 2.247445649390386,
+        "severity": 13.4,
+        "annual_rate": 0.022730856
+      },
+      {
+        "frequency_pct": 3.7408667776297997,
+        "severity": 8.959999999999999,
+        "annual_rate": 0.0381263267
+      },
+      {
+        "frequency_pct": 5.8851925109109295,
+        "severity": 5.970000000000001,
+        "annual_rate": 0.0606547927
+      },
+      {
+        "frequency_pct": 8.859674643075637,
+        "severity": 3.9800000000000004,
+        "annual_rate": 0.0927698303
+      },
+      {
+        "frequency_pct": 12.937804505082662,
+        "severity": 2.65,
+        "annual_rate": 0.138547432
+      },
+      {
+        "frequency_pct": 18.338289278847643,
+        "severity": 1.77,
+        "annual_rate": 0.202584951
+      },
+      {
+        "frequency_pct": 25.25886596655219,
+        "severity": 1.18,
+        "annual_rate": 0.291139589
+      },
+      {
+        "frequency_pct": 33.54283870771657,
+        "severity": 0.786,
+        "annual_rate": 0.408612637
+      },
+      {
+        "frequency_pct": 42.662827564486285,
+        "severity": 0.524,
+        "annual_rate": 0.556221039
+      },
+      {
+        "frequency_pct": 51.86599678090007,
+        "severity": 0.35000000000000003,
+        "annual_rate": 0.731181331
+      },
+      {
+        "frequency_pct": 60.526254935840896,
+        "severity": 0.233,
+        "annual_rate": 0.929534417
+      }
+    ],
+    "details": [
+      [
+        "Model",
+        "STATIC_CONUS_2023_R2"
+      ],
+      [
+        "Site class",
+        "BC"
+      ],
+      [
+        "Intensity",
+        "Site PGA, percent of gravitational acceleration"
+      ],
+      [
+        "Probability",
+        "1 \u2212 exp(\u2212annual USGS exceedance rate)"
+      ]
+    ],
+    "notes": [
+      "Site class is an explicit assumption; select a class appropriate to the site.",
+      "These are modeled long-term shaking probabilities, not a live earthquake reading."
+    ],
+    "status": "available",
+    "latitude": 37.7749,
+    "longitude": -122.4194,
+    "selection": {
+      "mode": "most_relevant",
+      "method": "fema_county_expected_annual_loss",
+      "source_url": "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Counties/FeatureServer/0",
+      "county": {
+        "name": "San Francisco",
+        "state": "California",
+        "fips": "06075",
+        "model_version": "December 2025"
+      },
+      "rankings": [
+        {
+          "peril": "earthquake",
+          "annual_loss_total": 662134761.2917633,
+          "components": {
+            "ERQK_EALT": 662134761.2917633
+          }
+        },
+        {
+          "peril": "flood",
+          "annual_loss_total": 178368323.17848045,
+          "components": {
+            "IFLD_EALT": 177730298.8070265,
+            "CFLD_EALT": 638024.3714539502
+          }
+        },
+        {
+          "peril": "wildfire",
+          "annual_loss_total": 12595.159177561092,
+          "components": {
+            "WFIR_EALT": 12595.159177561092
+          }
+        },
+        {
+          "peril": "cyclone",
+          "annual_loss_total": null,
+          "components": {}
+        }
+      ],
+      "checks": [
+        {
+          "peril": "earthquake",
+          "usable": true,
+          "status": "available",
+          "reason": "Local curve available."
+        }
+      ],
+      "notes": [
+        "County-level expected annual loss is regional context, not property risk or a premium. Only supported disasters with usable local curves are considered.",
+        "A missing flood curve can mean missing coverage or NoData; it does not establish low flood risk.",
+        "FEMA NRI has no standalone rainfall category. Rainfall can be shown as related inland-flood context or as an available-data fallback."
+      ],
+      "artifact_sha256": "e52b62e07d6a1f4d15edb024425d1e66b96b7fc290873805e45d4fe4f9fb6ddb",
+      "chosen_peril": "earthquake",
+      "explanation": "Earthquake is the highest-ranked supported disaster with a usable local curve, based on FEMA's county expected annual loss for San Francisco, California."
+    }
+  },
+  "cyclone_area": {
+    "peril": "cyclone",
+    "metric": "Maximum sustained cyclone wind",
+    "unit": "kn",
+    "source_name": "NOAA NHC HURDAT2 wind footprints",
+    "source_url": "https://www.nhc.noaa.gov/data/",
+    "frequency_label": "Observed annual exceedance frequency (%)",
+    "points": [
+      {
+        "frequency_pct": 13.636363636363635,
+        "severity": 64,
+        "hit_years": 3,
+        "exposure_years": 22
+      },
+      {
+        "frequency_pct": 27.27272727272727,
+        "severity": 50,
+        "hit_years": 6,
+        "exposure_years": 22
+      },
+      {
+        "frequency_pct": 50.0,
+        "severity": 34,
+        "hit_years": 11,
+        "exposure_years": 22
+      }
+    ],
+    "details": [
+      [
+        "Record",
+        "2004\u20132025 (22 complete calendar years)"
+      ],
+      [
+        "Metric",
+        "Sustained wind, 34 / 50 / 64 knots"
+      ],
+      [
+        "Method",
+        "Selected point inside NOAA quadrant wind radii at best-track observation times"
+      ],
+      [
+        "Cyclones with sampled footprint at point",
+        "17"
+      ]
+    ],
+    "notes": [
+      "Historical fractions of years with a recorded cyclone wind footprint at the point. These are lower-bound observed frequencies, not calibrated future probabilities or return-period wind gusts.",
+      "No interpolation between best-track times; between-record passages and missing wind radii can be missed. Zero observed years is not zero risk.",
+      "Wind speed belongs to Cyclone. Rainfall uses a separate 24-hour accumulation curve."
+    ],
+    "status": "available",
+    "source_files": [
+      "https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2025-092326.txt",
+      "https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2025-092926.txt"
+    ],
+    "missing_radius_records": 198,
+    "latitude": 29.9511,
+    "longitude": -90.0715,
+    "selection": {
+      "mode": "most_relevant",
+      "method": "fema_county_expected_annual_loss",
+      "source_url": "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Counties/FeatureServer/0",
+      "county": {
+        "name": "Orleans",
+        "state": "Louisiana",
+        "fips": "22071",
+        "model_version": "December 2025"
+      },
+      "rankings": [
+        {
+          "peril": "cyclone",
+          "annual_loss_total": 222948612.12037128,
+          "components": {
+            "HRCN_EALT": 222948612.12037128
+          }
+        },
+        {
+          "peril": "flood",
+          "annual_loss_total": 48528205.00650025,
+          "components": {
+            "IFLD_EALT": 46671981.711779244,
+            "CFLD_EALT": 1856223.2947210053
+          }
+        },
+        {
+          "peril": "earthquake",
+          "annual_loss_total": 1367544.7582807632,
+          "components": {
+            "ERQK_EALT": 1367544.7582807632
+          }
+        },
+        {
+          "peril": "wildfire",
+          "annual_loss_total": 34306.57640694439,
+          "components": {
+            "WFIR_EALT": 34306.57640694439
+          }
+        }
+      ],
+      "checks": [
+        {
+          "peril": "cyclone",
+          "usable": true,
+          "status": "available",
+          "reason": "Local curve available."
+        }
+      ],
+      "notes": [
+        "County-level expected annual loss is regional context, not property risk or a premium. Only supported disasters with usable local curves are considered.",
+        "A missing flood curve can mean missing coverage or NoData; it does not establish low flood risk.",
+        "FEMA NRI has no standalone rainfall category. Rainfall can be shown as related inland-flood context or as an available-data fallback."
+      ],
+      "artifact_sha256": "1bbf088ca7c6fc8b2e2638ab34485c489b248edded927997a4982985decb80a7",
+      "chosen_peril": "cyclone",
+      "explanation": "Cyclone / Hurricane is the highest-ranked supported disaster with a usable local curve, based on FEMA's county expected annual loss for Orleans, Louisiana."
+    }
+  }
+}

@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NDApp · Parametric Insurance Pool</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css">
+    <style>
+      :root { font-family: system-ui, sans-serif; color: #1e293b; background: #f4f7fb; }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      main { max-width: 1120px; margin: 0 auto; padding: 24px; }
+      h1 { margin: 0 0 6px; font-size: 1.65rem; }
+      p { line-height: 1.5; }
+      .intro { margin: 0 0 18px; color: #475569; }
+      .address-search { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+      .address-search input { flex: 1 1 280px; min-width: 0; padding: 10px; border: 1px solid #94a3b8; border-radius: 6px; font: inherit; }
+      .address-search button { padding: 10px 16px; border: 1px solid #2563eb; border-radius: 6px; background: #2563eb; color: white; font: inherit; cursor: pointer; }
+      .address-search button:disabled { opacity: .65; cursor: wait; }
+      #search-status { min-height: 1.5em; margin: 0 0 10px; color: #475569; font-size: .9rem; }
+      #map { width: 100%; height: min(62vh, 620px); min-height: 360px; border: 1px solid #cbd5e1; border-radius: 10px; }
+      .selection-controls { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:12px 0; }
+      .selection-controls select { padding:8px; font:inherit; border:1px solid #94a3b8; border-radius:6px; }
+      #selection-help { flex:1 1 300px; margin:0; color:#475569; font-size:.9rem; }
+      #map.selecting-area { cursor:crosshair; }
+      .panel { margin-top: 16px; padding: 18px 20px; background: white; border: 1px solid #cbd5e1; border-radius: 10px; }
+      .panel h2 { margin: 0 0 10px; font-size: 1.15rem; }
+      #status { margin: 0; }
+      #coordinates { margin: 0 0 12px; font-variant-numeric: tabular-nums; }
+      dl { display: grid; grid-template-columns: minmax(150px, 220px) 1fr; margin: 0; gap: 8px 16px; }
+      dt { font-weight: 600; }
+      dd { margin: 0; overflow-wrap: anywhere; }
+      [hidden] { display: none !important; }
+      .note { margin: 14px 0 0; color: #64748b; font-size: .9rem; }
+      .scenario-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+      .scenario-table th, .scenario-table td { padding: 9px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+      .scenario-table th { font-size: .9rem; }
+      .scenario-table input { width: 100%; max-width: 130px; padding: 7px; border: 1px solid #94a3b8; border-radius: 5px; font: inherit; }
+      .depth-detail, .damage-detail { display: block; margin-top: 4px; color: #64748b; font-size: .78rem; }
+      .building-fields { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+      .building-fields label { display: grid; gap: 5px; font-weight: 600; }
+      .building-fields select, .building-fields input { padding: 7px; border: 1px solid #94a3b8; border-radius: 5px; font: inherit; }
+      .building-fields input { width: 130px; }
+      .model-toggle { display: block; margin: 12px 0; }
+      .scenario-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      button.scenario-button { padding: 8px 12px; border: 1px solid #64748b; border-radius: 6px; background: white; color: #1e293b; font: inherit; cursor: pointer; }
+      button.scenario-button:hover { background: #f1f5f9; }
+      .chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+      .chart-box { min-height: 270px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 7px; }
+      .chart-box h3 { margin: 0 0 6px; font-size: 1rem; }
+      .chart-box svg { width: 100%; height: 240px; }
+      .chart-box p { color: #64748b; }
+      .hazard-controls { display:flex; flex-wrap:wrap; gap:18px; align-items:end; padding:16px 18px; margin-bottom:16px; background:#fff; border:1px solid #cbd5e1; border-radius:10px; }
+      .hazard-controls label { display:grid; gap:6px; font-weight:600; }
+      .hazard-controls select { padding:10px 12px; font:inherit; border:1px solid #94a3b8; border-radius:6px; background:white; min-width:210px; }
+      #metric-summary { margin:0; flex:1 1 240px; color:#475569; }
+      .source-link { color:#1d4ed8; }
+      .table-scroll { max-height:360px; overflow:auto; }
+      #hazard-chart svg { width:100%; min-height:280px; }
+      #hazard-chart { min-height:290px; }
+      #hazard-points th { position:sticky; top:0; background:white; }
+      .hazard-layout { display:grid; grid-template-columns:1.4fr 1fr; gap:20px; align-items:start; }
+      #hazard-status { padding:10px 12px; border-radius:6px; background:#eff6ff; color:#1e40af; }
+      #hazard-status[data-state="unavailable"], #hazard-status[data-state="error"] { background:#fff7ed; color:#9a3412; }
+      .axis-note { margin:0 0 12px; color:#475569; font-size:.9rem; }
+      .trigger-workspace { display:grid; grid-template-columns:1.15fr 1fr; gap:0; margin:20px 0; background:white; border:1px solid #cbd5e1; border-radius:12px; overflow:hidden; }
+      .trigger-setup { padding:24px; }
+      .trigger-setup h2 { margin:0 0 6px; font-size:1.2rem; }
+      .trigger-setup > p { margin:0 0 20px; color:#475569; font-size:.9rem; }
+      .prototype-note { margin:0 0 20px; padding:12px 14px; border-left:3px solid #d97706; border-radius:4px; background:#fffbeb; color:#78350f; font-size:.85rem; line-height:1.5; }
+      .prototype-note p { margin:6px 0 0; }
+      .trigger-setup .hazard-controls { padding:0; margin:0; border:0; gap:16px; }
+      .trigger-setup .hazard-controls label { width:100%; }
+      .trigger-setup select { width:100%; }
+      .trigger-setup input { width:100%; min-width:0; padding:10px 12px; font:inherit; border:1px solid #94a3b8; border-radius:6px; }
+      .trigger-setup input[aria-invalid="true"] { border-color:#b91c1c; }
+      #payout-help { margin:0; font-size:.85rem; color:#475569; }
+      .trigger-setup #site-class-control { width:auto; }
+      .trigger-help { margin:7px 0 0; color:#64748b; font-size:.85rem; }
+      #metric-summary { font-size:.85rem; }
+      .trigger-result { padding:26px; background:#eef5ff; border-left:1px solid #d6e4fa; display:flex; flex-direction:column; justify-content:center; }
+      .trigger-result h2 { margin:0 0 12px; font-size:.9rem; font-weight:600; color:#334e75; }
+      #trigger-probability { display:block; color:#1746a2; font-size:clamp(2.5rem, 5vw, 3.5rem); font-weight:700; letter-spacing:-.04em; line-height:1.15; overflow-wrap:anywhere; }
+      #trigger-explanation { margin:14px 0 0; }
+      .pool-contribution { margin-top:22px; padding-top:20px; border-top:1px solid #cbdcf5; }
+      #pool-contribution { display:block; font-size:clamp(1.8rem, 4vw, 2.5rem); font-weight:700; color:#1746a2; overflow-wrap:anywhere; }
+      #pool-calculation { margin:10px 0 0; font-size:.9rem; }
+      .pool-contribution .note { margin-top:8px; font-size:.8rem; }
+      #trigger-location, #trigger-source, #trigger-method { margin:10px 0 0; font-size:.83rem; color:#475569; }
+      .trigger-result[data-state="unavailable"], .trigger-result[data-state="error"] { background:#fff7ed; border-color:#fed7aa; }
+      .trigger-result[data-state="unavailable"] #trigger-probability, .trigger-result[data-state="error"] #trigger-probability { color:#9a3412; }
+      select:disabled { background:#f1f5f9; color:#64748b; cursor:not-allowed; }
+      .trigger-comparison { margin:0 0 20px; }
+      .trigger-comparison .table-scroll { max-height:320px; }
+      #comparison-table { margin-top:0; font-variant-numeric:tabular-nums; }
+      #comparison-table caption { text-align:left; padding:12px 9px; color:#475569; font-size:.9rem; }
+      #comparison-table thead th { position:sticky; top:0; background:#f1f5f9; z-index:1; }
+      #comparison-table tbody th { font-weight:600; }
+      #comparison-table tr[data-selected="true"] { background:#eef5ff; }
+      #comparison-table td:last-child { white-space:nowrap; }
+      #comparison-table button[aria-pressed="true"] { border-color:#1d4ed8; color:#1d4ed8; font-weight:600; }
+      select:focus-visible, input:focus-visible, button:focus-visible { outline:3px solid #93c5fd; outline-offset:3px; }
+      @media (max-width:700px) { .trigger-workspace { grid-template-columns:1fr; } .trigger-result { border-left:0; border-top:1px solid #d6e4fa; } .trigger-setup, .trigger-result { padding:20px; } }
+      @media (max-width:850px) { .hazard-layout { grid-template-columns:1fr; } }
+      @media (max-width:700px) { .hazard-controls select { min-width:0; width:100%; } }
+      @media (max-width: 540px) { main { padding: 14px; } dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
+      @media (max-width: 700px) { .chart-grid { grid-template-columns: 1fr; } .scenario-table { font-size: .85rem; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>NDApp · Parametric insurance pool</h1>
+      <p class="note" style="margin:6px 0 12px"><a class="source-link" href="/api/docs">Explore the research API ↗</a></p>
+      <p class="intro">Explore hazard data at a location. Where annual probabilities are available, choose a trigger and payout to calculate an expected annual pool contribution.</p>
+      <section class="trigger-workspace" aria-labelledby="trigger-heading">
+      <div class="trigger-setup">
+      <h2 id="trigger-heading">Set your trigger and payout</h2>
+      <p id="hazard-selection-description">Use a government model’s supported levels for your selected location.</p>
+      <aside id="potential-fire-prototype" class="prototype-note" hidden aria-label="Potential fire intensity prototype">
+        <strong>Research prototype — accuracy not yet validated</strong>
+        <p>Uses historical hourly weather (1991–2020), mapped fuels and assumed live fuel moisture with Rothermel–Byram methods to estimate potential surface-fire intensity (kW/m). The curve counts years whose modeled peak reaches each threshold; it does not predict actual wildfire occurrence or damage.</p>
+      </aside>
+      <div class="hazard-controls">
+        <label for="disaster-select">1. Select a hazard
+          <select id="disaster-select">
+            <option value="auto">Choose most relevant</option>
+            <option value="flood" selected>Flood</option>
+            <option value="earthquake">Earthquake</option>
+            <option value="potential_fire_intensity">Wildfire / Potential intensity (kW/m)</option>
+            <option value="wildfire">Wildfire / Flame length (FSim)</option>
+            <option value="cyclone">Wind (tropical cyclones)</option>
+            <option value="rainfall">Rainfall</option>
+            <option value="heat">Heat (historical annual exceedance)</option>
+          </select>
+        </label>
+        <label for="site-class" id="site-class-control" hidden>Earthquake site class
+          <select id="site-class"><option>A</option><option>B</option><option selected>BC</option><option>C</option><option>CD</option><option>D</option><option>DE</option><option>E</option></select>
+        </label>
+        <label for="trigger-select" id="trigger-level-control">2. Select a trigger level
+          <select id="trigger-select" disabled aria-describedby="trigger-help"><option value="">Choose a location first</option></select>
+        </label>
+        <label for="trigger-payout" id="trigger-payout-control">3. Payout if the trigger occurs (USD)
+          <input id="trigger-payout" type="number" min="0" step="0.01" list="payout-options" placeholder="Select or enter an amount" aria-describedby="payout-help">
+        </label>
+        <datalist id="payout-options"><option value="10000"></option><option value="25000"></option><option value="50000"></option><option value="100000"></option></datalist>
+        <p id="payout-help">The exceedance amount is the fixed payout when your selected trigger is met or exceeded.</p>
+        <p id="metric-summary">Flood · Peak inundation depth (m) · TWDB + FEMA</p>
+      </div>
+      <p class="trigger-help" id="trigger-help">Search an address or click the map below to load available trigger levels.</p>
+      </div>
+      <div class="trigger-result" id="trigger-result" data-state="idle" role="status" aria-live="polite" aria-atomic="true">
+        <h2 id="trigger-result-label">Annual exceedance probability</h2>
+        <output id="trigger-probability" for="disaster-select trigger-select site-class">—</output>
+        <p id="trigger-explanation">Select a location to get started.</p>
+        <p id="trigger-location" hidden></p>
+        <p id="area-average" class="note" hidden></p>
+        <p id="trigger-source" hidden></p>
+        <p id="trigger-method" hidden></p>
+        <div class="pool-contribution">
+          <h2 id="pool-contribution-label">Expected annual pool contribution (USD)</h2>
+          <output id="pool-contribution" for="disaster-select trigger-select site-class trigger-payout" aria-labelledby="pool-contribution-label">—</output>
+          <p id="pool-calculation">Select a location, trigger level, and payout amount.</p>
+          <p class="note">Probability × exceedance amount. Assumes one fixed payout in a year when the trigger occurs; excludes fees and other pricing adjustments.</p>
+        </div>
+      </div>
+      <div class="trigger-result" id="intensity-preview" hidden aria-live="polite" aria-atomic="true">
+        <h2>Fireline intensity</h2>
+        <output id="intensity-preview-value" style="font-size:2.4rem;font-weight:700">—</output>
+        <p id="intensity-preview-statistic">Weather-weighted mean of modeled heading fire behavior.</p>
+        <p class="note">kW/m = kilowatts per metre of fire front. Texas A&M Forest Service / TxWRAP.</p>
+      </div>
+      </section>
+      <section class="panel trigger-comparison" id="comparison-panel" aria-labelledby="comparison-heading">
+        <h2 id="comparison-heading">Compare trigger levels</h2>
+        <p id="comparison-status" role="status" aria-live="polite">Select a location to compare supported trigger levels.</p>
+        <div id="comparison-content" hidden>
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Supported trigger comparisons">
+            <table class="scenario-table" id="comparison-table" aria-describedby="comparison-note">
+              <caption id="comparison-context"></caption>
+              <thead><tr><th scope="col" id="comparison-severity">Trigger threshold</th><th scope="col" id="comparison-frequency">Annual exceedance probability</th><th scope="col">Fixed payout (USD)</th><th scope="col">Expected annual contribution (USD)</th><th scope="col" id="comparison-coverage" hidden>Grid samples used</th><th scope="col">Active trigger</th></tr></thead>
+              <tbody id="comparison-rows"></tbody>
+            </table>
+          </div>
+          <p class="note" id="comparison-note"></p>
+        </div>
+      </section>
+      <section class="panel" id="relevance-panel" aria-labelledby="relevance-heading" hidden style="margin:0 0 16px">
+        <h2 id="relevance-heading">Choose most relevant</h2>
+        <p id="relevance-status" role="status" aria-live="polite">Select a location to choose a disaster automatically.</p>
+        <p id="relevance-reason"></p>
+        <p class="note" id="relevance-source"></p>
+        <details id="relevance-details" hidden><summary>Why this disaster?</summary><ul id="relevance-checks"></ul><p class="note">County hazard rankings provide regional context. Missing local flood data does not establish low flood risk. Rainfall is related context when an inland-flood curve is unavailable.</p></details>
+      </section>
+      <form id="address-search" class="address-search">
+        <input id="address-input" type="search" maxlength="100" required autocomplete="street-address" aria-label="US street address" placeholder="Street address, city, state (e.g. 100 Dolorosa St, San Antonio, TX)">
+        <label for="station-count">Stations (n)
+          <input id="station-count" type="number" min="1" max="50" step="1" value="5" required aria-describedby="station-coverage" style="width: 5em; display: block;">
+        </label>
+        <button id="search-button" type="submit">Find address</button>
+      </form>
+      <p id="search-status" role="status" aria-live="polite">Address search uses the US Census Bureau geocoder. Its point is approximate; verify it on the map.</p>
+      <div class="selection-controls">
+        <label for="selection-mode">Select a <select id="selection-mode" aria-describedby="selection-help"><option value="point">Point</option><option value="area">Rectangular area</option></select></label>
+        <button class="scenario-button" id="redraw-area" type="button" hidden>Draw new area</button>
+        <button class="scenario-button" id="cancel-area" type="button" hidden>Cancel drawing</button>
+        <p id="selection-help" role="status" aria-live="polite">Click the map to select a point.</p>
+      </div>
+      <div id="map" role="application" aria-label="Map centered on San Antonio, Texas"></div>
+      <section id="heat-observation-panel" aria-labelledby="heat-heading" hidden>
+        <details>
+        <summary>Latest heat conditions — optional station context</summary>
+        <h2 id="heat-heading">Heat — station observation snapshot</h2>
+        <p class="note">Air temperature and derived Heat Index in shade/light wind from nearby METAR reports. These describe stations, not the selected worksite or the whole rectangle. Reports are checked at lookup; this snapshot does not refresh automatically.</p>
+        <p id="heat-status" role="status" aria-live="polite">Select a location to screen current station reports for heat.</p>
+        <ol id="heat-list" aria-label="Heat screening at nearby stations, nearest first"></ol>
+        <button id="heat-refresh" type="button">Refresh heat and station reports</button>
+        <p class="note">Heat Index is a screening estimate, not WBGT. For outdoor construction, use on-site WBGT with workload, clothing/PPE and acclimatization guidance. No construction shutdown threshold is supplied. Heat illness can occur below the listed bands. Sun and local heat sources can increase exposure.</p>
+        <p class="note">NWS Heat Index bands (°F): Caution 80–&lt;90; Extreme caution 90–&lt;103; Danger 103–&lt;125; Extreme danger ≥125. No forecast, heat-wave duration, historical annual probability or payout is calculated here.</p>
+        <p class="note">Sources: <a href="https://www.weather.gov/ama/heatindex" target="_blank" rel="noopener noreferrer">NWS Heat Index and bands</a> · <a href="https://www.osha.gov/heat-exposure/hazards" target="_blank" rel="noopener noreferrer">OSHA worksite heat assessment</a> · <a href="docs/heat-and-wind.md">Methods and limitations</a></p>
+        </details>
+      </section>
+      <section aria-labelledby="station-heading">
+        <h2 id="station-heading">Nearest monitoring stations</h2>
+        <p id="station-coverage" class="note">Network: NOAA Aviation Weather Center METAR weather stations, worldwide catalog, within 200 km. Choose 1–50 stations above. Address search covers US street addresses. This network is independent of the selected hazard. Orange marks stations; blue marks your selection.</p>
+        <p id="station-status" role="status" aria-live="polite">Select a location to find monitoring stations.</p>
+        <p id="station-details" class="note"></p>
+        <ol id="station-list" aria-label="Stations sorted by distance"></ol>
+        <button id="station-show" type="button" hidden>Show selection and stations</button>
+        <button id="station-retry" type="button" hidden>Retry station search</button>
+      </section>
+      <p id="area-summary" class="note" role="status" aria-live="polite" hidden></p>
+      <button class="scenario-button" id="export-area" type="button" disabled hidden>Export area averages and samples CSV</button>
+      <details id="area-sample-details" class="panel" hidden>
+        <summary>Point-by-point data for the selected trigger</summary>
+        <p id="area-sample-context"></p>
+        <div class="table-scroll"><table class="scenario-table"><thead><tr><th scope="col">Latitude</th><th scope="col">Longitude</th><th scope="col" id="area-sample-value">Exceedance (%)</th><th scope="col">Method</th></tr></thead><tbody id="area-sample-rows"></tbody></table></div>
+        <p id="area-sample-mean"></p>
+      </details>
+      <section class="panel" aria-live="polite">
+        <h2>Selected location</h2>
+        <p id="coordinates">Click the map to select a point.</p>
+        <p id="status"></p>
+        <dl id="results" hidden></dl>
+        <details id="heat-history-details" hidden>
+          <summary>Historical heat: annual maxima and record coverage</summary>
+          <p id="heat-history-context" class="note"></p>
+          <div class="table-scroll"><table class="scenario-table">
+            <thead><tr><th scope="col">Year</th><th scope="col">Valid / expected days</th><th scope="col">Annual maximum (°C / °F)</th><th scope="col">Source date of maximum</th><th scope="col">Included</th></tr></thead>
+            <tbody id="heat-history-rows"></tbody>
+          </table></div>
+          <button class="scenario-button" id="export-heat" type="button" disabled>Export historical heat data CSV</button>
+        </details>
+        <details id="fire-history-details" hidden>
+          <summary>Potential fire intensity: annual maxima and model inputs</summary>
+          <p class="note" id="fire-history-context"></p>
+          <p class="note">PYRETECHNICS developed by Spatial Informatics Group, LLC and contributors. This implementation uses its Community License for academic research; commercial use requires a separate licence. <a href="/docs/licenses/pyretechnics-2026.10.20.txt">Model licence</a>.</p>
+          <div class="table-scroll"><table class="scenario-table">
+            <thead><tr><th scope="col">Year</th><th scope="col">Valid / expected hours</th><th scope="col">Maximum potential intensity (kW/m)</th><th scope="col">Peak time (UTC)</th><th scope="col">Included</th></tr></thead>
+            <tbody id="fire-history-rows"></tbody>
+          </table></div>
+          <button class="scenario-button" id="export-potential-fire" type="button" disabled>Export curve, annual maxima and provenance JSON</button>
+        </details>
+        <p class="note" id="location-note">A missing polygon can also mean FEMA has no digital map here. A missing polygon or blank attribute does not establish that a location has no flood risk.</p>
+      </section>
+      <section class="panel" id="hazard-panel" aria-labelledby="hazard-heading" hidden>
+        <h2 id="hazard-heading">Earthquake hazard curve</h2>
+        <p id="hazard-status" role="status" aria-live="polite">Select a location to load government data.</p>
+        <p class="axis-note" id="hazard-axis-note">X: frequency · Y: severity</p>
+        <div id="hazard-intensity" hidden>
+          <h3 id="intensity-label">Weather-weighted fireline intensity</h3>
+          <p><output id="intensity-value" aria-labelledby="intensity-label" style="font-size:2rem;font-weight:700">—</output></p>
+          <p id="intensity-description"></p>
+          <button class="scenario-button" id="export-intensity" type="button" disabled>Export intensity and source data CSV</button>
+        </div>
+        <div class="hazard-layout" id="hazard-curve-layout">
+          <div id="hazard-chart"></div>
+          <div class="table-scroll"><table class="scenario-table" id="hazard-points"><thead><tr><th scope="col" id="frequency-column">Annual exceedance (%)</th><th scope="col" id="severity-column">Severity</th><th scope="col" id="coverage-column" hidden>Samples used</th></tr></thead><tbody id="hazard-point-rows"></tbody></table></div>
+        </div>
+        <p class="note" id="hazard-source"></p>
+        <div id="hazard-notes" class="note"></div>
+      </section>
+      <section class="panel" id="flood-panel" aria-labelledby="curves-heading">
+        <h2 id="curves-heading">Frequency, flood depth, and damage</h2>
+        <p>For Texas points with an installed tile, the app fills modeled TWDB flood depths. Choose a single-family home profile to estimate structure damage. Blank cells mean unavailable data, not zero flooding or zero damage.</p>
+        <p id="scenario-context">Select a map point to begin.</p>
+        <p id="depth-status" aria-live="polite">TWDB depth lookup starts after a map click.</p>
+        <div class="building-fields">
+          <label for="building-profile">Single-family home profile
+            <select id="building-profile"><option value="">Choose a profile</option><option value="R11N">1 story, no basement</option><option value="R11B">1 story, basement</option><option value="R12N">2 stories, no basement</option><option value="R12B">2 stories, basement</option></select>
+          </label>
+          <label for="first-floor-height">First floor above ground (ft)
+            <input id="first-floor-height" type="number" min="0" max="30" step="0.1" placeholder="e.g. 1.0">
+          </label>
+        </div>
+        <label class="model-toggle"><input id="auto-damage" type="checkbox"> Estimate structure damage using FEMA Hazus 4.0 riverine curves</label>
+        <label for="building-notes">Additional assumptions or notes</label><br>
+        <input id="building-notes" type="text" placeholder="Optional research notes" style="width:100%;padding:8px;margin-top:5px;border:1px solid #94a3b8;border-radius:5px;font:inherit">
+        <table class="scenario-table">
+          <thead><tr><th scope="col">Annual chance</th><th scope="col">Common label</th><th scope="col">Flood depth (ft)</th><th scope="col">Damage (% of building value)</th></tr></thead>
+          <tbody id="scenario-rows"></tbody>
+        </table>
+        <div class="scenario-actions">
+          <button class="scenario-button" id="example-button" type="button">Load illustrative example</button>
+          <button class="scenario-button" id="clear-button" type="button">Clear values</button>
+          <button class="scenario-button" id="export-button" type="button" disabled>Export selected point CSV</button>
+        </div>
+        <p id="export-status" class="note" aria-live="polite"></p>
+        <p class="note" id="scenario-note">Depth values come from TWDB's 2025 existing-conditions combined-peril rasters when the local data tiles are installed.</p>
+        <div class="chart-grid">
+          <div class="chart-box"><h3>Flood severity (m) vs. frequency</h3><div id="depth-chart"></div></div>
+          <div class="chart-box"><h3>Damage severity (%) vs. frequency</h3><div id="damage-chart"></div></div>
+        </div>
+        <p class="note">These are modeled event scenarios. Lines only guide the eye. The Hazus 4.0 riverine curves use depth relative to the first floor and estimate structure damage percentage for a selected residential type. TWDB's combined-peril depths and Hazus riverine curves come from different models; this is an exploratory pairing, not a site-specific loss assessment or insurance payout.</p>
+      </section>
+    </main>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js"></script>
+    <script src="damage_model.js?v=1"></script>
+    <script src="hazard_chart.js?v=1"></script>
+    <script src="hazard_trigger.js?v=4"></script>
+    <script src="script.js?v=24"></script>
+  </body>
+</html>

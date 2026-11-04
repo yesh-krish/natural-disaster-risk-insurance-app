@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0.0",
+  "location": {
+    "latitude": 29.4241,
+    "longitude": -98.4936,
+    "horizontal_crs": "EPSG:4326"
+  },
+  "reference_duration_years": 1,
+  "rating_status": "research_only",
+  "hazards": [
+    {
+      "peril": "earthquake",
+      "status": "available",
+      "source": {
+        "provider": "USGS",
+        "model_version": "STATIC_CONUS_2023_R2",
+        "endpoint": "https://earthquake.usgs.gov/ws/nshmp/conus-2023.R2/static/hazard?latitude=29.4241&longitude=-98.4936&siteClass=BC&imt=PGA&format=JSON",
+        "retrieved_at": "2026-10-11T18:57:44.452838+00:00",
+        "artifact_sha256": "5291db96affb7140c90f09165267b7342c6ea230328a74ee40cbed79a77f2992",
+        "spatial_method": "agency_interpolated_grid"
+      },
+      "metrics": [
+        {
+          "id": "pga_pct_g",
+          "unit": "%g",
+          "definition_id": "site_pga_nshm_shakemap_v1",
+          "definition": "Site PGA; %g; ground-motion component must match contract"
+        }
+      ],
+      "representation": {
+        "kind": "curve",
+        "frequency_measure": "annual_rate",
+        "interpolation": "log_log",
+        "points": [
+          {
+            "intensity": 0.233,
+            "frequency": 0.0125044519,
+            "annual_exceedance_probability": 0.012426596093942
+          },
+          {
+            "intensity": 0.35000000000000003,
+            "frequency": 0.00844351356,
+            "annual_exceedance_probability": 0.00840796721508435
+          },
+          {
+            "intensity": 0.524,
+            "frequency": 0.00549718009,
+            "annual_exceedance_probability": 0.005482098244058769
+          },
+          {
+            "intensity": 0.786,
+            "frequency": 0.00340747216,
+            "annual_exceedance_probability": 0.0034016733150767997
+          },
+          {
+            "intensity": 1.18,
+            "frequency": 0.0020023426,
+            "annual_exceedance_probability": 0.0020003392494106083
+          },
+          {
+            "intensity": 1.77,
+            "frequency": 0.00111975367,
+            "annual_exceedance_probability": 0.001119126979793972
+          },
+          {
+            "intensity": 2.65,
+            "frequency": 0.00060237798,
+            "annual_exceedance_probability": 0.0006021965868088551
+          },
+          {
+            "intensity": 3.9800000000000004,
+            "frequency": 0.000312658531,
+            "annual_exceedance_probability": 0.000312609658415106
+          },
+          {
+            "intensity": 5.970000000000001,
+            "frequency": 0.0001587929,
+            "annual_exceedance_probability": 0.00015878029307476036
+          },
+          {
+            "intensity": 8.959999999999999,
+            "frequency": 7.87430917e-05,
+            "annual_exceedance_probability": 7.873999154412725e-05
+          },
+          {
+            "intensity": 13.4,
+            "frequency": 3.830641e-05,
+            "annual_exceedance_probability": 3.830567631884471e-05
+          },
+          {
+            "intensity": 20.200000000000003,
+            "frequency": 1.78903792e-05,
+            "annual_exceedance_probability": 1.7890219168120386e-05
+          },
+          {
+            "intensity": 30.2,
+            "frequency": 8.29426588e-06,
+            "annual_exceedance_probability": 8.294231482671858e-06
+          },
+          {
+            "intensity": 45.4,
+            "frequency": 3.73157315e-06,
+            "annual_exceedance_probability": 3.7315661876895736e-06
+          },
+          {
+            "intensity": 68.0,
+            "frequency": 1.65107162e-06,
+            "annual_exceedance_probability": 1.6510702569820028e-06
+          },
+          {
+            "intensity": 102.0,
+            "frequency": 6.97754353e-07,
+            "annual_exceedance_probability": 6.977541095694881e-07
+          },
+          {
+            "intensity": 153.0,
+            "frequency": 2.73206939e-07,
+            "annual_exceedance_probability": 2.732069016789876e-07
+          },
+          {
+            "intensity": 229.99999999999997,
+            "frequency": 9.44417717e-08,
+            "annual_exceedance_probability": 9.444176724037602e-08
+          },
+          {
+            "intensity": 344.0,
+            "frequency": 2.80138871e-08,
+            "annual_exceedance_probability": 2.8013886707611068e-08
+          },
+          {
+            "intensity": 517.0,
+            "frequency": 6.52194145e-09,
+            "annual_exceedance_probability": 6.52194142873214e-09
+          }
+        ]
+      },
+      "assumptions": {
+        "site_class": "BC",
+        "occurrence_model": "stationary_poisson",
+        "raw_metadata": {
+          "imt": {
+            "value": "PGA",
+            "display": "Peak Ground Acceleration"
+          },
+          "siteClass": "BC",
+          "xLabel": "Ground Motion (g)",
+          "yLabel": "Annual Frequency of Exceedence"
+        }
+      }
+    },
+    {
+      "peril": "flood",
+      "status": "unavailable",
+      "reason": "TWDB 20%: no_mapped_depth; no complete depth curve"
+    },
+    {
+      "peril": "rain_wind",
+      "status": "unavailable",
+      "reason": "Calibrated paired storm catalog is not installed"
+    },
+    {
+      "peril": "wildfire",
+      "status": "unavailable",
+      "reason": "BP and compatible conditional flame-length layers are not installed"
+    }
+  ]
+}

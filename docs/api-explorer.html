@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NDApp · Research API</title>
+  <style>
+    :root { font-family:system-ui,sans-serif; color:#193143; background:#f4f7fb; }
+    * { box-sizing:border-box; } body { margin:0; } main { max-width:1180px; margin:auto; padding:30px 24px 60px; }
+    nav { display:flex; justify-content:space-between; gap:16px; font-size:.9rem; } a { color:#126658; }
+    header { margin:36px 0 26px; } .eyebrow { color:#126658; font-size:.8rem; font-weight:700; letter-spacing:.12em; }
+    h1 { font-size:clamp(2rem,4vw,3.1rem); margin:8px 0; } h2 { margin:0 0 18px; font-size:1.2rem; }
+    p { line-height:1.6; } header p { max-width:740px; color:#526576; } .layout { display:grid; grid-template-columns:minmax(300px, .85fr) minmax(0,1.15fr); gap:22px; align-items:start; }
+    section { border:1px solid #d8e2e9; background:white; border-radius:12px; padding:24px; }
+    label { display:grid; gap:7px; font-size:.9rem; font-weight:650; margin-bottom:18px; }
+    select,input { width:100%; padding:11px; color:inherit; border:1px solid #9aadb9; border-radius:6px; background:white; font:inherit; }
+    small { font-weight:400; color:#526576; line-height:1.5; } button { border:0; border-radius:6px; background:#126658; color:white; padding:12px 20px; font:inherit; font-weight:600; cursor:pointer; }
+    button:disabled { opacity:.6; cursor:wait; } :focus-visible { outline:3px solid #60a5fa; outline-offset:3px; }
+    #operation-description { font-size:.9rem; color:#526576; } .response-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    #response-status { font-size:.8rem; color:#126658; font-weight:650; } pre { margin:10px 0 0; padding:16px; border-radius:7px; background:#102a3a; color:#d8eee9; overflow:auto; font-size:.8rem; line-height:1.6; max-height:540px; }
+    #request-url { display:block; overflow-wrap:anywhere; font: .8rem ui-monospace,monospace; line-height:1.6; margin:14px 0; }
+    .note { color:#526576; font-size:.85rem; } .contract { margin-top:22px; } .contract dl { display:grid; grid-template-columns:120px 1fr; gap:12px; font-size:.9rem; } dt { font-weight:650; } dd { margin:0; line-height:1.6; }
+    [hidden] { display:none!important; } code { font-family:ui-monospace,monospace; } #request-state { min-height:1.6em; }
+    @media(max-width:800px) { .layout { grid-template-columns:1fr; } main { padding:20px 14px; } section { padding:18px; } }
+  </style>
+</head>
+<body><main>
+  <nav><a href="/">← Back to research map</a><a href="/api/v1/openapi.json">OpenAPI specification ↗</a></nav>
+  <header><span class="eyebrow">NDAPP / API v1</span><h1>Hazard data, ready to use.</h1><p>Query a location, compare supported triggers, or analyze an area. The same government data and research methods that power the map, returned as structured JSON.</p></header>
+  <div class="layout">
+    <section aria-labelledby="request-heading"><h2 id="request-heading">Try a request</h2>
+      <form id="api-form"><label>Endpoint<select id="endpoint" disabled></select></label><p id="operation-description"></p><div id="parameter-fields"></div><button id="send-request" disabled>Send request</button></form>
+      <p id="request-state" class="note" role="status" aria-live="polite">Loading API specification…</p>
+    </section>
+    <section aria-labelledby="response-heading"><div class="response-head"><h2 id="response-heading">Response</h2><span id="response-status"></span></div>
+      <a id="request-url" hidden></a><p id="address-result" class="note" role="status" hidden></p><details id="curl-details" hidden><summary>Command-line request</summary><pre id="curl-command"></pre></details>
+      <pre id="response-body" tabindex="0" aria-label="JSON response">Choose an endpoint and send a request to see its JSON response.</pre>
+    </section>
+  </div>
+  <section class="contract"><h2>Reading the results</h2><dl>
+    <dt>Response</dt><dd><code>api_version</code>, <code>status</code>, <code>data</code> and <code>meta</code> appear on every v1 lookup. Model sources, units and assumptions stay in <code>data</code>; <code>meta.request</code> records the validated inputs.</dd>
+    <dt>Availability</dt><dd>HTTP 200 means the lookup completed. Always check <code>status</code>: <code>unavailable</code> means no usable model data; <code>not_found</code> means no station found. Missing data never becomes zero risk.</dd>
+    <dt>Address input</dt><dd>For point lookups, choose Street address or Coordinates. Extra spaces are cleaned up. Address requests go to the US Census geocoder; check the displayed matched address and approximate coordinates. Typos may prevent a match; spelling corrections are not guaranteed. No match or multiple matches stops the calculation.</dd>
+    <dt>Errors</dt><dd>400: invalid parameters. 404: unknown endpoint. 405: use GET. 422: no unique address match. 502: provider failure. Errors include <code>error.code</code> and <code>error.message</code>. Blank, repeated and unknown parameters are rejected.</dd>
+    <dt>Frequency</dt><dd>Curve frequencies are percentages. Wind (API key: cyclone) covers tropical cyclones only and describes historical annual frequencies. Heat uses 1991–2020 annual maximum daily air temperature in °C at a qualifying historical US station, with complete-year counts; point mode only. Its contributions are historical-frequency illustrations. Wildfire results are research estimates. Fireline intensity returns a native Texas kW/m statistic without annual probabilities or contributions. These are not live forecasts. Response generation time is separate from source/model dates.</dd>
+    <dt>Coverage</dt><dd>Flood depths require installed Texas tiles. Other hazards use their connected datasets and regional coverage. Area results use 25 samples; their mean is not the probability of an event anywhere in the rectangle.</dd>
+    <dt>Local use</dt><dd>This server listens on 127.0.0.1 and has no API keys. Requests may contact government providers. These are research calculations; contributions exclude fees and other pricing adjustments. See the <a href="/docs/api.md">API guide</a> and <a href="/examples/api_client.py">Python example</a>.</dd>
+  </dl></section>
+  <script src="/docs/api-explorer.js?v=3"></script>
+</main></body></html>

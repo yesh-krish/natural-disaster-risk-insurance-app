@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ndapp:hazard-location:1.0.0",
+  "title": "NDApp location hazard curves and surfaces",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "location", "reference_duration_years", "rating_status", "hazards"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "location": {
+      "type": "object", "additionalProperties": false,
+      "required": ["latitude", "longitude", "horizontal_crs"],
+      "properties": {
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+        "horizontal_crs": {"const": "EPSG:4326"},
+        "location_id": {"type": "string", "minLength": 1},
+        "ground_elevation_m": {"type": ["number", "null"]},
+        "vertical_datum": {"type": ["string", "null"]},
+        "coordinate_accuracy_m": {"type": "number", "minimum": 0}
+      }
+    },
+    "reference_duration_years": {"const": 1},
+    "rating_status": {"enum": ["research_only", "approved"]},
+    "hazards": {
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "items": {"$ref": "#/$defs/hazard"},
+      "allOf": [
+        {"contains": {"properties": {"peril": {"const": "earthquake"}}, "required": ["peril"]}, "minContains": 1, "maxContains": 1},
+        {"contains": {"properties": {"peril": {"const": "rain_wind"}}, "required": ["peril"]}, "minContains": 1, "maxContains": 1},
+        {"contains": {"properties": {"peril": {"const": "flood"}}, "required": ["peril"]}, "minContains": 1, "maxContains": 1},
+        {"contains": {"properties": {"peril": {"const": "wildfire"}}, "required": ["peril"]}, "minContains": 1, "maxContains": 1}
+      ]
+    }
+  },
+  "$defs": {
+    "probability": {"type": "number", "minimum": 0, "maximum": 1},
+    "sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "metric": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "unit", "definition_id", "definition"],
+      "properties": {
+        "id": {"enum": ["pga_pct_g", "rain_24h_mm", "wind_gust_kn", "inundation_m", "flame_length_m"]},
+        "unit": {"enum": ["%g", "mm", "kn", "m"]},
+        "definition_id": {"type": "string", "minLength": 1},
+        "definition": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {"if": {"properties": {"id": {"const": "pga_pct_g"}}}, "then": {"properties": {"unit": {"const": "%g"}}}},
+        {"if": {"properties": {"id": {"const": "rain_24h_mm"}}}, "then": {"properties": {"unit": {"const": "mm"}}}},
+        {"if": {"properties": {"id": {"const": "wind_gust_kn"}}}, "then": {"properties": {"unit": {"const": "kn"}}}},
+        {"if": {"properties": {"id": {"enum": ["inundation_m", "flame_length_m"]}}}, "then": {"properties": {"unit": {"const": "m"}}}}
+      ]
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["provider", "model_version", "endpoint", "retrieved_at", "artifact_sha256", "spatial_method"],
+      "properties": {
+        "provider": {"type": "string", "minLength": 1},
+        "model_version": {"type": "string", "minLength": 1},
+        "endpoint": {"type": "string", "format": "uri"},
+        "retrieved_at": {"type": "string", "format": "date-time"},
+        "artifact_sha256": {"$ref": "#/$defs/sha256"},
+        "spatial_method": {"enum": ["agency_interpolated_grid", "raster_cell_sample", "hydraulic_transfer", "site_event_catalog", "calibrated_spatial_model"]}
+      }
+    },
+    "curve": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "frequency_measure", "interpolation", "points"],
+      "properties": {
+        "kind": {"const": "curve"},
+        "frequency_measure": {"enum": ["annual_rate", "annual_probability"]},
+        "interpolation": {"enum": ["log_log", "log_frequency_linear_intensity"]},
+        "points": {
+          "type": "array", "minItems": 2,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["intensity", "frequency", "annual_exceedance_probability"],
+            "properties": {
+              "intensity": {"type": "number", "minimum": 0},
+              "frequency": {"type": "number", "minimum": 0},
+              "annual_exceedance_probability": {"$ref": "#/$defs/probability"}
+            }
+          }
+        }
+      },
+      "allOf": [{"if": {"properties": {"frequency_measure": {"const": "annual_probability"}}},
+                 "then": {"properties": {"points": {"items": {"properties": {"frequency": {"maximum": 1}}}}}}}]
+    },
+    "surface": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "frequency_measure", "operator", "event_definition_id", "points"],
+      "properties": {
+        "kind": {"const": "surface"},
+        "frequency_measure": {"const": "annual_probability"},
+        "operator": {"enum": ["AND", "OR"]},
+        "event_definition_id": {"type": "string", "minLength": 1},
+        "points": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["thresholds", "annual_exceedance_probability"],
+            "properties": {
+              "thresholds": {
+                "type": "object", "additionalProperties": false,
+                "required": ["rain_24h_mm", "wind_gust_kn"],
+                "properties": {
+                  "rain_24h_mm": {"type": "number", "minimum": 0},
+                  "wind_gust_kn": {"type": "number", "minimum": 0}
+                }
+              },
+              "annual_exceedance_probability": {"oneOf": [{"$ref": "#/$defs/probability"}, {"type": "null"}]}
+            }
+          }
+        }
+      }
+    },
+    "hazard": {
+      "type": "object", "additionalProperties": false,
+      "required": ["peril", "status"],
+      "properties": {
+        "peril": {"enum": ["earthquake", "rain_wind", "flood", "wildfire"]},
+        "status": {"enum": ["available", "unavailable"]},
+        "reason": {"type": "string", "minLength": 1},
+        "source": {"$ref": "#/$defs/source"},
+        "metrics": {"type": "array", "minItems": 1, "maxItems": 2, "items": {"$ref": "#/$defs/metric"}},
+        "representation": {"oneOf": [{"$ref": "#/$defs/curve"}, {"$ref": "#/$defs/surface"}]},
+        "assumptions": {"type": "object"}
+      },
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "available"}}}, "then": {"required": ["source", "metrics", "representation", "assumptions"], "not": {"required": ["reason"]}},
+         "else": {"required": ["reason"], "not": {"anyOf": [{"required": ["source"]}, {"required": ["metrics"]}, {"required": ["representation"]}, {"required": ["assumptions"]}]}}},
+        {"if": {"properties": {"peril": {"const": "rain_wind"}, "status": {"const": "available"}}},
+         "then": {"properties": {"metrics": {"minItems": 2, "maxItems": 2, "allOf": [
+           {"contains": {"properties": {"id": {"const": "rain_24h_mm"}}}},
+           {"contains": {"properties": {"id": {"const": "wind_gust_kn"}}}}
+         ]}, "representation": {"$ref": "#/$defs/surface"}}}},
+        {"if": {"properties": {"peril": {"const": "earthquake"}, "status": {"const": "available"}}},
+         "then": {"properties": {"metrics": {"maxItems": 1, "items": {"properties": {"id": {"const": "pga_pct_g"}}}}, "representation": {"$ref": "#/$defs/curve"}}}},
+        {"if": {"properties": {"peril": {"const": "flood"}, "status": {"const": "available"}}},
+         "then": {"properties": {"metrics": {"maxItems": 1, "items": {"properties": {"id": {"const": "inundation_m"}}}}, "representation": {"$ref": "#/$defs/curve"}}}},
+        {"if": {"properties": {"peril": {"const": "wildfire"}, "status": {"const": "available"}}},
+         "then": {"properties": {"metrics": {"maxItems": 1, "items": {"properties": {"id": {"const": "flame_length_m"}}}}, "representation": {"$ref": "#/$defs/curve"}}}}
+      ]
+    }
+  }
+}

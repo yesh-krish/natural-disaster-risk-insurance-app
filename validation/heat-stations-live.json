@@ -1,0 +1,298 @@
+{
+  "verified_at": "2026-11-03T02:40:59.339804+00:00",
+  "response": {
+    "api_version": "1.3.0",
+    "status": "available",
+    "data": {
+      "status": "available",
+      "network": "NOAA Aviation Weather Center METAR stations",
+      "network_id": "awc_metar",
+      "requested_count": 3,
+      "returned_count": 3,
+      "fewer_than_requested": false,
+      "stations": [
+        {
+          "id": "KSKF",
+          "name": "Lackland AFB/Kelly Fld",
+          "network": "NOAA Aviation Weather Center METAR stations",
+          "latitude": 29.392,
+          "longitude": -98.581,
+          "distance_km": 9.187845230110476,
+          "measured_variables": [
+            "Air temperature",
+            "Dew point",
+            "Wind speed and direction",
+            "Visibility",
+            "Altimeter pressure",
+            "Cloud cover and ceiling"
+          ],
+          "variables_note": "METAR report variables; availability varies by station and report.",
+          "url": "https://aviationweather.gov/data/metar/?id=KSKF",
+          "observation": {
+            "status": "available",
+            "observed_at": "2026-11-03T02:25:00+00:00",
+            "age_minutes": 16.0,
+            "values": [
+              {
+                "variable": "Air temperature",
+                "value": 26,
+                "unit": "°C"
+              },
+              {
+                "variable": "Dew point",
+                "value": 22,
+                "unit": "°C"
+              },
+              {
+                "variable": "Wind speed",
+                "value": 14,
+                "unit": "kn"
+              },
+              {
+                "variable": "Wind direction",
+                "value": 130,
+                "unit": "°"
+              },
+              {
+                "variable": "Altimeter pressure",
+                "value": 1009.6,
+                "unit": "hPa"
+              },
+              {
+                "variable": "Visibility",
+                "value": "10+",
+                "unit": "statute mi"
+              }
+            ],
+            "message": "Fields absent from the report are not available. Reports older than 2 hours are stale; no values are filled in.",
+            "heat": {
+              "status": "available",
+              "data_kind": "observation_derived",
+              "metric": "Heat Index (shade)",
+              "air_temperature_c": 26,
+              "dew_point_c": 22,
+              "relative_humidity_pct": 78.65539220969599,
+              "heat_index_c": 26.354667620515475,
+              "heat_index_f": 79.43840171692786,
+              "category": "Below listed caution bands; heat illness is still possible",
+              "observed_at": "2026-11-03T02:25:00+00:00",
+              "method": "NWS vapor-pressure RH estimate; WPC Heat Index algorithm",
+              "source_urls": [
+                "https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml",
+                "https://www.weather.gov/media/epz/wxcalc/vaporPressure.pdf",
+                "https://www.weather.gov/ama/heatindex",
+                "https://www.noaa.gov/sites/default/files/2022-05/heatindex_chart_rh.pdf"
+              ],
+              "reason": "Derived screening estimate for shade/light wind at this station and report time. Not WBGT, a forecast, a heat-wave assessment, or a work/stop decision."
+            }
+          }
+        },
+        {
+          "id": "KSSF",
+          "name": "San Antonio/Stinson Muni",
+          "network": "NOAA Aviation Weather Center METAR stations",
+          "latitude": 29.33896,
+          "longitude": -98.47198,
+          "distance_km": 9.69614071158189,
+          "measured_variables": [
+            "Air temperature",
+            "Dew point",
+            "Wind speed and direction",
+            "Visibility",
+            "Altimeter pressure",
+            "Cloud cover and ceiling"
+          ],
+          "variables_note": "METAR report variables; availability varies by station and report.",
+          "url": "https://aviationweather.gov/data/metar/?id=KSSF",
+          "observation": {
+            "status": "available",
+            "observed_at": "2026-11-03T01:53:00+00:00",
+            "age_minutes": 48.0,
+            "values": [
+              {
+                "variable": "Air temperature",
+                "value": 25.6,
+                "unit": "°C"
+              },
+              {
+                "variable": "Dew point",
+                "value": 22.2,
+                "unit": "°C"
+              },
+              {
+                "variable": "Wind speed",
+                "value": 13,
+                "unit": "kn"
+              },
+              {
+                "variable": "Wind direction",
+                "value": 140,
+                "unit": "°"
+              },
+              {
+                "variable": "Altimeter pressure",
+                "value": 1010.2,
+                "unit": "hPa"
+              },
+              {
+                "variable": "Visibility",
+                "value": "10+",
+                "unit": "statute mi"
+              }
+            ],
+            "message": "Fields absent from the report are not available. Reports older than 2 hours are stale; no values are filled in.",
+            "heat": {
+              "status": "available",
+              "data_kind": "observation_derived",
+              "metric": "Heat Index (shade)",
+              "air_temperature_c": 25.6,
+              "dew_point_c": 22.2,
+              "relative_humidity_pct": 81.52724894006921,
+              "heat_index_c": 25.972161305606456,
+              "heat_index_f": 78.74989035009162,
+              "category": "Below listed caution bands; heat illness is still possible",
+              "observed_at": "2026-11-03T01:53:00+00:00",
+              "method": "NWS vapor-pressure RH estimate; WPC Heat Index algorithm",
+              "source_urls": [
+                "https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml",
+                "https://www.weather.gov/media/epz/wxcalc/vaporPressure.pdf",
+                "https://www.weather.gov/ama/heatindex",
+                "https://www.noaa.gov/sites/default/files/2022-05/heatindex_chart_rh.pdf"
+              ],
+              "reason": "Derived screening estimate for shade/light wind at this station and report time. Not WBGT, a forecast, a heat-wave assessment, or a work/stop decision."
+            }
+          }
+        },
+        {
+          "id": "KSAT",
+          "name": "San Antonio Intl",
+          "network": "NOAA Aviation Weather Center METAR stations",
+          "latitude": 29.54429,
+          "longitude": -98.48394,
+          "distance_km": 13.397205988238614,
+          "measured_variables": [
+            "Air temperature",
+            "Dew point",
+            "Wind speed and direction",
+            "Visibility",
+            "Altimeter pressure",
+            "Cloud cover and ceiling"
+          ],
+          "variables_note": "METAR report variables; availability varies by station and report.",
+          "url": "https://aviationweather.gov/data/metar/?id=KSAT",
+          "observation": {
+            "status": "available",
+            "observed_at": "2026-11-03T01:51:00+00:00",
+            "age_minutes": 50.0,
+            "values": [
+              {
+                "variable": "Air temperature",
+                "value": 25.6,
+                "unit": "°C"
+              },
+              {
+                "variable": "Dew point",
+                "value": 21.1,
+                "unit": "°C"
+              },
+              {
+                "variable": "Wind speed",
+                "value": 13,
+                "unit": "kn"
+              },
+              {
+                "variable": "Wind direction",
+                "value": 130,
+                "unit": "°"
+              },
+              {
+                "variable": "Altimeter pressure",
+                "value": 1010.9,
+                "unit": "hPa"
+              },
+              {
+                "variable": "Visibility",
+                "value": "10+",
+                "unit": "statute mi"
+              }
+            ],
+            "message": "Fields absent from the report are not available. Reports older than 2 hours are stale; no values are filled in.",
+            "heat": {
+              "status": "available",
+              "data_kind": "observation_derived",
+              "metric": "Heat Index (shade)",
+              "air_temperature_c": 25.6,
+              "dew_point_c": 21.1,
+              "relative_humidity_pct": 76.22666006742404,
+              "heat_index_c": 25.902959173102477,
+              "heat_index_f": 78.62532651158446,
+              "category": "Below listed caution bands; heat illness is still possible",
+              "observed_at": "2026-11-03T01:51:00+00:00",
+              "method": "NWS vapor-pressure RH estimate; WPC Heat Index algorithm",
+              "source_urls": [
+                "https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml",
+                "https://www.weather.gov/media/epz/wxcalc/vaporPressure.pdf",
+                "https://www.weather.gov/ama/heatindex",
+                "https://www.noaa.gov/sites/default/files/2022-05/heatindex_chart_rh.pdf"
+              ],
+              "reason": "Derived screening estimate for shade/light wind at this station and report time. Not WBGT, a forecast, a heat-wave assessment, or a work/stop decision."
+            }
+          }
+        }
+      ],
+      "search_radius_km": 200,
+      "catalog_fetched_at": "2026-11-03T02:34:08.931058+00:00",
+      "skipped_catalog_rows": 13,
+      "coverage": "Worldwide NOAA AWC catalog entries marked METAR with valid coordinates, within 200 km of the selection. US street addresses via Census; coordinates worldwide.",
+      "message": "Sorted by great-circle distance from the exact selection (area center for rectangles). METAR weather stations only, independent of the selected hazard. Catalog membership does not guarantee live telemetry. Station observations do not change hazard curves, probabilities or payouts."
+    },
+    "meta": {
+      "generated_at": "2026-11-03T02:40:59.237005+00:00",
+      "request": {
+        "network": "awc_metar",
+        "n": 3,
+        "lat": 29.4241,
+        "lon": -98.4936
+      },
+      "purpose": "Research estimates; not a binding insurance quote or live forecast."
+    }
+  },
+  "invalid_inputs": [
+    {
+      "query": "lat=nan&lon=0&n=3",
+      "status": 400
+    },
+    {
+      "query": "lat=29.4&lon=-98.5&n=0",
+      "status": 400
+    }
+  ],
+  "no_station_response": {
+    "api_version": "1.3.0",
+    "status": "not_found",
+    "data": {
+      "status": "not_found",
+      "network": "NOAA Aviation Weather Center METAR stations",
+      "network_id": "awc_metar",
+      "requested_count": 3,
+      "returned_count": 0,
+      "fewer_than_requested": true,
+      "stations": [],
+      "search_radius_km": 200,
+      "catalog_fetched_at": "2026-11-03T02:34:08.931058+00:00",
+      "skipped_catalog_rows": 13,
+      "coverage": "Worldwide NOAA AWC catalog entries marked METAR with valid coordinates, within 200 km of the selection. US street addresses via Census; coordinates worldwide.",
+      "message": "Sorted by great-circle distance from the exact selection (area center for rectangles). METAR weather stations only, independent of the selected hazard. Catalog membership does not guarantee live telemetry. Station observations do not change hazard curves, probabilities or payouts."
+    },
+    "meta": {
+      "generated_at": "2026-11-03T02:40:59.338644+00:00",
+      "request": {
+        "network": "awc_metar",
+        "n": 3,
+        "lat": 0.0,
+        "lon": -140.0
+      },
+      "purpose": "Research estimates; not a binding insurance quote or live forecast."
+    }
+  }
+}

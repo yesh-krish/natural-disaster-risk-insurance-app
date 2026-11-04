@@ -1,0 +1,560 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="https://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="utf-8">
+    <meta name="google-site-verification" content="PNJ7F-eIgfnP-NtJOpsWTiL-zB3G3Yb28bw6KsK86H0" /> <!--google search  console verification for Laurie-->		
+	<!--<base href="" />-->
+    <title>Forest Service Research Data Archive</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="description" content="This archive contains research data collected and/or funded by Forest Service Research and Development (FS R&amp;D), U.S. Department of Agriculture. It is a resource for accessing both short and long-term FS R&amp;D research data, which includes Experimental Forest and Range data. It is a way to both preserve and share the quality science of our researchers."/>
+    <meta name="keywords" content="Forest Service data, Forest Service research data, Forest Service research data archive, Research data, Data archive, Datalyst, Research data archive, doi:10.2737/RDS"/>
+   
+   
+   
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-T9D41PS4SW"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', "G-T9D41PS4SW");
+	</script>
+	
+<!-- Script for Google Analytics -->
+  <script>
+   (function(i,s,o,g,r,a,m){i["GoogleAnalyticsObject"]=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,"script","https://www.google-analytics.com/analytics.js","ga");
+
+   ga('create', "UA-38274714-1", 'auto');
+   ga('send', 'pageview');
+
+    // R&D site specific Universal Analytics (UA) code directive
+    ga('create', 'UA-25293892-10', 'auto', {'name': 'RDtracker'});
+    ga('RDtracker.send', 'pageview');
+  
+
+    // RDS site specific Universal Analytics (UA) code directive
+    //ga('create', 'UA-38274714-1', 'auto');
+    //ga('send', 'pageview');
+
+    // R&D site specific Universal Analytics (UA) code directive
+    //ga('create', ‘UA-25293892-10’, 'auto', 'RDtracker');
+    //ga('RDtracker.send', 'pageview');
+  
+    // Forest Service enterprise Universal Analytics (UA) code directive
+    ga('create', 'UA-47791907-1', 'auto', {'name': 'FStracker'});
+    ga('FStracker.send', 'pageview');
+
+    // USDA reporting of FS activity Universal Analytics (UA) code directive
+    ga('create', 'UA-27627304-16', 'auto', {'name': 'USDAtrackFS'});
+    ga('USDAtrackFS.send', 'pageview');
+
+    // USDA-wide Universal Analytics (UA) code directive
+    ga('create', 'UA-27627304-1', 'auto', {'name': 'USDAtracker'});
+    ga('USDAtracker.send', 'pageview');
+
+
+  </script>
+
+	<!--  Script for Federated Analytics system -->
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	
+	<script id="_fed_an_ua_tag" type="text/javascript" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=USDA&subagency=FS"></script>
+	
+    <script type="text/javascript">
+        jQuery(document).ready(function () {
+            jQuery(".facetlistcontent").hide();
+            jQuery(".facetsideheading").click(function () {
+                jQuery(this).next(".facetlistcontent").slideToggle(500);
+            }).toggle(function () {
+                $(this).children("span").text("[-]");
+            }, function () {
+                $(this).children("span").text("[+]");
+            });
+        });
+    </script>
+	
+	
+   	 <!-- Bootstrap Required meta tags -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<!-- Bootstrap CSS -->
+	<!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">-->
+  
+   <!--US Design System recommended fonts -->
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+   
+    <link rel="stylesheet" href="/rds/_shared/Content/css/bootstrapcarousel.css" type="text/css" />
+	<link rel="stylesheet" href="/rds/_shared/Content/css/structure.css" type="text/css" />
+    <!--<link rel="stylesheet" href="/rds/_shared/Content/css/format.css" type="text/css" />-->
+
+    <link rel="stylesheet" href="/rds/_shared/Content/css/simplePagination.css" type="text/css" />
+	<link rel="stylesheet" href="/rds/_shared/Content/uswds/css/uswds.min.css" type="text/css" >
+    <link rel="stylesheet" href="/rds/_shared/Content/css/style.css" type="text/css" />
+	<link rel="stylesheet" href="/rds/_shared/Content/chosen/chosen.css" type="text/css" />
+  
+     <!--Script for toggle on facet fields -->
+  
+    <!--<script src="Scripts/jquery-1.8.3.min.js" type="text/javascript"></script>-->
+
+	<!-- bootstrap javascript code, must stay above dialog jquery references-->
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    
+	<!--Script for dialog for "More" feature on facet fields -->
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" type="text/javascript"></script>
+
+    <script src="/rds/_shared/Scripts/dialog.js" type="text/javascript"></script>
+    <script src="/rds/_shared/Scripts/jquery.simplePagination.js" type="text/javascript"></script>
+
+    <!-- Script (SlideJS) for rotating products under "Spotlight" -->
+   
+   <!--<link rel="stylesheet" href="Content/homepage_slideshow.css" type="text/css"/> 
+   <script src="Scripts/jquery.slides.min.js" type="text/javascript" delay></script> 
+   <script type="text/javascript" delay>
+      $(function () {
+          $('#slides').slidesjs({
+              width: 720,
+              height: 130,
+              play: {
+                  active: true,
+                  auto: true,
+                  interval: 4000,
+                  swap: true
+              }
+          });
+      });
+  </script>-->
+  
+  <!-- Script for highlighting current location -->
+  
+  <script type="text/javascript">
+	$(function(){
+		var current = location.pathname.toLowerCase();
+		$('#nav li a').each(function(){
+			var $this = $(this);
+			// if the current path is like this link, make it active
+			if(current.indexOf($this.attr('id')) !== -1){
+				$this.addClass('usa-current');
+			}
+		})
+		$('#nav li button').each(function(){
+			var $this = $(this);
+			// if the current path is like this link, make it active
+			if(current.indexOf($this.attr('id')) !== -1){
+				$this.addClass('usa-current');
+			}
+		})
+	})
+  </script>
+
+	<!--  Script for ForeSee tracking -->
+	<script type="text/javascript">
+
+      // Instructions: please embed this snippet directly into every page in your website template.
+      // Each Forest, Grassland and Research site specifies their individual SubSiteCode here, 
+      // by declaring the Javascript variable subsiteCode and assigning the appropriate value:
+      // Examples:
+      // National Office of Communications site (www.fs.fed.us), specify a value of 11
+      // For the Boise National Forest site (http://www.fs.usda.gov/boise) specify a value of 1110402.
+      // Research site: FPL site (http://www.fpl.fs.fed.us), specify a value of 1132.
+
+      var subsiteCode = "115501";
+
+    // Answers Cloud Services Embed Script v1.02
+    // DO NOT MODIFY BELOW THIS LINE *****************************************
+    ;(function (g) {
+        var d = document, i, am = d.createElement('script'), h = d.head || d.getElementsByTagName("head")[0],
+                aex = {
+                    "src": "//gateway.answerscloud.com/fs-fed-us/production/gateway.min.js",
+                    "type": "text/javascript",
+                    "async": "true",
+                    "data-vendor": "acs",
+                    "data-role": "gateway"
+                };
+        for (var attr in aex) { am.setAttribute(attr,aex[attr]); }
+        h.appendChild(am);
+        g['acsReady'] = function () {var aT = '__acsReady__', args = Array.prototype.slice.call(arguments, 0),k = setInterval(function () {if (typeof g[aT] === 'function') {clearInterval(k);for (i = 0; i < args.length; i++) {g[aT].call(g, function(fn) { return function() { setTimeout(fn, 1) };}(args[i]));}}}, 50);};
+    })(window);
+    // DO NOT MODIFY ABOVE THIS LINE *****************************************
+
+</script> 
+   
+	
+<!--[if gte IE 5]>
+<style>
+#navlist a  {
+margin: -6px  0 0 0;
+padding: 5px 10px 0 10px;
+position: relative;
+height: 19px;
+zoom: 100%;
+}
+</style>
+<![endif]-->
+
+</head>
+
+<body>
+	<noscript><div>You need javascript enabled to fully use this site.</div></noscript>
+	   <script src="/rds/_shared/Content/uswds/js/uswds.min.js"></script>
+	<a class="usa-skipnav" href="#main-content">Skip to main content</a>
+
+<section class="usa-banner">
+  <div class="usa-accordion">
+    <header class="usa-banner-header">
+      <div class="usa-grid usa-banner-inner">
+      <img src="/rds/_shared/Content/uswds/img/favicons/favicon-57.png" alt="U.S. flag">
+      <p>An official website of the United States government</p>
+      <button class="usa-accordion-button usa-banner-button"
+        aria-expanded="false" aria-controls="gov-banner">
+        <span class="usa-banner-button-text">Here's how you know</span>
+      </button>
+      </div>
+    </header>
+    <div class="usa-banner-content usa-grid usa-accordion-content" id="gov-banner">
+      <div class="usa-banner-guidance-gov usa-width-one-half">
+        <img class="usa-banner-icon usa-media_block-img" src="/rds/_shared/Content/uswds/img/icon-dot-gov.svg" alt="Dot gov">
+        <div class="usa-media_block-body">
+          <p>
+            <strong>The .gov means it’s official.</strong>
+            <br>
+            Federal government websites often end in .gov or .mil. Before sharing sensitive information, make sure you’re on a federal government site.
+          </p>
+        </div>
+      </div>
+      <div class="usa-banner-guidance-ssl usa-width-one-half">
+        <img class="usa-banner-icon usa-media_block-img" src="/rds/_shared/Content/uswds/img/icon-https.svg" alt="Https">
+        <div class="usa-media_block-body">
+          <p>
+            <strong>The site is secure.</strong>
+            <br>
+            The <strong>https://</strong> ensures that you are connecting to the official website and that any information you provide is encrypted and transmitted securely.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="usda-banner">
+<div class="usa-grid usa-banner-inner usda-logo-text">
+	<a href="https://www.usda.gov/" aria-label="The U.S. Department of Agriculture" target="_blank" rel=noopener><img src="/rds/_shared/Content/images/logousda.gif" alt="USDA Logo" class="usda-logo-img" title="U.S. Department of Agriculture">
+	U.S. Department of Agriculture</a>
+</div>
+</section>
+<header class="rda-header usa-header usa-header-extended" role="banner">
+
+  <div class="usa-navbar">
+
+  <div class="usa-logo" id="extended-logo">
+
+	<em class="usa-logo-text">
+	<a href="https://www.fs.usda.gov/rds/archive/" aria-label="Research Data Archive" >Research Data Archive</a>
+
+	</em>
+	<div class="rda-tagline usa-logo-text"><span>Roots of our Research</span></div>
+  </div>
+  <button class="usa-menu-btn">Menu</button>
+</div>
+
+  <nav role="navigation" class="rda-nav usa-nav">
+  <div class="usa-nav-inner">
+    <button class="usa-nav-close">
+	  <img src="/rds/_shared/Content/uswds/img/close.svg" alt="close">
+	</button>
+	<ul id=nav class="usa-nav-primary usa-accordion">
+		<li class="usa-nav-primary-item">
+          <button id="catalog"
+            class="usa-accordion-button usa-nav-link"
+            aria-expanded="false"
+            aria-controls="basic-nav-section-one"
+          >
+            <span>Catalog</span>
+          </button>
+		<ul id="basic-nav-section-one" class="usa-nav-submenu">
+            <li class="usa-nav-submenu-item">
+              <a id="catalog pubs" class="usa-nav-link" href="https://www.fs.usda.gov/rds/archive/catalog">Publications</a>
+            </li>
+            <li class="usa-nav-submenu-item">
+              <a id="catalog metrics" class="usa-nav-link" href="https://www.fs.usda.gov/rds/archive/catalog/metrics">Metrics</a>
+            </li>
+          </ul>
+		</li>
+		<li><a id="usingformats" class="usa-nav-link" href="https://www.fs.usda.gov/rds/archive/usingFormats">
+			<span>Our Formats</span>
+		</a></li>
+		<li><a id="metadata" class="usa-nav-link" href="https://www.fs.usda.gov/rds/archive/metadata">
+		  <span>Metadata & Tools</span>
+		</a></li>
+		<li><a id="submittingdata" class="usa-nav-link " href="https://www.fs.usda.gov/rds/archive/submittingData">
+		  <span>Submitting Data</span>
+		</a></li>
+		<li><a id="digitizing" class="usa-nav-link " href="https://www.fs.usda.gov/rds/archive/digitizing">
+		  <span>Digitizing</span>
+		</a></li>
+		<li><a id="datauseinfo" class="usa-nav-link" href="https://www.fs.usda.gov/rds/archive/dataUseInfo">
+		  <span>Conditions of Use</span>
+		</a></li>
+		<li>
+			<a id="aboutus" class="usa-nav-link" href="https://www.fs.usda.gov/rds/archive/aboutus"><span>About Us</span></a>
+		</li>
+	</ul>
+      <div class="usa-nav-secondary">
+  
+    <form class="rda-header-search usa-search usa-search-small js-search-form" action="https://www.fs.usda.gov/rds/archive/catalog" method="get" hidden>
+  <div role="search">
+    <label class="usa-sr-only" for="extended-search-field-small">Search data catalog</label>
+    <input id="extended-search-field-small" type="search" name="freesearch" placeholder="Search catalog">
+    <button type="submit">
+      <span class="usa-sr-only">Search catalog</span>
+    </button>
+  </div>
+</form>
+
+  
+  <ul class="usa-unstyled-list usa-nav-secondary-links">
+    
+    <li class="js-search-button-container">
+      <button class="rda-header-search-button usa-header-search-button js-search-button">Search catalog</button>
+    </li>
+    
+    
+    <li>
+      <a href="https://www.fs.usda.gov/" aria-label="The USDA Forest Service" target="_blank" rel=noopener>
+		<img src="/rds/_shared/Content/images/logofs.gif" alt="FS Logo" class="usda-logo-img" title="Forest Service">
+      </a>
+    </li>
+    
+  </ul>
+</div>
+
+    </div>
+  </nav>
+</header>	<div class="usa-overlay"></div>
+	<div class="usa-grid usa-section usa-layout-docs" id="main-content" style="overflow:auto">
+	<meta name="citation_title" content="Spatial datasets of probabilistic wildfire risk components for the conterminous United States (270m) for circa 2011 climate and projected future climate circa 2047" />
+<meta name="DC.title" content="Spatial datasets of probabilistic wildfire risk components for the conterminous United States (270m) for circa 2011 climate and projected future climate circa 2047" />	<text><meta name="citation_author" content="Riley, Karin L." /></text>	<text><meta name="citation_author" content="Zimmer, Scott N." /></text>	<text><meta name="citation_author" content="Kodra, Evan" /></text>	<text><meta name="citation_author" content="Grenfell, Isaac C." /></text>	<text><meta name="citation_author" content="Dillon, Gregory K." /></text>	<text><meta name="citation_author" content="Scott, Joe H." /></text>	<text><meta name="citation_author" content="Jaffe, Melissa R." /></text>	<text><meta name="citation_author" content="Olszewski, Julia H." /></text>	<text><meta name="citation_author" content="Vogler, Kevin C." /></text>	<text><meta name="citation_author" content="Finney, Mark A." /></text>	<text><meta name="citation_author" content="Short, Karen C." /></text>	<text><meta name="citation_author" content="Jolly, W. Matthew" /></text>	<text><meta name="citation_author" content="Brittain, Stuart E." /></text>	<text><meta name="citation_author" content="Callahan, Michael N." /></text><meta name="DC.issued" content="2025" /> <!-- 'Year' -->
+<meta name="citation_publisher" content="Forest Service Research Data Archive" /><meta name="citation_doi" content="https://doi.org/10.2737/RDS-2025-0006" />
+<h3>Publication Details</h3>
+
+    <div class="document" style="border: none;">
+        <dl class="defList">
+            <dt>Title:</dt>
+            <dd>Spatial datasets of probabilistic wildfire risk components for the conterminous United States (270m) for circa 2011 climate and projected future climate circa 2047				<img src="https://www.fs.usda.gov/rds/archive/Content/images/GIS.jpg" alt="Data publication contains GIS data" title="Data publication contains GIS data"/> </dd>
+            <dt>Author(s):</dt>
+			<dd>					<text>
+					<a href="/rds/archive/Catalog?authorid=6320">Riley, Karin L.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=7393">Zimmer, Scott N.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=RDS1963">Kodra, Evan</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=5341">Grenfell, Isaac C.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=1740">Dillon, Gregory K.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=RDS581">Scott, Joe H.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=RDS1655">Jaffe, Melissa R.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=7333">Olszewski, Julia H.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=RDS895">Vogler, Kevin C.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=1900">Finney, Mark A.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=5361">Short, Karen C.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=RDS304">Jolly, W. Matthew</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=RDS1657">Brittain, Stuart E.</a>; 					</text>					<text>
+					<a href="/rds/archive/Catalog?authorid=RDS1763">Callahan, Michael N.</a>					</text>			 </dd>
+            <dt>Publication Year:</dt>
+            <dd>2025</dd>
+            <dt>How to Cite:</dt>
+            <dd>
+				These data were collected using funding from the U.S. Government and can be used without additional permissions or fees. If you use these data in a publication, presentation, or other research product please use the following citation:<blockquote>Riley, Karin L.; Zimmer, Scott N.; Kodra, Evan; Grenfell, Isaac C.; Dillon, Gregory K.; Scott, Joe H.; Jaffe, Melissa R.; Olszewski, Julia H.; Vogler, Kevin C.; Finney, Mark A.; Short, Karen C.; Jolly, W. Matthew; Brittain, Stuart E.; Callahan, Michael N. 2025. Spatial datasets of probabilistic wildfire risk components for the conterminous United States (270m) for circa 2011 climate and projected future climate circa 2047. Updated 01 July 2025. Fort Collins, CO: Forest Service Research Data Archive. https://doi.org/10.2737/RDS-2025-0006<br />
+<br />
+Users are strongly encouraged to read and fully comprehend the metadata prior to data use. Users should acknowledge the Originator when using this dataset as a source. Users should share data products developed using the source dataset with the Originator. No warranty is made by the Originator as to the accuracy, reliability, or completeness of these data for individual use or aggregate use with other data, or for purposes not intended by the Originator. This dataset is intended to estimate probabilistic wildfire risk components that can support national strategic planning. The applicability of the data to support fire and land management planning on smaller areas will vary by location and specific intended use. Further investigation by local and regional experts should be conducted to inform decisions regarding local applicability. It is the sole responsibility of the local user, using this metadata document and local knowledge, to determine if and/or how these data can be used for particular areas of interest. National FSim products are not intended to replace local products where they exist, but rather serve as a back-up by providing wall-to-wall cross-boundary data coverage. It is the responsibility of the user to be familiar with the value, assumptions, and limitations of these national data publications. Managers and planners must evaluate these data according to the scale and requirements specific to their needs. Spatial information may not meet National Map Accuracy Standards. This information may be updated without notification.</blockquote>			</dd>
+
+            <dt>Abstract:</dt>
+            <dd>The Large Fire Simulation System (FSim) simulates the growth and behavior of hundreds of thousands of fire events for risk analysis using geospatial data on historical fire occurrence, weather, terrain, and fuel conditions. It can be used to model the frequency and intensity of fires across large spatial and temporal scales. We simulated fire activity in FSim across the conterminous United States with a 2020 landscape (LANDFIRE) and under two sets of climate conditions: 1) using recent climate patterns from 2004-2018 and 2) with modeled future climate conditions for 2040-2054 to address how fire activity may change under future climate. The purpose of this research is to address how climate itself is expected to impact fire activity. Changes in climate will impact the number of days with conditions that promote burning and affect the intensity of burning conditions, which will impact ultimate fire activity and behavior.<br />
+<br />
+The data presented here represent modeled burn probability (BP) and conditional flame length probabilities (FLPs) for the conterminous United States (CONUS) at a 270-meter grid spatial resolution. Flame-length probability is estimated for six standard Fire Intensity Levels (FIL). The six FILs correspond to flame-length classes as follows: FLP1 = < 2 feet (ft); FLP2 = 2 - < 4 ft; FLP3 = 4 - < 6 ft; FLP4 = 6 - < 8 ft; FLP5 = 8 - < 12 ft; FLP6 = 12+ ft. Since they indicate conditional probabilities (i.e., representing the likelihood of burning at a certain intensity level, given that a fire occurs), the FLP data must be used in conjunction with the BP data for risk assessment. All calibration settings and input data used in this analysis, such as vegetation and fuels, were the same as those used in the prior 2020-landscape 2011-climate vintage national FSim run, Dillon et al. (2023) (referred to in the remainder of this document as either the "2020 national run" or the "2011 climate run").<br />
+<br />
+The 2020 national run published here is distinct from the preceding one in two ways: 1) in the previously published version, burnable pixels that did not burn during any simulations were backfilled with the low burn probability of 0.00008 and were assigned flame length probabilities; in this publication we do not alter outputs in this way; and 2) a complete set of flame length and arrival time data are available for all simulated fires in this version. Because of stochasticity in FSim, the two 2020 national runs have minor differences in some areas.<br />
+<br />
+The weather streams used in the circa 2047 climate simulation were updated to a 15-year climate period centered on 2047 using projected shifts in monthly temperature, precipitation, and relative humidity from an ensemble of six General Circulation Models (GCMs) from the Coupled Model Intercomparison Project Phase 5 (CMIP5). Burn probabilities and flame length probabilities from this circa 2047 run were compared to those from the 2020 national FSim run to assess expected changes at the scale of counties and pyromes, or areas of homogeneous fire regime.<p></p></dd> <!-- 'Description' -->
+            <dt>Keywords:</dt>
+            <dd>biota; climatologyMeteorologyAtmosphere; environment; Climate change; Climate change effects; Carbon; Ecology, Ecosystems, & Environment; Fire; Natural Resource Management & Use; fire; climate change; burn probability; wildfire risk; United States; CONUS			</dd>
+			<dt>Related publications:</dt>
+				<dd><ul><li style="line-height:unset">Short, Karen C.; Finney, Mark A.; Scott, Joe H.; Gilbertson-Day, Julie W.; Grenfell, Isaac C. 2016. Spatial dataset of probabilistic wildfire risk components for the conterminous United States. 1st Edition. Fort Collins, CO: Forest Service Research Data Archive. <a href='https://doi.org/10.2737/RDS-2016-0034' target='_blank' rel='noopener'>https://doi.org/10.2737/RDS-2016-0034</a></li><li style="line-height:unset">Short, Karen C.; Finney, Mark A.; Vogler, Kevin C.; Scott, Joe H.; Gilbertson-Day, Julie W.; Grenfell, Isaac C. 2020. Spatial datasets of probabilistic wildfire risk components for the United States (270m). 2nd Edition. Fort Collins, CO: Forest Service Research Data Archive. <a href='https://doi.org/10.2737/RDS-2016-0034-2' target='_blank' rel='noopener'>https://doi.org/10.2737/RDS-2016-0034-2</a></li><li style="line-height:unset">Dillon, Gregory K.; Scott, Joe H.; Jaffe, Melissa R.; Olszewski, Julia H.; Vogler, Kevin C.; Finney, Mark A.; Short, Karen C.; Riley, Karin L.; Grenfell, Isaac C.; Jolly, W. Matthew; Brittain, Stuart E. 2023. Spatial datasets of probabilistic wildfire risk components for the United States (270m). 3rd Edition. Fort Collins, CO: Forest Service Research Data Archive. <a href='https://doi.org/10.2737/RDS-2016-0034-3' target='_blank' rel='noopener'>https://doi.org/10.2737/RDS-2016-0034-3</a></li><li style="line-height:unset">Columbia Climate School, National Center for Disaster Preparedness. 2025. U.S. natural hazards climate change projections. Columbia Climate School, National Center for Disaster Preparedness. https://ncdp.columbia.edu/us-natural-hazards-and-climate-change/</li></ul></dd>			<dt>Metrics:</dt>
+            <dd>Visit count : <span id='visitCount'>2372</span>				<span id="accessCount" style="display:none">0</span>				<br/>Download count: <span id="downloadCount">236</span>			<br/><a href="/rds/archive/catalog/metrics/RDS-2025-0006">More details</a>
+			</dd>
+            <dt>Data Access:</dt>
+            <dd class="product">			<ul><li style="line-height:unset">View <a href="/rds/archive/products/RDS-2025-0006/_metadata_RDS-2025-0006.html" target="_blank">metadata</a> (HTML)</li><li style="line-height:unset">View <a href="/rds/archive/products/RDS-2025-0006/_fileindex_RDS-2025-0006.html" target="_blank">file index</a> (HTML), which lists all files in this data publication and short description of their contents</li><li style='line-height:unset'>Download all files below for the complete publication:<ul><li><a href="/rds/archive/products/RDS-2025-0006/RDS-2025-0006_Metadata_Fileindex.zip" target="_blank">RDS-2025-0006_Metadata_Fileindex.zip</a> <em>(41.14 KB; <div hidden id='checksum_RDS-2025-0006_Metadata_Fileindex.zip'>sha256: 1f959ab309a324ca285364832fd4d7f3a1b85f6888e6c7c3e216ad5b9f0ec337</div><a href='#' onclick='showChecksum("RDS-2025-0006_Metadata_Fileindex.zip");return false;'>Checksum</a>)</em></li><li><a href="https://usfs-public.box.com/shared/static/h55qel755s97nagdu97ebd4z6fzpp3w1.zip" target="_blank">RDS-2025-0006.zip</a> <em>(1.59 GB; <div hidden id='checksum_RDS-2025-0006.zip'>SHA256: a92b4f6ecb2c5f3c496851a82c5b65d38b7c97cfd6c16d433cafaa5905265825</div><a href='#' onclick='showChecksum("RDS-2025-0006.zip");return false;'>Checksum</a>)</em></li></ul></li>			</ul>
+            </dd>
+        </dl>
+        <p>Need information about <a href="https://www.fs.usda.gov/rds/archive/UsingFormats">Using our Formats</a>?</p>
+    </div>
+<!--}-->
+<script type="text/javascript">
+		jQuery(document).ready(function () {
+		var rdsid = 'RDS-2025-0006';
+		$.post("/rds/archive/catalog/downloadevent",
+		  {
+			rdsid: rdsid,
+			type: 'page_visits',
+		  });
+		//var test=document.getElementById("visitCount").innerHTML;
+		//document.getElementById("visitCount").innerHTML=parseInt(test)+1;
+		$('dd.product a').click(function(event) {
+			//event.preventDefault();
+			var href = $(this).prop('href');
+			var type = 'External Product';
+			if (href.search('/products/')!==-1) {
+				type = 'Product';
+				if (/metadata/i.test(href))
+					type = 'Metadata';
+				else if (/fileindex/i.test(href))
+					type = 'FileIndex';
+				else if (/_Supplements/i.test(href))
+					type = 'Supplements';
+			}
+			else if (/https:\/\/s3-us-west-2\.amazonaws\.com\/fs\.usda\.rds\//i.test(href)) {
+				type = 'LargeProduct';
+			}else if (/https:\/\/usfs-public\.box\.com/i.test(href)) {
+				type = 'LargeProduct';
+				href=$(this).html(); //send the filename, since the pinyon link is random
+			}else if (/https:\/\/www\.fs\.usda\.gov\/rds\/efrdata\//i.test(href)) {
+				type = 'EFR';
+			}else if (/https:\/\/www\.fs\.usda\.gov\/rds\/waterQualityDB\//i.test(href)) {
+				type = 'DB';
+			}else if (/https:\/\/www\.fs\.usda\.gov\/rds\/imagedb\//i.test(href)) {
+				type = 'ImageDB';
+			}else if (/https:\/\/www\.fs\.usda\.gov\/rds\/archive\/catalog\/RDS-2025-0006/i.test(href)) {
+				type = 'checksum link';
+			}else if (/https:\/\/www\.fs\.usda\.gov\/rds\//i.test(href)) {
+				type = 'other local download';
+			}
+			$.post("/rds/archive/catalog/downloadevent",
+			  {
+				rdsid: rdsid,
+				type: type,
+				href: href
+			  });
+			/*$.post("/rds/archive/catalog/downloadevent",
+			  {
+				rdsid: rdsid,
+				type: type,
+				href: href
+			  },
+			  function(data, status){
+				alert("Data: " + data + "\nStatus: " + status);
+			  });*/
+			  //update download count in realtime
+			  if (type == 'EFR' || type == 'DB' || type == 'ImageDB' || type == 'External Product'){
+				  var test=document.getElementById("accessCount").innerHTML;
+				  document.getElementById("accessCount").innerHTML=parseInt(test)+1;
+			  }else if (type=='Product' || type=='LargeProduct'){
+				  var test=document.getElementById("downloadCount").innerHTML;
+				  document.getElementById("downloadCount").innerHTML=parseInt(test)+1;
+			  }
+			ga('send','event','Download',type, href);
+		});
+	});
+		
+	function showChecksum(id){
+		var content = document.getElementById("checksum_"+id).innerHTML;
+		
+		var $dialog = $('<div></div>')
+					   .html(content)
+					   .dialog({
+						   autoOpen: false,
+						   modal: true,
+						   width: 700,
+						   title: "Checksum for "+id
+					   });
+		$dialog.dialog('open');
+	}
+</script>
+	</div>
+	<footer class="usa-footer usa-footer-slim" role="contentinfo">
+  <div class="usa-grid usa-footer-return-to-top" >
+    <a href="#">Return to top</a>
+  </div>
+  <div class="rda-footer1 usa-footer-primary-section">
+    <div class="usa-grid">
+      <nav class="usa-footer-nav">
+        <ul class="usa-unstyled-list">				<li class="usa-width-one-third usa-footer-primary-content">					<a class="usa-footer-primary-link" href="https://www.fs.usda.gov/rds/archive/contactus"><span>Contact Us</span></a></li>				<li class="usa-width-one-third usa-footer-primary-content">					<a class="usa-footer-primary-link" href="https://www.fs.usda.gov/rds/archive/links"><span>Other Data Resources</span></a></li>				<li class="usa-width-one-third usa-footer-primary-content">					<a class="usa-footer-primary-link" href="https://www.fs.usda.gov/rds/archive/sitemap"><span>Sitemap</span></a></li>        </ul>
+      </nav>
+
+    </div>
+  </div>
+
+<div class="rda-footer2 usa-footer-secondary_section">
+    <div class="usa-grid">
+		<div class="usa-logo">
+			<a href="https://www.usda.gov" target="_blank" rel=noopener><img class="usda-logo-img" src="/rds/_shared/Content/images/logousda.gif" alt="USDA Logo" title="U.S. Department of Agriculture"></a>
+			<a href="https://www.fs.usda.gov" target="_blank" rel=noopener><img class="usda-logo-img" src="/rds/_shared/Content/images/logofs.gif" alt="FS Logo" title="Forest Service"></a>
+			<h3 class="usa-footer-slim-logo-heading">
+				<a href="https://www.fs.usda.gov/rds/archive/" aria-label="Research Data Archive" target="_blank" rel=noopener>Research Data Archive</a>
+			</h3>
+		</div>
+	</div>
+	<div class="usa-grid">
+		<ul class="usa-unstyled-list usa-nav-secondary-links rda-nav-footer-links">
+		<li><a href="https://research.fs.usda.gov" target="_blank" rel=noopener>National R&amp;D</a></li>
+		<li><a href="https://research.fs.usda.gov/programs/fia" target="_blank" rel=noopener>Forest Inventory &amp; Analysis</a></li>
+		<li><a href="https://research.fs.usda.gov/about/people/" target="_blank" rel=noopener>People Search</a></li>
+		<li><a href="https://research.fs.usda.gov/stations/" target="_blank" rel=noopener>Stations</a></li>
+		<li><a href="https://research.fs.usda.gov/treesearch/" target="_blank" rel=noopener>Treesearch Publications</a></li>
+		</ul>
+	</div>
+	<div class="usa-grid">
+		<div class="usa-nav-secondary-links"><span>We are proud to be affiliated with:</span>
+		<ul class="usa-unstyled-list rda-nav-footer-links" style="display:inline-block">
+		<li><a href="https://www.re3data.org/" target="_blank" rel=noopener><img class="usda-logo-img" src="/rds/_shared/Content/images/re3datalogo.png" alt="R3 logo" title="Registry of Research Data Repositories"></a></li>
+		<li><a href="https://fairsharing.org/" target="_blank" rel=noopener><img class="usda-logo-img" src="/rds/_shared/Content/images/FAIRsharing_logo.png" alt="Fair sharing logo" title="FAIR Sharing"></a></li>
+		<li><a href="https://www.nature.com/sdata/" target="_blank" rel=noopener><img class="usda-logo-img" height="33px" style="background-color:#164880; padding-left:5px" src="/rds/_shared/Content/images/scientificdata_logo.png" alt="Scientific data logo" title="Scientific Data"></a></li>
+		</ul></div><br/>
+	</div>
+</div>
+
+<div class="rda-last-footer usa-footer-secondary_section">
+		<div class="usa-grid">
+			<ul class="usa-unstyled-list usa-nav-secondary-links rda-nav-footer-links">
+				<li>
+					<a href="https://www.usda.gov/policies-and-links" target="_blank" rel=noopener>Policies and Links</a>
+				</li>
+				<li>
+					<a href="https://www.usda.gov/our-agency/about-usda/performance" target="_blank" rel=noopener>Our Performance</a>
+				</li>
+				<li>
+					<a href="https://usdaoig.oversight.gov/resources/hotline-information" target="_blank" rel=noopener>Report Fraud on USDA Contracts</a>
+				</li>
+				<li>
+					<a href="https://usdaoig.oversight.gov/" target="_blank" rel=noopener>Visit OIG</a>
+				</li>
+				<li>
+					<a href="https://www.foia.gov/" target="_blank" rel=noopener>FOIA</a>
+				</li>
+				<li>
+					<a href="https://www.usda.gov/accessibility-statement" target="_blank" rel=noopener>Accessibility Statement</a>
+				</li>
+				<li>
+					<a href="https://www.usda.gov/privacy-policy" target="_blank" rel=noopener>Privacy Policy</a>
+				</li>
+				<li>
+					<a href="https://www.usda.gov/non-discrimination-statement" target="_blank" rel=noopener>Non-Discrimination Statement</a>
+				</li>
+				<li>
+					<a href="https://www.usda.gov/oascr/civil-rights-statements" target="_blank" rel=noopener>Anti-Harassment Policy</a>
+				</li>
+				<li>
+					<a href="https://www.usda.gov/ocio/guidelines-and-compliance-resources/information-quality-activities" target="_blank" rel=noopener>Information Quality</a>
+				</li>
+				<li>
+					<a href="https://www.usa.gov/" target="_blank" rel=noopener>USA.gov</a>
+				</li>
+				<li>
+					<a href="https://www.whitehouse.gov/" target="_blank" rel=noopener>White House</a>
+				</li>
+			</ul>
+		</div>
+</div>
+</footer>	 <div id="moreDialog" align="left" style="display:none;"></div>
+</body>
+</html>

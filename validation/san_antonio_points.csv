@@ -1,0 +1,11 @@
+point_id,latitude,longitude,selection_1pct,twdb_tile,depth_20pct_ft,depth_10pct_ft,depth_1pct_ft,depth_0_2pct_ft,status_20pct,status_10pct,status_1pct,status_0_2pct,fema_status,fema_fld_zone,fema_zone_subty,fema_sfha_tf,comparison_1pct,fema_error
+1,29.39741277,-98.47084089,mapped,n29w99,,0.92,1.54,1.90,no_mapped_depth,sampled,sampled,sampled,found,X,AREA OF MINIMAL FLOOD HAZARD,F,different,
+2,29.46021099,-98.47141774,mapped,n29w99,,,2.85,5.81,no_mapped_depth,no_mapped_depth,sampled,sampled,found,X,AREA OF MINIMAL FLOOD HAZARD,F,different,
+3,29.42695335,-98.45069496,mapped,n29w99,,1.15,1.87,2.33,no_mapped_depth,sampled,sampled,sampled,found,X,AREA OF MINIMAL FLOOD HAZARD,F,different,
+4,29.38993601,-98.55680799,mapped,n29w99,,,0.56,0.72,no_mapped_depth,no_mapped_depth,sampled,sampled,found,X,AREA OF MINIMAL FLOOD HAZARD,F,different,
+5,29.37031929,-98.52948054,mapped,n29w99,,,0.95,1.12,no_mapped_depth,no_mapped_depth,sampled,sampled,found,X,AREA OF MINIMAL FLOOD HAZARD,F,different,
+6,29.37915246,-98.49692892,blank,n29w99,,,,,no_mapped_depth,no_mapped_depth,no_mapped_depth,no_mapped_depth,found,X,AREA OF MINIMAL FLOOD HAZARD,F,same,
+7,29.45445026,-98.50229499,blank,n29w99,,,,,no_mapped_depth,no_mapped_depth,no_mapped_depth,no_mapped_depth,found,X,AREA OF MINIMAL FLOOD HAZARD,F,same,
+8,29.38216503,-98.46621631,blank,n29w99,,,,,no_mapped_depth,no_mapped_depth,no_mapped_depth,no_mapped_depth,found,X,AREA OF MINIMAL FLOOD HAZARD,F,same,
+9,29.38540262,-98.50329827,blank,n29w99,,,,,no_mapped_depth,no_mapped_depth,no_mapped_depth,no_mapped_depth,found,X,AREA OF MINIMAL FLOOD HAZARD,F,same,
+10,29.44584435,-98.46023562,blank,n29w99,,,,,no_mapped_depth,no_mapped_depth,no_mapped_depth,no_mapped_depth,found,X,AREA OF MINIMAL FLOOD HAZARD,F,same,

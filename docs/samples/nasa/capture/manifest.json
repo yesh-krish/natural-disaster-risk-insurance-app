@@ -1,0 +1,113 @@
+{
+  "files": {
+    "firms-noaa20-24h.csv": {
+      "url": "https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/csv/J1_VIIRS_C2_USA_contiguous_and_Hawaii_24h.csv",
+      "resolved_url": "https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/csv/J1_VIIRS_C2_USA_contiguous_and_Hawaii_24h.csv",
+      "http_status": 200,
+      "retrieved_at_utc": "2026-11-03T22:57:23.922578+00:00",
+      "last_modified": "Tue, 03 Nov 2026 22:41:29 GMT",
+      "http_date": "Tue, 03 Nov 2026 22:57:20 GMT",
+      "bytes": 149327,
+      "sha256": "fa3268823db96b75e7739509a010dcc93936d163bdb9cdb92dd5bd6cdff1582e"
+    },
+    "mod11a2-san-antonio.json": {
+      "url": "https://modis.ornl.gov/rst/api/v1/MOD11A2/subset?latitude=29.4241&longitude=-98.4936&startDate=A2024185&endDate=A2024185&kmAboveBelow=0&kmLeftRight=0",
+      "resolved_url": "https://modis.ornl.gov/rst/api/v1/MOD11A2/subset?latitude=29.4241&longitude=-98.4936&startDate=A2024185&endDate=A2024185&kmAboveBelow=0&kmLeftRight=0",
+      "http_status": 200,
+      "retrieved_at_utc": "2026-11-03T22:57:25.456317+00:00",
+      "last_modified": null,
+      "http_date": "Tue, 03 Nov 2026 22:57:20 GMT",
+      "bytes": 2092,
+      "sha256": "aa02cfcb3be5aa5de3855160e5b34bf452654717bed2093ec8969de023c8187c"
+    },
+    "mod11a2-bands.json": {
+      "url": "https://modis.ornl.gov/rst/api/v1/MOD11A2/bands",
+      "resolved_url": "https://modis.ornl.gov/rst/api/v1/MOD11A2/bands",
+      "http_status": 200,
+      "retrieved_at_utc": "2026-11-03T22:57:25.714779+00:00",
+      "last_modified": null,
+      "http_date": "Tue, 03 Nov 2026 22:57:22 GMT",
+      "bytes": 1874,
+      "sha256": "da9a73e6cc7634fd0e516b5985227d444b5b5a488e78312a7f81812415507fdb"
+    },
+    "mod11a2-cmr-granule.json": {
+      "url": "https://cmr.earthdata.nasa.gov/search/granules.json?collection_concept_id=C2269056084-LPCLOUD&temporal=2024-07-03T00%3A00%3A00Z%2C2024-07-10T23%3A59%3A59Z&producer_granule_id=MOD11A2.A2024185.h09v06.%2A&options%5Bproducer_granule_id%5D%5Bpattern%5D=true&page_size=1",
+      "resolved_url": "https://cmr.earthdata.nasa.gov/search/granules.json?collection_concept_id=C2269056084-LPCLOUD&temporal=2024-07-03T00%3A00%3A00Z%2C2024-07-10T23%3A59%3A59Z&producer_granule_id=MOD11A2.A2024185.h09v06.%2A&options%5Bproducer_granule_id%5D%5Bpattern%5D=true&page_size=1",
+      "http_status": 200,
+      "retrieved_at_utc": "2026-11-03T22:59:24.103572+00:00",
+      "last_modified": null,
+      "http_date": "Tue, 03 Nov 2026 22:59:20 GMT",
+      "bytes": 5851,
+      "sha256": "8346ae69eee1c6ae8529667cefe7dca1a08ecd1f0a4843051c087f42e597908c"
+    }
+  },
+  "authentication": "none",
+  "summary": {
+    "fire": {
+      "bbox_wsen": [
+        -99,
+        29,
+        -98,
+        30
+      ],
+      "date_utc": "2026-11-02",
+      "source_rows": 1761,
+      "selected_rows": 5,
+      "source_date_min": "2026-11-02",
+      "source_date_max": "2026-11-03",
+      "acquisition_times_utc": [
+        "0745",
+        "2044"
+      ],
+      "confidence_values": [
+        "nominal"
+      ],
+      "version_values": [
+        "2.0NRT"
+      ],
+      "frp_mw_min": 0.17,
+      "frp_mw_max": 3.7
+    },
+    "lst": {
+      "location": [
+        29.4241,
+        -98.4936
+      ],
+      "composite_start": "2024-07-03",
+      "composite_end_inclusive": "2024-07-10",
+      "collection_version": "061 (matched to CMR by product/date/tile/processing ID)",
+      "matched_granule_id": "MOD11A2.A2024185.h09v06.061.2024195060944",
+      "tile": "h09v06",
+      "proc_date": "2024195060944",
+      "cellsize_sinusoidal_m": 926.6254330558338,
+      "day": {
+        "raw_lst": 15635,
+        "raw_qc": 81,
+        "kelvin": 312.7,
+        "celsius": 39.55,
+        "qa_codes": {
+          "mandatory": 1,
+          "data_quality": 0,
+          "emissivity_error": 1,
+          "lst_error": 1
+        },
+        "strict_filter_accepted": false,
+        "clear_sky_bitmap": 11
+      },
+      "night": {
+        "raw_lst": 15061,
+        "raw_qc": 17,
+        "kelvin": 301.22,
+        "celsius": 28.07,
+        "qa_codes": {
+          "mandatory": 1,
+          "data_quality": 0,
+          "emissivity_error": 1,
+          "lst_error": 0
+        },
+        "strict_filter_accepted": false,
+        "clear_sky_bitmap": 7
+      }
+    }
+  }
+}
