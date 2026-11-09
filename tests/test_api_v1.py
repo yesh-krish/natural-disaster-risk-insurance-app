@@ -128,6 +128,14 @@ class APIV1Tests(unittest.TestCase):
         self.assertIsNone(payload["data"])
         self.assertNotIn("private upstream diagnostic", json.dumps(payload))
         self.assert_contract(payload, "/api/v1/hazards/{peril}", 502)
+        # Truncated or malformed upstream bodies are provider failures too, not crashes.
+        import http.client
+        for error in (http.client.IncompleteRead(b"{"), AttributeError("'list' object has no attribute 'get'"),
+                      IndexError("list index out of range")):
+            with self.subTest(error=type(error).__name__), patch("api_v1.disaster_at", side_effect=error):
+                status, payload = dispatch("/api/v1/hazards/flood", "lat=0&lon=0")
+            self.assertEqual(status, 502)
+            self.assert_contract(payload, "/api/v1/hazards/{peril}", 502)
 
     def test_area_contract_with_real_aggregation_and_partial_coverage(self):
         with patch("area_hazard.disaster_at", return_value=curve()):

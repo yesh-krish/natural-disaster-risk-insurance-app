@@ -5,11 +5,13 @@ const vm = require('node:vm');
 
 // Run the complete application script with deterministic DOM, map, and API adapters.
 const nodes = new Map(), events = {}, layers = new Set(), requests = [], downloads = [];
-const stationRequests = [], timers = new Map();
+const stationRequests = [], hazardStationRequests = [], timers = new Map();
+const fireLoads = [], fireClears = [];
+const proximityLoads = [], proximityClears = [];
 function node(id = '') {
   if (id && nodes.has(id)) return nodes.get(id);
   const n = { value: '', textContent: '', hidden: false, disabled: false, children: [], dataset: {},
-    validity: { valid: true }, classList: { add() {}, remove() {} },
+    validity: { valid: true }, classList: { add() {}, remove() {}, toggle() {} },
     get valueAsNumber() { return Number(this.value); },
     append(...items) { this.children.push(...items); },
     replaceChildren(...items) { this.children = items; },
@@ -37,6 +39,8 @@ class LocalURL extends URL {
   static revokeObjectURL() {}
 }
 const context = vm.createContext({
+  FireHistory: { load(...args) { fireLoads.push(args); }, clear(...args) { fireClears.push(args); } },
+  FireProximity: { load(...args) { proximityLoads.push(args); }, clear(...args) { proximityClears.push(args); } },
   console, Intl, AbortController, URLSearchParams, URL: LocalURL, Blob,
   setTimeout(fn, ms) { const id = Symbol(); timers.set(id, {fn, ms}); return id; },
   clearTimeout(id) { timers.delete(id); },
@@ -49,7 +53,9 @@ const context = vm.createContext({
       getCenter: () => ({ lat: (a.lat + b.lat) / 2, lng: (a.lng + b.lng) / 2 }) }; } },
   drawHazardChart() {}, formatHazardNumber: value => String(value), HAZUS_CURVES: {},
   ...require('../hazard_trigger.js'),
-  fetch(url, options) { return new Promise(resolve => (url.startsWith('/api/v1/monitoring-stations?') ? stationRequests : requests).push({ url, options, resolve })); },
+  fetch(url, options) { return new Promise(resolve => (url.startsWith('/api/v1/monitoring-stations?')
+    ? (new URL(url, 'http://localhost').searchParams.has('peril') ? hazardStationRequests : stationRequests)
+    : requests).push({ url, options, resolve })); },
 });
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../script.js'), 'utf8'), context);
 const flush = () => new Promise(resolve => setImmediate(resolve));
@@ -68,6 +74,9 @@ const data = {
 };
 
 (async () => {
+  assert.equal(node('nearest-fire-panel').hidden, true);
+  assert.equal(fireLoads.length, 0, 'other hazards never request nearest fire');
+  assert.equal(proximityLoads.length, 0, 'other hazards never request annual fire frequencies');
   node('selection-mode').value = 'area'; node('selection-mode').change();
   events.click({ latlng: { lat: 0, lng: 0 } });
   events.click({ latlng: { lat: 4, lng: 4 } });
@@ -426,6 +435,8 @@ const data = {
   assert.match(node('pool-calculation').textContent, /observed annual frequency.*Historical 1991–2020 station-proxy/);
   assert.match(node('trigger-result-label').textContent, /Observed annual heat exceedance frequency/);
   assert.match(node('trigger-location').textContent, /USW00012921.*13.40 km.*30 included years/);
+  assert.match(node('hazard-station-status').textContent, /GHCN-Daily historical heat/);
+  assert.match(node('hazard-station-details').children[0].textContent, /USW00012921.*13.40 km/);
   assert.match(node('trigger-method').textContent, /not a calibrated future probability/);
   node('export-heat').click();
   const heatCsv = await blobs.at(-1).text();
@@ -439,6 +450,8 @@ const data = {
   requests.at(-1).resolve({ok: true, json: async () => unsupportedHeatArea});
   await flush();
   assert.match(node('hazard-status').textContent, /Point mode/);
+  assert.equal(node('hazard-station-show').hidden, true, 'unsupported heat area clears historical station marker');
+  assert.match(node('hazard-station-status').textContent, /Point mode/);
   assert.equal(node('trigger-select').disabled, true);
   assert.equal(node('pool-contribution').textContent, '—');
   assert.equal(node('heat-history-details').hidden, true);
@@ -491,6 +504,114 @@ const data = {
     fireRequestsBeforeSwitch, 'switching hazards stops polling the old fire point');
   assert.equal(node('fire-history-details').hidden, true);
   assert.equal(node('export-potential-fire').disabled, true);
+  const requestsBeforeHistory = requests.length;
+  node('disaster-select').value = 'nearest_fire'; node('disaster-select').change();
+  assert.equal(node('nearest-fire-panel').hidden, false);
+  assert.equal(node('hazard-panel').hidden, true);
+  for (const id of ['trigger-level-control', 'trigger-payout-control', 'trigger-result', 'comparison-panel', 'trigger-help']) {
+    assert.equal(node(id).hidden, true, `${id} is hidden for occurrence records`);
+  }
+  assert.equal(requests.length, requestsBeforeHistory, 'history hazard does not request a modeled hazard curve');
+  assert.equal(fireLoads.length, 1, 'selecting history reuses the current map selection');
+  assert.equal(proximityLoads.length, 1, 'selecting history calculates annual fire frequencies');
+  assert.equal(fireLoads[0][1].lat, 30.1);
+  events.click({latlng: {lat: 31, lng: -98}});
+  assert.equal(fireLoads.length, 2);
+  assert.equal(fireLoads[1][1].lat, 31);
+  assert.equal(proximityLoads[1][1].lat, 31);
+  const proximityClearsBeforeSwitch = proximityClears.length;
+  const clearsBeforeSwitch = fireClears.length;
+  node('disaster-select').value = 'rainfall'; node('disaster-select').change();
+  assert.equal(node('nearest-fire-panel').hidden, true);
+  assert.equal(node('trigger-result').hidden, false);
+  assert.ok(fireClears.length > clearsBeforeSwitch, 'switching hazards cancels and clears history');
+  assert.equal(fireLoads.length, 2, 'other hazards do not restart fire requests');
+  assert.equal(proximityLoads.length, 2, 'other hazards do not restart annual frequency requests');
+  assert.ok(proximityClears.length > proximityClearsBeforeSwitch);
+  // The hazard station uses the right network independently of the METAR list.
+  node('selection-mode').value = 'point'; node('selection-mode').change();
+  const hazardStation = {id: 'TEST-1', name: '<script>Gauge</script>', latitude: 31.1, longitude: -98.1,
+    distance_km: 2.5, url: 'https://waterdata.usgs.gov/monitoring-location/USGS-TEST/'};
+  function resolveHazardStation(request, peril, network, station = hazardStation) {
+    request.resolve({ok: true, json: async () => ({data: {peril, network, station,
+      status: station ? 'available' : 'not_found', message: 'Station context only, within 200 km.'}})});
+  }
+  for (const [peril, stationPeril, network] of [
+    ['flood', 'flood', 'USGS stream gauges'], ['rainfall', 'rainfall', 'USGS precipitation gauges'],
+    ['earthquake', 'earthquake', 'EarthScope seismic stations'], ['wildfire', 'wildfire', 'NIFC RAWS'],
+    ['nearest_fire', 'wildfire', 'NIFC RAWS'], ['potential_fire_intensity', 'wildfire', 'NIFC RAWS'],
+  ]) {
+    node('disaster-select').value = peril; node('disaster-select').change();
+    const request = hazardStationRequests.at(-1);
+    const params = new URL(request.url, 'http://localhost').searchParams;
+    assert.equal(params.get('peril'), stationPeril);
+    assert.equal(params.has('network'), false);
+    assert.equal(params.has('n'), false, 'weather count must not alter hazard network search');
+    resolveHazardStation(request, stationPeril, network);
+    await flush();
+    assert.equal(node('hazard-station-status').textContent, network);
+    assert.equal(node('hazard-station-details').children[0].textContent, '<script>Gauge</script> (TEST-1) · 2.50 km');
+    assert.equal(node('hazard-station-show').hidden, false);
+    node('hazard-station-show').click();
+    assert.equal(map.fitted.points.length, 2);
+    assert.equal(map.fitted.points[1].lat, hazardStation.latitude);
+  }
+  const oldHazardMarker = [...layers].find(l => l.popup?.textContent?.startsWith('NIFC RAWS:'));
+  node('disaster-select').value = 'flood'; node('disaster-select').change();
+  const oldHazardRequest = hazardStationRequests.at(-1);
+  assert.ok(!layers.has(oldHazardMarker), 'switching hazards immediately removes the previous hazard marker');
+  node('disaster-select').value = 'earthquake'; node('disaster-select').change();
+  assert.equal(oldHazardRequest.options.signal.aborted, true);
+  resolveHazardStation(oldHazardRequest, 'flood', 'Wrong old gauge');
+  await flush();
+  assert.match(node('hazard-station-status').textContent, /Finding.*EarthScope/);
+  resolveHazardStation(hazardStationRequests.at(-1), 'earthquake', 'EarthScope', null);
+  await flush();
+  assert.match(node('hazard-station-status').textContent, /No eligible station/);
+  assert.equal(node('hazard-station-show').hidden, true);
+  node('hazard-station-retry').click();
+  hazardStationRequests.at(-1).resolve({ok: false, status: 502, json: async () => ({error: {message: 'Provider offline'}})});
+  await flush();
+  assert.match(node('hazard-station-status').textContent, /EarthScope.*Provider offline/);
+  assert.equal(node('hazard-station-retry').hidden, false);
+  node('hazard-station-retry').click();
+  const timedHazardRequest = hazardStationRequests.at(-1);
+  [...timers.values()].filter(t => t.ms === 15000).at(-1).fn();
+  assert.equal(timedHazardRequest.options.signal.aborted, true);
+  resolveHazardStation(timedHazardRequest, 'earthquake', 'Too late');
+  await flush();
+  assert.match(node('hazard-station-status').textContent, /timed out/);
+  node('disaster-select').value = 'cyclone'; node('disaster-select').change();
+  const beforeWind = hazardStationRequests.length;
+  assert.match(node('hazard-station-status').textContent, /METAR.*HURDAT2/);
+  assert.equal(node('hazard-station-show').hidden, true);
+  node('disaster-select').value = 'heat'; node('disaster-select').change();
+  assert.equal(hazardStationRequests.length, beforeWind, 'heat uses the actual historical curve station, not a separate nearest lookup');
+  assert.match(node('hazard-station-status').textContent, /Waiting.*GHCN-Daily/);
+  node('disaster-select').value = 'auto'; node('disaster-select').change();
+  assert.match(node('hazard-station-status').textContent, /Waiting.*automatic/);
+  requests.at(-1).resolve({ok: true, json: async () => ({peril: 'rainfall', status: 'available', points: [], selection: {explanation: 'Selected rain'}})});
+  await flush();
+  assert.match(hazardStationRequests.at(-1).url, /peril=rainfall/);
+  resolveHazardStation(hazardStationRequests.at(-1), 'rainfall', 'USGS precipitation gauges', {...hazardStation, url: 'javascript:alert(1)'});
+  await flush();
+  assert.equal(node('hazard-station-details').children.length, 3, 'unsafe provider URL is omitted');
+  node('disaster-select').value = 'rainfall'; node('disaster-select').change();
+  const pendingHazardLookup = requests.at(-1);
+  assert.match(pendingHazardLookup.url, /^\/api\/(v1\/)?(hazards|disaster)/);
+  node('address-input').value = 'Unknown address';
+  addressSearch = node('address-search').submit({preventDefault() {}});
+  assert.equal(node('hazard-station-details').children.length, 0, 'address search immediately clears hazard station details');
+  assert.equal(node('hazard-station-show').hidden, true);
+  requests.at(-1).resolve({ok: true, json: async () => ({status: 'no_match'})});
+  await addressSearch;
+  assert.match(node('hazard-station-status').textContent, /not searched/);
+  assert.equal(pendingHazardLookup.options.signal.aborted, false, 'a failed address search keeps the current point\'s hazard lookup');
+  pendingHazardLookup.resolve({ok: true, json: async () => data});
+  await flush();
+  assert.match(node('hazard-status').textContent, /severity–frequency points loaded/, 'hazard view recovers instead of staying on Loading');
+  console.log('Hazard stations: every network, actual historical heat station, auto selection, markers, safe links, empty/error/timeout states and stale response clearing passed.');
+  console.log('Nearest fire hazard: dropdown selection, existing/new point lookup, hidden probability controls and clearing on hazard switch passed.');
   console.log('Potential intensity: hazard/API flow, annual maxima, conditional interpretation, triggers, illustrative payouts, provenance export and stale-data clearing passed.');
   console.log('Historical Heat: selector/API flow, station/baseline/coverage, triggers and historical contributions, CSV provenance, point-only areas and stale-data clearing passed.');
   console.log('Heat screening: units, bands, timestamps, stale/absent values, safe text, empty/error/timeout states, refresh and hazard switching passed.');

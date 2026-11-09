@@ -1,0 +1,14 @@
+{
+  "reviewed_at": "2026-11-08T00:15:42.575022+00:00",
+  "server": "ndapp",
+  "tools": {
+    "resolve_location": "808f75a255396a858058ce9611a22ce2fc4042b636d59a0991d35131a2d7dddc",
+    "get_hazard_curve": "acc12906d93245c91da2c7e45129107cd175d3d89c9f4a939cb1e449b8de6031",
+    "get_active_weather_alerts": "394534f924a955f3418562a6ba362f30bbc9324c5d035944f5b614ec3c032714",
+    "get_flood_zone_context": "2867a76645fd002144200031fbe6df92de07671dd9c61102391fb89d7d20013a",
+    "get_elevation_context": "4417d031cc4309d08e76163c8c7ba84490aeef252a84bad88188d3d4e322587d",
+    "get_recent_earthquakes": "90c45fd5801c089756e1a0de9adcf13324d54e572029b303fc77e5cf90579d45",
+    "get_community_risk_index": "51e1c48d79cfa84eb888b6c40e64f1745948dce4e328990e921fd22faecde71a",
+    "get_wildfire_history": "122e147c445cdb87f39f827ed007759e63a75ac65aa6a20b55055f12ca1abd09"
+  }
+}

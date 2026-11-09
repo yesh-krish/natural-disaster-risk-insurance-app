@@ -1,5 +1,44 @@
 # NDApp natural disaster research map
 
+**AI risk assessment agent over MCP:** `ndapp_mcp_server.py` is a real MCP
+server (official Python SDK, stdio) exposing eight reviewed, read-only evidence
+tools. `risk_agent.py` is the host: it plans a bounded set of MCP calls, pins
+tool definitions, records hashed evidence, extracts traceable facts and can ask
+Claude to explain them under code-enforced citation checks. Install
+`requirements-agent.txt`, then run
+`python risk_agent.py --lat 29.4242 --lon -98.4933 --hazards flood earthquake`.
+See the [agent architecture](docs/ai-risk-agent-architecture.md).
+
+**Risk assessment tools:** the API now includes active NWS point alerts and FEMA
+flood-zone context, with validated agent-tool handler prototypes. These add
+current and regulatory context alongside the existing hazard curves. See
+[implemented tools, usage and the next development priorities](docs/risk-assessment-tools.md).
+
+**Using NDApp from another project:** the standalone JSON API runs independently
+of the map. Install `requirements-api.txt`, run `python api_server.py`, and open
+`http://127.0.0.1:8000/api/docs`. See the
+[student API handoff](docs/student-api-handoff.md) for setup, JavaScript/Python
+clients, response rules, dataset preparation, and Docker deployment.
+Remote access still requires a reachable hosted or shared-network server.
+
+**Nearest recorded wildfire:** choose **Wildfire / Nearby fire frequency** in the
+hazard dropdown, then select a point to see the closest reported fire
+across all available USFS FPA FOD and NIFC WFIGS history, with no date filter.
+The red marker and dashed line show the reported fire location and its distance
+from the selection. Results include discovery date, reported size, source record
+and last checked time. The browser checks for updates every five minutes while
+visible; **Refresh fire history** retries a lookup. Historical archive coverage
+currently starts in 1992, with WFIGS supplying ongoing incident updates. See
+[sources, coverage and search method](docs/fire-history.md).
+
+The same wildfire view now includes **Annual nearby-fire frequency**: the share
+of published archive years with at least one reported fire within **5, 10 or
+20 km**. The current baseline is **1992–2024 (33 calendar years)**, with each year
+counted once per radius. Select a radius to draw it on the map, inspect all years,
+or export the annual calculations to CSV. These are historical reporting
+frequencies with an explicit coverage assumption, not calibrated future burn
+probabilities. Ongoing WFIGS reports are excluded from this annual baseline.
+
 **Since last week:** the [weekly research and development update](docs/weekly-update.md)
 summarizes the latest implementation, research findings, verification and open
 questions. A [Word report](<docs/Natural Disaster Risk Analysis Weekly Update.docx>) is also available.

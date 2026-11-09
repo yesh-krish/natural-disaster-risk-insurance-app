@@ -1,5 +1,19 @@
 # NDApp Research API v1
 
+The current contract is **1.8.0**. Version 1.8.0 adds read-only USGS
+`/api/v1/elevation-context`, USGS `/api/v1/recent-earthquakes` and FEMA National
+Risk Index `/api/v1/risk-index` snapshots, also exposed as MCP tools by
+`ndapp_mcp_server.py` (see [risk assessment tools](risk-assessment-tools.md)).
+Version 1.7.0 added read-only NWS
+`/api/v1/weather-alerts` and FEMA `/api/v1/flood-zone-context` snapshots; see
+[risk assessment tools](risk-assessment-tools.md) for semantics and agent handlers.
+Version 1.5.0 added `/api/v1/nearest-fire`
+([recorded wildfire history](fire-history.md)); version 1.6.0 added
+`/api/v1/fire-proximity` for annual reported nearby-fire frequencies.
+The [student handoff](student-api-handoff.md) covers the standalone API server,
+JavaScript client and remote deployment setup. The map server and standalone
+server share the same v1 calculations and response contract.
+
 API **1.4.0** adds `potential_fire_intensity`: historical-weather potential
 surface-fire intensity in **kW/m**, a 1991–2020 annual exceedance curve, annual
 maxima and source provenance. This is potential-condition frequency on fixed
@@ -37,6 +51,11 @@ Use `server.py --port 8001` to run a separate instance on another port.
 | --- | --- | --- |
 | `/api/v1/health` | None | Local service status; does not check upstream providers |
 | `/api/v1/geocode` | `address` | Matched address and approximate coordinates, or explicit match failure |
+| `/api/v1/weather-alerts` | `address` OR both `lat`, `lon` | Actual active NWS point-alert products with agency text, timestamps and verified point coverage |
+| `/api/v1/flood-zone-context` | `address` OR both `lat`, `lon` | All intersecting FEMA NFHL flood-zone attributes, source units and elevation datum; no polygon means unavailable coverage |
+| `/api/v1/elevation-context` | `address` OR both `lat`, `lon` | USGS 3DEP bare-earth elevation in meters (datum not stated by the service); no-data returns unavailable; upstream can take up to 30 s |
+| `/api/v1/recent-earthquakes` | `address` OR both `lat`, `lon`; optional `radius_km` (1–300, default 100), `days` (1–3650, default 365), `min_magnitude` (0–9.5, default 2.5) | Full USGS ComCat count plus up to the 100 largest events with epicentral distances; historical catalog, not a probability |
+| `/api/v1/risk-index` | `address` OR both `lat`, `lon` | FEMA National Risk Index ratings, scores and expected annual loss for the intersecting census tract; tract-wide relative index, not property risk |
 | `/api/v1/hazards/{peril}` | `address` OR both `lat`, `lon` | Source severity–frequency points, units, sources and model details |
 | `/api/v1/trigger-comparisons/{peril}` | `payout_usd`, plus `address` OR both `lat`, `lon` | Alternative supported point thresholds and annual contributions |
 | `/api/v1/areas/{peril}` | `south`, `west`, `north`, `east` | 25-point grid means and per-threshold/per-sample coverage |
@@ -130,7 +149,7 @@ no hazard calculation.
 
 Every v1 lookup includes:
 
-- `api_version`: contract release, currently `1.1.0` (adds address input).
+- `api_version`: contract release, currently `1.7.0`.
 - `status`: `available`, `unavailable`, `not_found` (stations), or `error`.
 - `data`: the provider result, with original source, method, units and notes;
   `null` on errors. Hazard points have `severity` and `frequency_pct`.
@@ -214,14 +233,22 @@ coordinates and include the normalized/matched addresses.
 
 ## Operating scope
 
-This is a local research service. It binds to `127.0.0.1` and uses the map's
-installed raster files and connected government providers. No public deployment,
-API-key authentication, cross-origin browser access, rate limiting, or billing is
-configured. Remote Python/server clients can use a future hosted deployment;
-browser clients on other origins would also require an explicit CORS policy.
+Both server entry points default to `127.0.0.1` and use the installed raster files
+and connected government providers. `server.py` serves the map and API together;
+`api_server.py` serves the API alone using FastAPI/Uvicorn, with interactive docs
+at `/api/docs`. Install `requirements-api.txt` for the standalone server. Use
+`--host` and `--port`, or `HOST` and `PORT`, to configure its listener.
+
+The standalone server supports explicit browser origins through
+`NDAPP_ALLOWED_ORIGINS` and limits concurrent lookups to four per application
+process. A busy service returns HTTP 503 (`service_busy`) with `Retry-After`;
+unexpected adapter failures return HTTP 500 (`internal_error`) without internal
+details. Source files and dataset downloads are not served by that entry point.
+No public deployment, API-key authentication, per-client request quotas, or billing
+is configured. Remote clients need a reachable deployment or their own local copy.
 
 Source coverage and service availability vary. Flood requires installed Texas
 tiles; the API does not supply nationwide depth coverage. Provider caching and
-timeouts remain those of the underlying map providers. Serving it publicly would
-require a production server, controlled static-file serving, authentication,
-concurrency/rate controls and deployment work.
+timeouts remain those of the underlying map providers. For shared hosting, use
+persistent storage for `data/`, HTTPS, and host access controls/request quotas
+appropriate to the chosen audience. See the student handoff for Docker commands.

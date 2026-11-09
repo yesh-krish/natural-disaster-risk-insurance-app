@@ -1,0 +1,2733 @@
+{
+  "assessment_id": "0a6ce2f7-f54b-4764-ae27-a4f559eb3269",
+  "schema_version": "ndapp.assessment/0.1",
+  "created_at": "2026-11-08T00:14:54.407586+00:00",
+  "assessment_type": "hazard_screening",
+  "status": "complete",
+  "scope": {
+    "hazards": [
+      "flood",
+      "earthquake",
+      "wildfire"
+    ],
+    "purpose": null
+  },
+  "location": {
+    "lat": 29.4242,
+    "lon": -98.4933,
+    "confirmed": false
+  },
+  "evidence": [
+    {
+      "id": "E1",
+      "server": "ndapp",
+      "tool": "get_flood_zone_context",
+      "arguments": {
+        "lat": 29.4242,
+        "lon": -98.4933
+      },
+      "started_at": "2026-11-08T00:14:55.687782+00:00",
+      "retrieved_at": "2026-11-08T00:14:55.945790+00:00",
+      "is_error": false,
+      "status": "available",
+      "error": null,
+      "sha256": "5de0435de4418af47214966e8c08f182633a238142b0a7d0ecbd0ffcfc2db15b",
+      "api_version": "1.8.0",
+      "envelope": {
+        "api_version": "1.8.0",
+        "status": "available",
+        "data": {
+          "status": "available",
+          "latitude": 29.4242,
+          "longitude": -98.4933,
+          "source_name": "FEMA National Flood Hazard Layer",
+          "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?f=json&where=1%3D1&geometry=-98.4933%2C29.4242&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=OBJECTID%2CDFIRM_ID%2CVERSION_ID%2CFLD_AR_ID%2CSTUDY_TYP%2CFLD_ZONE%2CZONE_SUBTY%2CSFHA_TF%2CSTATIC_BFE%2CV_DATUM%2CDEPTH%2CLEN_UNIT&returnGeometry=false&resultRecordCount=100",
+          "checked_at": "2026-11-08T00:14:55.937227+00:00",
+          "zones": [
+            {
+              "zone": "X",
+              "subtype": "AREA OF MINIMAL FLOOD HAZARD",
+              "special_flood_hazard_area": false,
+              "static_base_flood_elevation": null,
+              "mapped_depth": null,
+              "length_unit": null,
+              "vertical_datum": null,
+              "raw_attributes": {
+                "OBJECTID": 28823296,
+                "DFIRM_ID": "48029C",
+                "VERSION_ID": "1.1.1.0",
+                "FLD_AR_ID": "48029C_4230",
+                "STUDY_TYP": "NP",
+                "FLD_ZONE": "X",
+                "ZONE_SUBTY": "AREA OF MINIMAL FLOOD HAZARD",
+                "SFHA_TF": "F",
+                "STATIC_BFE": -9999.0,
+                "V_DATUM": null,
+                "DEPTH": -9999.0,
+                "LEN_UNIT": null
+              }
+            }
+          ],
+          "zone_count": 1,
+          "reason": null,
+          "notes": [
+            "Regulatory flood-map context; not a property-specific flood probability, depth curve or loss estimate.",
+            "All intersecting polygons are retained, including overlaps and boundary matches.",
+            "Numeric missing-data codes -9999 and -8888 become null; raw attributes remain available.",
+            "Base flood elevation is an elevation, not water depth above the ground or first floor.",
+            "Lengths retain the provider unit and elevation datum; no implicit conversion is applied.",
+            "No polygon, Zone X, or SFHA=false does not mean zero flood risk."
+          ]
+        },
+        "meta": {
+          "generated_at": "2026-11-08T00:14:55.937260+00:00",
+          "request": {
+            "lat": 29.4242,
+            "lon": -98.4933
+          },
+          "purpose": "Agency context snapshot; not an annual probability, property loss estimate or safety determination."
+        }
+      }
+    },
+    {
+      "id": "E2",
+      "server": "ndapp",
+      "tool": "get_hazard_curve",
+      "arguments": {
+        "peril": "flood",
+        "lat": 29.4242,
+        "lon": -98.4933
+      },
+      "started_at": "2026-11-08T00:14:55.687619+00:00",
+      "retrieved_at": "2026-11-08T00:14:56.477433+00:00",
+      "is_error": false,
+      "status": "available",
+      "error": null,
+      "sha256": "8f520fc35096cb55612d053cc4af76c9c4f2a53dbf1512929a2e361ca53645f2",
+      "api_version": "1.8.0",
+      "envelope": {
+        "api_version": "1.8.0",
+        "status": "available",
+        "data": {
+          "peril": "flood",
+          "metric": "Peak inundation depth",
+          "unit": "m",
+          "source_name": "TWDB 2025 flood-depth model",
+          "source_url": "https://twdb-flood-planning-resources-twdb.hub.arcgis.com/pages/cursory-floodplain-data-2025",
+          "frequency_label": "Annual exceedance probability (%)",
+          "points": [
+            {
+              "frequency_pct": 0.2,
+              "severity": 0.20116800799369813,
+              "status": "Modeled depth"
+            },
+            {
+              "frequency_pct": 1.0,
+              "severity": null,
+              "status": "No mapped depth / NoData"
+            },
+            {
+              "frequency_pct": 10.0,
+              "severity": null,
+              "status": "No mapped depth / NoData"
+            },
+            {
+              "frequency_pct": 20.0,
+              "severity": null,
+              "status": "No mapped depth / NoData"
+            }
+          ],
+          "details": [
+            [
+              "Model",
+              "2025 existing conditions, scenario 5"
+            ],
+            [
+              "Tile",
+              "n29w99"
+            ],
+            [
+              "Coverage",
+              "Installed Texas tiles"
+            ],
+            [
+              "Intensity",
+              "Depth above ground, meters"
+            ]
+          ],
+          "notes": [
+            "Missing or zero/NoData raster cells remain blank; they do not establish no flood risk.",
+            "FEMA flood zones are regulatory context; TWDB supplies the frequency-depth points."
+          ],
+          "status": "available",
+          "latitude": 29.4242,
+          "longitude": -98.4933
+        },
+        "meta": {
+          "generated_at": "2026-11-08T00:14:56.465513+00:00",
+          "request": {
+            "peril": "flood",
+            "lat": 29.4242,
+            "lon": -98.4933,
+            "site_class": "BC"
+          },
+          "purpose": "Research estimates; not a binding insurance quote or live forecast."
+        }
+      }
+    },
+    {
+      "id": "E3",
+      "server": "ndapp",
+      "tool": "get_hazard_curve",
+      "arguments": {
+        "peril": "earthquake",
+        "lat": 29.4242,
+        "lon": -98.4933
+      },
+      "started_at": "2026-11-08T00:14:55.687894+00:00",
+      "retrieved_at": "2026-11-08T00:14:56.604080+00:00",
+      "is_error": false,
+      "status": "available",
+      "error": null,
+      "sha256": "ccb443acc12710ee493279ff16d09894b91966056aeecc33d8b6c77412ad6dc1",
+      "api_version": "1.8.0",
+      "envelope": {
+        "api_version": "1.8.0",
+        "status": "available",
+        "data": {
+          "peril": "earthquake",
+          "metric": "Peak ground acceleration",
+          "unit": "%g",
+          "source_name": "USGS National Seismic Hazard Model",
+          "source_url": "https://earthquake.usgs.gov/ws/nshmp/conus-2023.R2/static/hazard?latitude=29.4242&longitude=-98.4933&siteClass=BC&imt=PGA&format=JSON",
+          "frequency_label": "Annual exceedance probability (%)",
+          "points": [
+            {
+              "frequency_pct": 6.521705888733676e-07,
+              "severity": 517.0,
+              "annual_rate": 6.52170591e-09
+            },
+            {
+              "frequency_pct": 2.8012388307653044e-06,
+              "severity": 344.0,
+              "annual_rate": 2.80123887e-08
+            },
+            {
+              "frequency_pct": 9.443498794101623e-06,
+              "severity": 229.99999999999997,
+              "annual_rate": 9.44349924e-08
+            },
+            {
+              "frequency_pct": 2.7318213068575494e-05,
+              "severity": 153.0,
+              "annual_rate": 2.73182168e-07
+            },
+            {
+              "frequency_pct": 6.976789646219179e-05,
+              "severity": 102.0,
+              "annual_rate": 6.97679208e-07
+            },
+            {
+              "frequency_pct": 0.00016508733773070464,
+              "severity": 68.0,
+              "annual_rate": 1.65087474e-06
+            },
+            {
+              "frequency_pct": 0.00037311124093827804,
+              "severity": 45.4,
+              "annual_rate": 3.73111937e-06
+            },
+            {
+              "frequency_pct": 0.0008293286680507884,
+              "severity": 30.2,
+              "annual_rate": 8.29332107e-06
+            },
+            {
+              "frequency_pct": 0.00178884634995287,
+              "severity": 20.200000000000003,
+              "annual_rate": 1.78886235e-05
+            },
+            {
+              "frequency_pct": 0.003830275533073516,
+              "severity": 13.4,
+              "annual_rate": 3.83034889e-05
+            },
+            {
+              "frequency_pct": 0.007873596536116571,
+              "severity": 8.959999999999999,
+              "annual_rate": 7.87390652e-05
+            },
+            {
+              "frequency_pct": 0.01587767046446164,
+              "severity": 5.970000000000001,
+              "annual_rate": 0.000158789311
+            },
+            {
+              "frequency_pct": 0.03126123215823103,
+              "severity": 3.9800000000000004,
+              "annual_rate": 0.000312661195
+            },
+            {
+              "frequency_pct": 0.06022205703570538,
+              "severity": 2.65,
+              "annual_rate": 0.000602401978
+            },
+            {
+              "frequency_pct": 0.1119201516281936,
+              "severity": 1.77,
+              "annual_rate": 0.00111982829
+            },
+            {
+              "frequency_pct": 0.20005090390784486,
+              "severity": 1.18,
+              "annual_rate": 0.00200251273
+            },
+            {
+              "frequency_pct": 0.34019874727178046,
+              "severity": 0.786,
+              "annual_rate": 0.00340778739
+            },
+            {
+              "frequency_pct": 0.5482592131471326,
+              "severity": 0.524,
+              "annual_rate": 0.0054976767
+            },
+            {
+              "frequency_pct": 0.8408650362264094,
+              "severity": 0.35000000000000003,
+              "annual_rate": 0.0084442025
+            },
+            {
+              "frequency_pct": 1.2427455381186903,
+              "severity": 0.233,
+              "annual_rate": 0.012505322
+            }
+          ],
+          "details": [
+            [
+              "Model",
+              "STATIC_CONUS_2023_R2"
+            ],
+            [
+              "Site class",
+              "BC"
+            ],
+            [
+              "Intensity",
+              "Site PGA, percent of gravitational acceleration"
+            ],
+            [
+              "Probability",
+              "1 \u2212 exp(\u2212annual USGS exceedance rate)"
+            ]
+          ],
+          "notes": [
+            "Site class is an explicit assumption; select a class appropriate to the site.",
+            "These are modeled long-term shaking probabilities, not a live earthquake reading."
+          ],
+          "status": "available",
+          "latitude": 29.4242,
+          "longitude": -98.4933
+        },
+        "meta": {
+          "generated_at": "2026-11-08T00:14:56.597210+00:00",
+          "request": {
+            "peril": "earthquake",
+            "lat": 29.4242,
+            "lon": -98.4933,
+            "site_class": "BC"
+          },
+          "purpose": "Research estimates; not a binding insurance quote or live forecast."
+        }
+      }
+    },
+    {
+      "id": "E4",
+      "server": "ndapp",
+      "tool": "get_recent_earthquakes",
+      "arguments": {
+        "lat": 29.4242,
+        "lon": -98.4933
+      },
+      "started_at": "2026-11-08T00:14:55.687949+00:00",
+      "retrieved_at": "2026-11-08T00:14:57.603225+00:00",
+      "is_error": false,
+      "status": "available",
+      "error": null,
+      "sha256": "809c38ac59866805e95fa645a5d554a3d1db3cf7ce198aa6ee7961c4de63aa8b",
+      "api_version": "1.8.0",
+      "envelope": {
+        "api_version": "1.8.0",
+        "status": "available",
+        "data": {
+          "status": "available",
+          "latitude": 29.4242,
+          "longitude": -98.4933,
+          "source_name": "USGS ANSS Comprehensive Catalog (ComCat)",
+          "source_url": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&latitude=29.4242&longitude=-98.4933&maxradiuskm=100&starttime=2025-11-08T00%3A14%3A56&endtime=2026-11-08T00%3A14%3A56&minmagnitude=2.5&eventtype=earthquake&orderby=magnitude&limit=100",
+          "checked_at": "2026-11-08T00:14:57.572793+00:00",
+          "window": {
+            "start": "2025-11-08T00:14:56+00:00",
+            "end": "2026-11-08T00:14:56+00:00",
+            "days": 365,
+            "radius_km": 100,
+            "min_magnitude": 2.5
+          },
+          "total_count": 54,
+          "returned_count": 54,
+          "truncated": false,
+          "largest_magnitude": 3.6,
+          "events": [
+            {
+              "id": "tx2026rfeetf",
+              "magnitude": 3.6,
+              "magnitude_type": "ml",
+              "place": "12 km SW of Falls City, Texas",
+              "time": "2026-09-01T14:26:42.369000+00:00",
+              "latitude": 28.897,
+              "longitude": -98.102,
+              "depth_km": 8.6209,
+              "epicentral_distance_km": 69.9,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026rfeetf"
+            },
+            {
+              "id": "tx2025wlzejk",
+              "magnitude": 3.5,
+              "magnitude_type": "ml",
+              "place": "23 km E of Dilley, Texas",
+              "time": "2025-11-15T03:08:31.432000+00:00",
+              "latitude": 28.679,
+              "longitude": -98.935,
+              "depth_km": 6.6072,
+              "epicentral_distance_km": 93.3,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2025wlzejk"
+            },
+            {
+              "id": "tx2026gwnzyp",
+              "magnitude": 3.5,
+              "magnitude_type": "ml",
+              "place": "19 km WNW of Pawnee, Texas",
+              "time": "2026-04-08T06:18:56.677000+00:00",
+              "latitude": 28.748,
+              "longitude": -98.171,
+              "depth_km": 4.4906,
+              "epicentral_distance_km": 81.5,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026gwnzyp"
+            },
+            {
+              "id": "tx2026gwzjxk",
+              "magnitude": 3.4,
+              "magnitude_type": "ml",
+              "place": "20 km WNW of Pawnee, Texas",
+              "time": "2026-04-08T12:02:23.235000+00:00",
+              "latitude": 28.752,
+              "longitude": -98.175,
+              "depth_km": 5.7206,
+              "epicentral_distance_km": 80.9,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026gwzjxk"
+            },
+            {
+              "id": "tx2026uqnved",
+              "magnitude": 3.2,
+              "magnitude_type": "ml",
+              "place": "20 km ESE of Pleasanton, Texas",
+              "time": "2026-10-20T06:55:37.522000+00:00",
+              "latitude": 28.902,
+              "longitude": -98.285,
+              "depth_km": 7.0584,
+              "epicentral_distance_km": 61.5,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026uqnved"
+            },
+            {
+              "id": "tx2026rviiec",
+              "magnitude": 3.1,
+              "magnitude_type": "ml",
+              "place": "22 km E of Dilley, Texas",
+              "time": "2026-09-10T09:42:57.330000+00:00",
+              "latitude": 28.678,
+              "longitude": -98.939,
+              "depth_km": 6.8297,
+              "epicentral_distance_km": 93.6,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026rviiec"
+            },
+            {
+              "id": "tx2026dtwugw",
+              "magnitude": 3,
+              "magnitude_type": "ml",
+              "place": "2 km ESE of Falls City, Texas",
+              "time": "2026-02-23T07:41:24.407000+00:00",
+              "latitude": 28.978,
+              "longitude": -97.994,
+              "depth_km": 7.9954,
+              "epicentral_distance_km": 69.4,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026dtwugw"
+            },
+            {
+              "id": "tx2026eiqbql",
+              "magnitude": 3,
+              "magnitude_type": "ml",
+              "place": "23 km E of Dilley, Texas",
+              "time": "2026-03-03T08:25:51.770000+00:00",
+              "latitude": 28.67,
+              "longitude": -98.935,
+              "depth_km": 5.9207,
+              "epicentral_distance_km": 94.2,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026eiqbql"
+            },
+            {
+              "id": "tx2026gtpumg",
+              "magnitude": 3,
+              "magnitude_type": "ml",
+              "place": "20 km WNW of Pawnee, Texas",
+              "time": "2026-04-06T15:59:32.248000+00:00",
+              "latitude": 28.751,
+              "longitude": -98.186,
+              "depth_km": 6.1637,
+              "epicentral_distance_km": 80.6,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026gtpumg"
+            },
+            {
+              "id": "tx2026khewkn",
+              "magnitude": 2.9,
+              "magnitude_type": "ml",
+              "place": "19 km S of Nixon, Texas",
+              "time": "2026-05-26T13:22:53.842000+00:00",
+              "latitude": 29.093,
+              "longitude": -97.774,
+              "depth_km": 6.7744,
+              "epicentral_distance_km": 78.9,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026khewkn"
+            },
+            {
+              "id": "tx2026ccffgk",
+              "magnitude": 2.9,
+              "magnitude_type": "ml",
+              "place": "22 km E of Dilley, Texas",
+              "time": "2026-01-30T12:38:35.202000+00:00",
+              "latitude": 28.668,
+              "longitude": -98.943,
+              "depth_km": 6.6654,
+              "epicentral_distance_km": 94.8,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026ccffgk"
+            },
+            {
+              "id": "tx2026gustao",
+              "magnitude": 2.9,
+              "magnitude_type": "ml",
+              "place": "19 km WNW of Pawnee, Texas",
+              "time": "2026-04-07T06:32:50.122000+00:00",
+              "latitude": 28.746,
+              "longitude": -98.175,
+              "depth_km": 7.1065,
+              "epicentral_distance_km": 81.5,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026gustao"
+            },
+            {
+              "id": "tx2026nqkqfx",
+              "magnitude": 2.8,
+              "magnitude_type": "ml",
+              "place": "13 km ESE of Pearsall, Texas",
+              "time": "2026-07-13T01:44:51.186000+00:00",
+              "latitude": 28.832,
+              "longitude": -98.974,
+              "depth_km": 6.6359,
+              "epicentral_distance_km": 80.7,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026nqkqfx"
+            },
+            {
+              "id": "tx2026unuutp",
+              "magnitude": 2.8,
+              "magnitude_type": "ml",
+              "place": "19 km S of Nixon, Texas",
+              "time": "2026-10-18T19:12:55.692000+00:00",
+              "latitude": 29.094,
+              "longitude": -97.768,
+              "depth_km": 6.9901,
+              "epicentral_distance_km": 79.4,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026unuutp"
+            },
+            {
+              "id": "tx2026rfoaez",
+              "magnitude": 2.8,
+              "magnitude_type": "ml",
+              "place": "12 km SW of Falls City, Texas",
+              "time": "2026-09-01T19:23:08.707000+00:00",
+              "latitude": 28.891,
+              "longitude": -98.093,
+              "depth_km": 7.4913,
+              "epicentral_distance_km": 70.9,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026rfoaez"
+            },
+            {
+              "id": "tx2026hdndru",
+              "magnitude": 2.8,
+              "magnitude_type": "ml",
+              "place": "18 km WNW of Pawnee, Texas",
+              "time": "2026-04-12T01:24:28.128000+00:00",
+              "latitude": 28.736,
+              "longitude": -98.172,
+              "depth_km": 5.9612,
+              "epicentral_distance_km": 82.6,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026hdndru"
+            },
+            {
+              "id": "tx2026cswfhb",
+              "magnitude": 2.8,
+              "magnitude_type": "ml",
+              "place": "8 km ESE of Smiley, Texas",
+              "time": "2026-02-08T14:23:13.176000+00:00",
+              "latitude": 29.232,
+              "longitude": -97.562,
+              "depth_km": 6.9929,
+              "epicentral_distance_km": 92.8,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026cswfhb"
+            },
+            {
+              "id": "tx2026smwdrk",
+              "magnitude": 2.8,
+              "magnitude_type": "ml",
+              "place": "14 km SSW of Smiley, Texas",
+              "time": "2026-09-19T22:56:14.111000+00:00",
+              "latitude": 29.141,
+              "longitude": -97.679,
+              "depth_km": 9.0837,
+              "epicentral_distance_km": 85.0,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026smwdrk"
+            },
+            {
+              "id": "tx2026szoalq",
+              "magnitude": 2.8,
+              "magnitude_type": "ml",
+              "place": "17 km W of Charlotte, Texas",
+              "time": "2026-09-26T20:49:18.574000+00:00",
+              "latitude": 28.848,
+              "longitude": -98.884,
+              "depth_km": 6.3136,
+              "epicentral_distance_km": 74.5,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026szoalq"
+            },
+            {
+              "id": "tx2025ynthef",
+              "magnitude": 2.8,
+              "magnitude_type": "ml",
+              "place": "20 km ENE of Falls City, Texas",
+              "time": "2025-12-14T10:12:26.824000+00:00",
+              "latitude": 29.074,
+              "longitude": -97.829,
+              "depth_km": 6.9835,
+              "epicentral_distance_km": 75.3,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2025ynthef"
+            },
+            {
+              "id": "tx2026cvwfrd",
+              "magnitude": 2.7,
+              "magnitude_type": "ml",
+              "place": "15 km ENE of Falls City, Texas",
+              "time": "2026-02-10T05:37:05.859000+00:00",
+              "latitude": 29.043,
+              "longitude": -97.875,
+              "depth_km": 8.2369,
+              "epicentral_distance_km": 73.5,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026cvwfrd"
+            },
+            {
+              "id": "tx2026sznqpd",
+              "magnitude": 2.7,
+              "magnitude_type": "ml",
+              "place": "16 km ESE of Pearsall, Texas",
+              "time": "2026-09-26T20:37:50.425000+00:00",
+              "latitude": 28.835,
+              "longitude": -98.941,
+              "depth_km": 6.6925,
+              "epicentral_distance_km": 78.6,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026sznqpd"
+            },
+            {
+              "id": "tx2026trgpil",
+              "magnitude": 2.7,
+              "magnitude_type": "ml",
+              "place": "8 km ESE of Smiley, Texas",
+              "time": "2026-10-06T12:25:46.949000+00:00",
+              "latitude": 29.232,
+              "longitude": -97.559,
+              "depth_km": 7.0205,
+              "epicentral_distance_km": 93.1,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026trgpil"
+            },
+            {
+              "id": "tx2026jyhaxp",
+              "magnitude": 2.7,
+              "magnitude_type": "ml",
+              "place": "15 km SE of Pearsall, Texas",
+              "time": "2026-05-21T16:46:54.711000+00:00",
+              "latitude": 28.799,
+              "longitude": -98.98,
+              "depth_km": 8.457,
+              "epicentral_distance_km": 84.1,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026jyhaxp"
+            },
+            {
+              "id": "tx2026rjeibs",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "12 km SW of Falls City, Texas",
+              "time": "2026-09-03T18:48:31.356000+00:00",
+              "latitude": 28.893,
+              "longitude": -98.093,
+              "depth_km": 8.854,
+              "epicentral_distance_km": 70.7,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026rjeibs"
+            },
+            {
+              "id": "tx2026tputog",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "12 km ESE of Pearsall, Texas",
+              "time": "2026-10-05T17:24:06.427000+00:00",
+              "latitude": 28.853,
+              "longitude": -98.978,
+              "depth_km": 7.1851,
+              "epicentral_distance_km": 79.1,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026tputog"
+            },
+            {
+              "id": "tx2026uaihsw",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "14 km ESE of Pearsall, Texas",
+              "time": "2026-10-11T10:57:32.813000+00:00",
+              "latitude": 28.833,
+              "longitude": -98.966,
+              "depth_km": 6.3989,
+              "epicentral_distance_km": 80.2,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026uaihsw"
+            },
+            {
+              "id": "tx2026tguohs",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "16 km ESE of Pearsall, Texas",
+              "time": "2026-09-30T19:37:44.260000+00:00",
+              "latitude": 28.851,
+              "longitude": -98.928,
+              "depth_km": 7.6057,
+              "epicentral_distance_km": 76.5,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026tguohs"
+            },
+            {
+              "id": "tx2026tkhqaz",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "16 km ESE of Pearsall, Texas",
+              "time": "2026-10-02T17:25:25.792000+00:00",
+              "latitude": 28.836,
+              "longitude": -98.938,
+              "depth_km": 7.2808,
+              "epicentral_distance_km": 78.4,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026tkhqaz"
+            },
+            {
+              "id": "tx2026lfjgcj",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "11 km SE of Pearsall, Texas",
+              "time": "2026-06-08T17:20:56.463000+00:00",
+              "latitude": 28.826,
+              "longitude": -99.008,
+              "depth_km": 6.2622,
+              "epicentral_distance_km": 83.2,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026lfjgcj"
+            },
+            {
+              "id": "tx2026jqlgmh",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "15 km SE of Pearsall, Texas",
+              "time": "2026-05-17T10:18:14.190000+00:00",
+              "latitude": 28.791,
+              "longitude": -98.984,
+              "depth_km": 7.0814,
+              "epicentral_distance_km": 85.0,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026jqlgmh"
+            },
+            {
+              "id": "tx2026isoezd",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "7 km SE of Pearsall, Texas",
+              "time": "2026-05-04T09:59:35.975000+00:00",
+              "latitude": 28.852,
+              "longitude": -99.033,
+              "depth_km": 7.7876,
+              "epicentral_distance_km": 82.4,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026isoezd"
+            },
+            {
+              "id": "tx2026upfzqc",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "17 km ESE of Pearsall, Texas",
+              "time": "2026-10-19T13:54:56.027000+00:00",
+              "latitude": 28.824,
+              "longitude": -98.934,
+              "depth_km": 7.8971,
+              "epicentral_distance_km": 79.3,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026upfzqc"
+            },
+            {
+              "id": "tx2026dwztab",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "2 km NNE of Falls City, Texas",
+              "time": "2026-02-25T00:23:51.224000+00:00",
+              "latitude": 29.004,
+              "longitude": -98.008,
+              "depth_km": 5.6092,
+              "epicentral_distance_km": 66.3,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026dwztab"
+            },
+            {
+              "id": "tx2026casfsz",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "10 km SE of Pearsall, Texas",
+              "time": "2026-01-29T17:02:27.208000+00:00",
+              "latitude": 28.836,
+              "longitude": -99.005,
+              "depth_km": 8.0108,
+              "epicentral_distance_km": 82.1,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026casfsz"
+            },
+            {
+              "id": "tx2026vdtnxx",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "16 km ESE of Pearsall, Texas",
+              "time": "2026-10-27T11:46:24.864000+00:00",
+              "latitude": 28.844,
+              "longitude": -98.938,
+              "depth_km": 6.9881,
+              "epicentral_distance_km": 77.6,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026vdtnxx"
+            },
+            {
+              "id": "tx2025yvigsp",
+              "magnitude": 2.6,
+              "magnitude_type": "ml",
+              "place": "17 km SW of Charlotte, Texas",
+              "time": "2025-12-18T13:15:48.971000+00:00",
+              "latitude": 28.743,
+              "longitude": -98.83,
+              "depth_km": 6.518,
+              "epicentral_distance_km": 82.5,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2025yvigsp"
+            },
+            {
+              "id": "tx2026uoxyjy",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "16 km ESE of Pearsall, Texas",
+              "time": "2026-10-19T09:52:07.326000+00:00",
+              "latitude": 28.818,
+              "longitude": -98.95,
+              "depth_km": 7.2619,
+              "epicentral_distance_km": 80.7,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026uoxyjy"
+            },
+            {
+              "id": "tx2026upytqj",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "19 km ESE of Pearsall, Texas",
+              "time": "2026-10-19T23:21:15.225000+00:00",
+              "latitude": 28.815,
+              "longitude": -98.921,
+              "depth_km": 7.0575,
+              "epicentral_distance_km": 79.5,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026upytqj"
+            },
+            {
+              "id": "tx2026urpjmn",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "19 km ESE of Pearsall, Texas",
+              "time": "2026-10-20T20:46:52.389000+00:00",
+              "latitude": 28.823,
+              "longitude": -98.911,
+              "depth_km": 8.454,
+              "epicentral_distance_km": 78.2,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026urpjmn"
+            },
+            {
+              "id": "tx2026viexdm",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "13 km ESE of Pearsall, Texas",
+              "time": "2026-10-29T21:46:53.906000+00:00",
+              "latitude": 28.839,
+              "longitude": -98.965,
+              "depth_km": 7.8615,
+              "epicentral_distance_km": 79.6,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026viexdm"
+            },
+            {
+              "id": "tx2026vnfxzf",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "14 km ESE of Pearsall, Texas",
+              "time": "2026-11-01T15:40:25.202000+00:00",
+              "latitude": 28.83,
+              "longitude": -98.961,
+              "depth_km": 6.7288,
+              "epicentral_distance_km": 80.2,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026vnfxzf"
+            },
+            {
+              "id": "tx2026svpfvl",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "17 km ESE of Pearsall, Texas",
+              "time": "2026-09-24T17:07:48.526000+00:00",
+              "latitude": 28.826,
+              "longitude": -98.936,
+              "depth_km": 8.6819,
+              "epicentral_distance_km": 79.2,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026svpfvl"
+            },
+            {
+              "id": "tx2026pwzswu",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "13 km SE of Pearsall, Texas",
+              "time": "2026-08-13T23:40:03.775000+00:00",
+              "latitude": 28.815,
+              "longitude": -98.987,
+              "depth_km": 7.4418,
+              "epicentral_distance_km": 83.0,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026pwzswu"
+            },
+            {
+              "id": "tx2026pedtmg",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "13 km ESE of Pearsall, Texas",
+              "time": "2026-08-03T17:16:24.305000+00:00",
+              "latitude": 28.845,
+              "longitude": -98.971,
+              "depth_km": 8.2857,
+              "epicentral_distance_km": 79.4,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026pedtmg"
+            },
+            {
+              "id": "tx2026kzxlvo",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "12 km SE of Pearsall, Texas",
+              "time": "2026-06-05T18:03:10.684000+00:00",
+              "latitude": 28.812,
+              "longitude": -99.003,
+              "depth_km": 7.0156,
+              "epicentral_distance_km": 84.2,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026kzxlvo"
+            },
+            {
+              "id": "tx2026kakvpn",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "12 km SE of Pearsall, Texas",
+              "time": "2026-05-22T20:50:22.465000+00:00",
+              "latitude": 28.814,
+              "longitude": -99.009,
+              "depth_km": 8.4398,
+              "epicentral_distance_km": 84.3,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026kakvpn"
+            },
+            {
+              "id": "tx2026ipwale",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "7 km SE of Pearsall, Texas",
+              "time": "2026-05-02T22:42:18.349000+00:00",
+              "latitude": 28.852,
+              "longitude": -99.029,
+              "depth_km": 6.8655,
+              "epicentral_distance_km": 82.2,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026ipwale"
+            },
+            {
+              "id": "tx2026gwnzal",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "19 km WNW of Pawnee, Texas",
+              "time": "2026-04-08T06:17:52.045000+00:00",
+              "latitude": 28.749,
+              "longitude": -98.17,
+              "depth_km": 5.2422,
+              "epicentral_distance_km": 81.4,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026gwnzal"
+            },
+            {
+              "id": "tx2026cxqjai",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "14 km ENE of Falls City, Texas",
+              "time": "2026-02-11T04:48:51.697000+00:00",
+              "latitude": 29.045,
+              "longitude": -97.882,
+              "depth_km": 7.4904,
+              "epicentral_distance_km": 72.8,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026cxqjai"
+            },
+            {
+              "id": "tx2026chqcbv",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "10 km ESE of Pearsall, Texas",
+              "time": "2026-02-02T11:29:10.679000+00:00",
+              "latitude": 28.851,
+              "longitude": -98.998,
+              "depth_km": 6.5065,
+              "epicentral_distance_km": 80.4,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026chqcbv"
+            },
+            {
+              "id": "tx2026bushsp",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "8 km ESE of Pearsall, Texas",
+              "time": "2026-01-26T10:37:53.299000+00:00",
+              "latitude": 28.859,
+              "longitude": -99.012,
+              "depth_km": 6.7794,
+              "epicentral_distance_km": 80.5,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026bushsp"
+            },
+            {
+              "id": "tx2026bcrnei",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "7 km ENE of Pearsall, Texas",
+              "time": "2026-01-16T14:53:29.435000+00:00",
+              "latitude": 28.907,
+              "longitude": -99.018,
+              "depth_km": 5.8913,
+              "epicentral_distance_km": 76.8,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2026bcrnei"
+            },
+            {
+              "id": "tx2025zcsiej",
+              "magnitude": 2.5,
+              "magnitude_type": "ml",
+              "place": "18 km SW of Charlotte, Texas",
+              "time": "2025-12-22T13:50:33.202000+00:00",
+              "latitude": 28.746,
+              "longitude": -98.845,
+              "depth_km": 6.94,
+              "epicentral_distance_km": 82.8,
+              "review_status": "reviewed",
+              "max_mmi": null,
+              "pager_alert": null,
+              "tsunami_flag": false,
+              "source_url": "https://earthquake.usgs.gov/earthquakes/eventpage/tx2025zcsiej"
+            }
+          ],
+          "reason": null,
+          "notes": [
+            "Historical catalog events in a fixed window; not a ground-shaking probability or hazard curve.",
+            "Catalog completeness varies by region, era and magnitude; small events may be missing.",
+            "Events are ordered by magnitude; when truncated, the 100 largest are returned with the full count.",
+            "Epicentral distance is great-circle distance, not distance to the rupture or site shaking intensity.",
+            "No returned events does not establish low earthquake hazard; use the USGS hazard curve for that."
+          ]
+        },
+        "meta": {
+          "generated_at": "2026-11-08T00:14:57.573154+00:00",
+          "request": {
+            "lat": 29.4242,
+            "lon": -98.4933,
+            "radius_km": 100,
+            "days": 365,
+            "min_magnitude": 2.5
+          },
+          "purpose": "Historical catalog snapshot; not a shaking probability, hazard curve or loss estimate."
+        }
+      }
+    },
+    {
+      "id": "E5",
+      "server": "ndapp",
+      "tool": "get_wildfire_history",
+      "arguments": {
+        "lat": 29.4242,
+        "lon": -98.4933
+      },
+      "started_at": "2026-11-08T00:14:55.687985+00:00",
+      "retrieved_at": "2026-11-08T00:14:58.638429+00:00",
+      "is_error": false,
+      "status": "available",
+      "error": null,
+      "sha256": "5cc5b27b550b99296479374fbc854dcba5e743ca66d929ad5cf73cbc66ef6bd5",
+      "api_version": "1.8.0",
+      "envelope": {
+        "api_version": "1.8.0",
+        "status": "available",
+        "data": {
+          "status": "available",
+          "frequency_basis": "historical_annual_reported_fire_frequency",
+          "selection": {
+            "latitude": 29.4242,
+            "longitude": -98.4933
+          },
+          "baseline": {
+            "start_year": 1992,
+            "end_year": 2024,
+            "year_count": 33,
+            "source_time_extent": [
+              "1992-01-01T00:00:00+00:00",
+              "2024-12-31T00:00:00+00:00"
+            ],
+            "source_layer": "Fire_FPA_FOD_7th_Fires",
+            "local_reporting_completeness_verified": false,
+            "coverage_assumption": "All calendar years in the published baseline are included. A year with no eligible archive record in a radius is counted as zero reported-fire years for that radius. Local reporting completeness has not been independently verified."
+          },
+          "radii_km": [
+            5,
+            10,
+            20
+          ],
+          "frequencies": [
+            {
+              "radius_km": 5,
+              "years_with_fire": 1,
+              "total_years": 33,
+              "frequency_pct": 3.0303030303030303,
+              "qualifying_years": [
+                2011
+              ],
+              "reference_interval": {
+                "minimum_pct": 0.536941053687183,
+                "maximum_pct": 15.31872538211892,
+                "method": "wilson_95_binomial_reference"
+              }
+            },
+            {
+              "radius_km": 10,
+              "years_with_fire": 3,
+              "total_years": 33,
+              "frequency_pct": 9.090909090909092,
+              "qualifying_years": [
+                2006,
+                2009,
+                2011
+              ],
+              "reference_interval": {
+                "minimum_pct": 3.140394152458165,
+                "maximum_pct": 23.57260564646973,
+                "method": "wilson_95_binomial_reference"
+              }
+            },
+            {
+              "radius_km": 20,
+              "years_with_fire": 13,
+              "total_years": 33,
+              "frequency_pct": 39.39393939393939,
+              "qualifying_years": [
+                1994,
+                2005,
+                2006,
+                2007,
+                2008,
+                2009,
+                2010,
+                2011,
+                2012,
+                2013,
+                2014,
+                2018,
+                2022
+              ],
+              "reference_interval": {
+                "minimum_pct": 24.68310743447709,
+                "maximum_pct": 56.31655918005977,
+                "method": "wilson_95_binomial_reference"
+              }
+            }
+          ],
+          "annual_records": [
+            {
+              "year": 1992,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 1993,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 1994,
+              "reported_fire_count_within_20_km": 1,
+              "nearest_distance_within_20_km": 10.901056508511203,
+              "nearest_fire": {
+                "id": "245044",
+                "name": "SAN JUAN",
+                "latitude": 29.33360500710972,
+                "longitude": -98.45030775813962,
+                "distance_km": 10.901056508511203,
+                "discovered_at": "1994-08-15T00:00:00+00:00",
+                "discovery_date": "1994-08-15",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 0.1,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D240499&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 1995,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 1996,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 1997,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 1998,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 1999,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2000,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2001,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2002,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2003,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2004,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2005,
+              "reported_fire_count_within_20_km": 2,
+              "nearest_distance_within_20_km": 17.539827134623025,
+              "nearest_fire": {
+                "id": "664690",
+                "name": "HILL COUNTRY - 18",
+                "latitude": 29.322224968774364,
+                "longitude": -98.63139778214192,
+                "distance_km": 17.539827134623025,
+                "discovered_at": "2005-12-10T00:00:00+00:00",
+                "discovery_date": "2005-12-10",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 20.0,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D616340&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 2006,
+              "reported_fire_count_within_20_km": 32,
+              "nearest_distance_within_20_km": 9.489050676606476,
+              "nearest_fire": {
+                "id": "362774",
+                "name": "ESPADA DAM FIRE",
+                "latitude": 29.343605008720196,
+                "longitude": -98.46110776123501,
+                "distance_km": 9.489050676606476,
+                "discovered_at": "2006-09-02T00:00:00+00:00",
+                "discovery_date": "2006-09-02",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 3.2,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D352920&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": true,
+                "20": true
+              }
+            },
+            {
+              "year": 2007,
+              "reported_fire_count_within_20_km": 1,
+              "nearest_distance_within_20_km": 19.49485364531174,
+              "nearest_fire": {
+                "id": "690810",
+                "name": "Unnamed reported wildfire",
+                "latitude": 29.366335018523333,
+                "longitude": -98.30334772337936,
+                "distance_km": 19.49485364531174,
+                "discovered_at": "2007-12-31T00:00:00+00:00",
+                "discovery_date": "2007-12-31",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 16.0,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D639192&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 2008,
+              "reported_fire_count_within_20_km": 116,
+              "nearest_distance_within_20_km": 10.054623275303628,
+              "nearest_fire": {
+                "id": "710825",
+                "name": "Unnamed reported wildfire",
+                "latitude": 29.462365034239028,
+                "longitude": -98.39916775122981,
+                "distance_km": 10.054623275303628,
+                "discovered_at": "2008-04-12T00:00:00+00:00",
+                "discovery_date": "2008-04-12",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 0.2,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D656862&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 2009,
+              "reported_fire_count_within_20_km": 85,
+              "nearest_distance_within_20_km": 9.794648139680206,
+              "nearest_fire": {
+                "id": "201394174",
+                "name": "BINZ ENGELMAN AND SPRINFIELD",
+                "latitude": 29.456929263159807,
+                "longitude": -98.39939459104443,
+                "distance_km": 9.794648139680206,
+                "discovered_at": "2009-08-10T00:00:00+00:00",
+                "discovery_date": "2009-08-10",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 0.1,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D1536808&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": true,
+                "20": true
+              }
+            },
+            {
+              "year": 2010,
+              "reported_fire_count_within_20_km": 6,
+              "nearest_distance_within_20_km": 14.812064535067954,
+              "nearest_fire": {
+                "id": "201397130",
+                "name": "5723 ELK LAKE",
+                "latitude": 29.480064599250735,
+                "longitude": -98.35442509099443,
+                "distance_km": 14.812064535067954,
+                "discovered_at": "2010-02-17T00:00:00+00:00",
+                "discovery_date": "2010-02-17",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 1.0,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D1539546&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 2011,
+              "reported_fire_count_within_20_km": 8,
+              "nearest_distance_within_20_km": 3.283611294759508,
+              "nearest_fire": {
+                "id": "201417361",
+                "name": "IH 16/ S. ZARZAMORA",
+                "latitude": 29.428129423156015,
+                "longitude": -98.52690268113987,
+                "distance_km": 3.283611294759508,
+                "discovered_at": "2011-08-03T00:00:00+00:00",
+                "discovery_date": "2011-08-03",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 1.0,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D1557734&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": true,
+                "10": true,
+                "20": true
+              }
+            },
+            {
+              "year": 2012,
+              "reported_fire_count_within_20_km": 8,
+              "nearest_distance_within_20_km": 10.949733022937965,
+              "nearest_fire": {
+                "id": "201510001",
+                "name": "SAN JUAN",
+                "latitude": 29.330991006373782,
+                "longitude": -98.45684675963392,
+                "distance_km": 10.949733022937965,
+                "discovered_at": "2012-08-28T00:00:00+00:00",
+                "discovery_date": "2012-08-28",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 0.1,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D1579508&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 2013,
+              "reported_fire_count_within_20_km": 2,
+              "nearest_distance_within_20_km": 14.479883391498403,
+              "nearest_fire": {
+                "id": "201862406",
+                "name": "GRISSOM ROAD",
+                "latitude": 29.491257032345203,
+                "longitude": -98.62150180718687,
+                "distance_km": 14.479883391498403,
+                "discovered_at": "2013-03-05T00:00:00+00:00",
+                "discovery_date": "2013-03-05",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 0.5,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D1690588&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 2014,
+              "reported_fire_count_within_20_km": 6,
+              "nearest_distance_within_20_km": 11.11643588256683,
+              "nearest_fire": {
+                "id": "300105834",
+                "name": "GENA DR BF MUTUAL AID",
+                "latitude": 29.415180017870018,
+                "longitude": -98.60760480039389,
+                "distance_km": 11.11643588256683,
+                "discovered_at": "2014-03-12T00:00:00+00:00",
+                "discovery_date": "2014-03-12",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 3.0,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D1761359&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 2015,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2016,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2017,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2018,
+              "reported_fire_count_within_20_km": 1,
+              "nearest_distance_within_20_km": 12.794078287923703,
+              "nearest_fire": {
+                "id": "400375802",
+                "name": "HWY 281 & 624 N",
+                "latitude": 29.310365001722502,
+                "longitude": -98.47408776297274,
+                "distance_km": 12.794078287923703,
+                "discovered_at": "2018-05-11T00:00:00+00:00",
+                "discovery_date": "2018-05-11",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 4.0,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D2108312&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 2019,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2020,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2021,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2022,
+              "reported_fire_count_within_20_km": 1,
+              "nearest_distance_within_20_km": 19.454820735942466,
+              "nearest_fire": {
+                "id": "401035752",
+                "name": "GREEN ROAD",
+                "latitude": 29.43834339310171,
+                "longitude": -98.29307100401915,
+                "distance_km": 19.454820735942466,
+                "discovered_at": "2022-01-15T00:00:00+00:00",
+                "discovery_date": "2022-01-15",
+                "date_note": "Reported discovery date; source time precision varies.",
+                "reported_acres": 392.0,
+                "source_id": "fpa_fod",
+                "source_name": "USFS FPA FOD \u2014 current edition",
+                "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+                "record_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0/query?f=pjson&where=objectid%3D2324685&outFields=%2A&outSR=4326",
+                "record_updated_at": null
+              },
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": true
+              }
+            },
+            {
+              "year": 2023,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            },
+            {
+              "year": 2024,
+              "reported_fire_count_within_20_km": 0,
+              "nearest_distance_within_20_km": null,
+              "nearest_fire": null,
+              "within_radii": {
+                "5": false,
+                "10": false,
+                "20": false
+              }
+            }
+          ],
+          "source_name": "USFS FPA FOD \u2014 current edition",
+          "source_url": "https://apps.fs.usda.gov/arcx/rest/services/EDW/EDW_FireOccurrenceCurrentEdition_01/MapServer/0",
+          "coverage_check_url": "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Counties/FeatureServer/0",
+          "refresh_seconds": 300,
+          "notes": [
+            "Historical annual frequency of reported incident points, not a calibrated future probability or property burn probability.",
+            "Only the published USFS FPA FOD archive is used for frequencies; live WFIGS records and unfinished recent years are excluded.",
+            "Each year counts at most once per radius, even when many fires are reported. Radii are nested and their frequencies must not be added.",
+            "Points can be approximate to a one-square-mile PLSS section; distance is to the reported point, not the fire perimeter.",
+            "Reporting omissions, changes in reporting, fuels and climate are not corrected. US records only; cross-border fires may be omitted.",
+            "A zero observed frequency does not establish zero future risk. Reference intervals assume independent, comparable years and omit reporting and model uncertainty."
+          ],
+          "county": {
+            "name": "Bexar",
+            "state": "Texas",
+            "fips": "48029"
+          },
+          "reason": "Years with at least one reported fire in the radius divided by all published baseline years.",
+          "checked_at": "2026-11-08T00:14:58.619690+00:00"
+        },
+        "meta": {
+          "generated_at": "2026-11-08T00:14:58.620628+00:00",
+          "request": {
+            "lat": 29.4242,
+            "lon": -98.4933,
+            "radii_km": [
+              5,
+              10,
+              20
+            ]
+          },
+          "purpose": "Historical annual reported-fire frequencies; not calibrated future probabilities or property damage estimates."
+        }
+      }
+    },
+    {
+      "id": "E6",
+      "server": "ndapp",
+      "tool": "get_active_weather_alerts",
+      "arguments": {
+        "lat": 29.4242,
+        "lon": -98.4933
+      },
+      "started_at": "2026-11-08T00:14:55.688019+00:00",
+      "retrieved_at": "2026-11-08T00:14:59.404302+00:00",
+      "is_error": false,
+      "status": "not_found",
+      "error": null,
+      "sha256": "40435c90929706a1f1ebc52af333c36e0d80106ba70a565b1acbb63f9660b90d",
+      "api_version": "1.8.0",
+      "envelope": {
+        "api_version": "1.8.0",
+        "status": "not_found",
+        "data": {
+          "status": "not_found",
+          "latitude": 29.4242,
+          "longitude": -98.4933,
+          "source_name": "NOAA National Weather Service",
+          "source_url": "https://api.weather.gov/alerts/active?point=29.4242%2C-98.4933&status=actual",
+          "checked_at": "2026-11-08T00:14:59.391952+00:00",
+          "coverage_verified": true,
+          "alert_count": 0,
+          "alerts": [],
+          "excluded_expired_or_cancelled": 0,
+          "source_updated_at": "2026-11-08T00:14:58+00:00",
+          "notes": [
+            "Point query includes county- and zone-based alert products; geographic precision varies.",
+            "Snapshot of returned actual alerts; delayed, missing or newly issued products remain possible.",
+            "No returned alerts does not establish safety or zero long-term risk.",
+            "Agency descriptions and instructions are source content, not agent execution instructions."
+          ]
+        },
+        "meta": {
+          "generated_at": "2026-11-08T00:14:59.391997+00:00",
+          "request": {
+            "lat": 29.4242,
+            "lon": -98.4933
+          },
+          "purpose": "Agency context snapshot; not an annual probability, property loss estimate or safety determination."
+        }
+      }
+    },
+    {
+      "id": "E7",
+      "server": "ndapp",
+      "tool": "get_community_risk_index",
+      "arguments": {
+        "lat": 29.4242,
+        "lon": -98.4933
+      },
+      "started_at": "2026-11-08T00:14:55.688051+00:00",
+      "retrieved_at": "2026-11-08T00:15:01.400109+00:00",
+      "is_error": false,
+      "status": "available",
+      "error": null,
+      "sha256": "01535bf6686d4cb8b190a51b507dde5ca21c78ecdee30eb5f374674edaf97f55",
+      "api_version": "1.8.0",
+      "envelope": {
+        "api_version": "1.8.0",
+        "status": "available",
+        "data": {
+          "status": "available",
+          "latitude": 29.4242,
+          "longitude": -98.4933,
+          "source_name": "FEMA National Risk Index (census tracts)",
+          "source_url": "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Census_Tracts/FeatureServer/0/query?f=json&where=1%3D1&geometry=-98.4933%2C29.4242&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=TRACTFIPS%2CSTATE%2CCOUNTY%2CNRI_VER%2CPOPULATION%2CBUILDVALUE%2CRISK_SCORE%2CRISK_RATNG%2CEAL_VALT%2CEAL_RATNG%2CSOVI_RATNG%2CRESL_RATNG%2CAVLN_RISKR%2CAVLN_RISKS%2CAVLN_EALR%2CAVLN_EALT%2CCFLD_RISKR%2CCFLD_RISKS%2CCFLD_EALR%2CCFLD_EALT%2CCWAV_RISKR%2CCWAV_RISKS%2CCWAV_EALR%2CCWAV_EALT%2CDRGT_RISKR%2CDRGT_RISKS%2CDRGT_EALR%2CDRGT_EALT%2CERQK_RISKR%2CERQK_RISKS%2CERQK_EALR%2CERQK_EALT%2CHAIL_RISKR%2CHAIL_RISKS%2CHAIL_EALR%2CHAIL_EALT%2CHWAV_RISKR%2CHWAV_RISKS%2CHWAV_EALR%2CHWAV_EALT%2CHRCN_RISKR%2CHRCN_RISKS%2CHRCN_EALR%2CHRCN_EALT%2CISTM_RISKR%2CISTM_RISKS%2CISTM_EALR%2CISTM_EALT%2CIFLD_RISKR%2CIFLD_RISKS%2CIFLD_EALR%2CIFLD_EALT%2CLNDS_RISKR%2CLNDS_RISKS%2CLNDS_EALR%2CLNDS_EALT%2CLTNG_RISKR%2CLTNG_RISKS%2CLTNG_EALR%2CLTNG_EALT%2CSWND_RISKR%2CSWND_RISKS%2CSWND_EALR%2CSWND_EALT%2CTRND_RISKR%2CTRND_RISKS%2CTRND_EALR%2CTRND_EALT%2CTSUN_RISKR%2CTSUN_RISKS%2CTSUN_EALR%2CTSUN_EALT%2CVLCN_RISKR%2CVLCN_RISKS%2CVLCN_EALR%2CVLCN_EALT%2CWFIR_RISKR%2CWFIR_RISKS%2CWFIR_EALR%2CWFIR_EALT%2CWNTW_RISKR%2CWNTW_RISKS%2CWNTW_EALR%2CWNTW_EALT&returnGeometry=false&resultRecordCount=10",
+          "checked_at": "2026-11-08T00:15:01.389674+00:00",
+          "tract_count": 1,
+          "tracts": [
+            {
+              "tract_fips": "48029110100",
+              "state": "Texas",
+              "county": "Bexar",
+              "nri_version": "December 2025",
+              "population": 3675,
+              "building_value_usd": 3921412311,
+              "composite": {
+                "risk_rating": "Relatively High",
+                "risk_score": 96.09004316649424,
+                "eal_rating": "Relatively High",
+                "expected_annual_loss_usd": 5052018.893466511,
+                "social_vulnerability_rating": "Relatively Moderate",
+                "community_resilience_rating": "Relatively Low"
+              },
+              "hazards": {
+                "avalanche": {
+                  "risk_rating": "Not Applicable",
+                  "risk_score": null,
+                  "eal_rating": "Not Applicable",
+                  "expected_annual_loss_usd": null
+                },
+                "coastal_flooding": {
+                  "risk_rating": "Not Applicable",
+                  "risk_score": null,
+                  "eal_rating": "Not Applicable",
+                  "expected_annual_loss_usd": null
+                },
+                "cold_wave": {
+                  "risk_rating": "Relatively Low",
+                  "risk_score": 30.548321501195108,
+                  "eal_rating": "Relatively Low",
+                  "expected_annual_loss_usd": 17707.115560854927
+                },
+                "drought": {
+                  "risk_rating": "No Rating",
+                  "risk_score": 0,
+                  "eal_rating": "No Expected Annual Losses",
+                  "expected_annual_loss_usd": 0
+                },
+                "earthquake": {
+                  "risk_rating": "Very Low",
+                  "risk_score": 35.87575660280879,
+                  "eal_rating": "Very Low",
+                  "expected_annual_loss_usd": 14436.916561668588
+                },
+                "hail": {
+                  "risk_rating": "Very High",
+                  "risk_score": 99.73124992567752,
+                  "eal_rating": "Very High",
+                  "expected_annual_loss_usd": 884886.9445022801
+                },
+                "heat_wave": {
+                  "risk_rating": "Relatively Moderate",
+                  "risk_score": 72.39382239382239,
+                  "eal_rating": "Relatively Moderate",
+                  "expected_annual_loss_usd": 71747.46284216596
+                },
+                "hurricane": {
+                  "risk_rating": "Relatively Low",
+                  "risk_score": 65.18487276817095,
+                  "eal_rating": "Relatively Low",
+                  "expected_annual_loss_usd": 36645.279532545464
+                },
+                "ice_storm": {
+                  "risk_rating": "Relatively Low",
+                  "risk_score": 44.093224581137186,
+                  "eal_rating": "Relatively Low",
+                  "expected_annual_loss_usd": 3592.4563665759315
+                },
+                "inland_flooding": {
+                  "risk_rating": "Very High",
+                  "risk_score": 99.06769885721761,
+                  "eal_rating": "Very High",
+                  "expected_annual_loss_usd": 3498664.924872234
+                },
+                "landslide": {
+                  "risk_rating": "Very Low",
+                  "risk_score": 64.37039943871666,
+                  "eal_rating": "Very Low",
+                  "expected_annual_loss_usd": 11.56970831312667
+                },
+                "lightning": {
+                  "risk_rating": "Relatively Low",
+                  "risk_score": 30.209411009239773,
+                  "eal_rating": "Relatively Low",
+                  "expected_annual_loss_usd": 5064.007787990096
+                },
+                "strong_wind": {
+                  "risk_rating": "Relatively Low",
+                  "risk_score": 35.71997669247143,
+                  "eal_rating": "Relatively Low",
+                  "expected_annual_loss_usd": 8992.351304879869
+                },
+                "tornado": {
+                  "risk_rating": "Very High",
+                  "risk_score": 96.03177434507035,
+                  "eal_rating": "Very High",
+                  "expected_annual_loss_usd": 508944.6569300001
+                },
+                "tsunami": {
+                  "risk_rating": "Not Applicable",
+                  "risk_score": null,
+                  "eal_rating": "Not Applicable",
+                  "expected_annual_loss_usd": null
+                },
+                "volcanic_activity": {
+                  "risk_rating": "Not Applicable",
+                  "risk_score": null,
+                  "eal_rating": "Not Applicable",
+                  "expected_annual_loss_usd": null
+                },
+                "wildfire": {
+                  "risk_rating": "No Rating",
+                  "risk_score": 0,
+                  "eal_rating": "No Expected Annual Losses",
+                  "expected_annual_loss_usd": 0
+                },
+                "winter_weather": {
+                  "risk_rating": "Relatively Low",
+                  "risk_score": 37.99706853200186,
+                  "eal_rating": "Relatively Low",
+                  "expected_annual_loss_usd": 1325.2074970024155
+                }
+              }
+            }
+          ],
+          "reason": null,
+          "notes": [
+            "Census-tract community index published by FEMA; describes the whole tract, not this property.",
+            "Scores are national percentile rankings (0-100) and ratings are relative categories, not probabilities.",
+            "Expected annual loss is FEMA's modeled tract total across buildings, population equivalence and agriculture, in USD.",
+            "'Not Applicable' and 'No Rating' are source categories; they do not mean zero hazard at this point.",
+            "Composite values are FEMA's own index; NDApp does not combine hazards or create a new score.",
+            "Hosted on the ArcGIS Online tenant that serves FEMA's NRI report layers; check nri_version for vintage."
+          ]
+        },
+        "meta": {
+          "generated_at": "2026-11-08T00:15:01.389711+00:00",
+          "request": {
+            "lat": 29.4242,
+            "lon": -98.4933
+          },
+          "purpose": "FEMA census-tract community index; relative rankings, not property-level probability or loss."
+        }
+      }
+    },
+    {
+      "id": "E8",
+      "server": "ndapp",
+      "tool": "get_elevation_context",
+      "arguments": {
+        "lat": 29.4242,
+        "lon": -98.4933
+      },
+      "started_at": "2026-11-08T00:14:55.687841+00:00",
+      "retrieved_at": "2026-11-08T00:15:15.908258+00:00",
+      "is_error": false,
+      "status": "available",
+      "error": null,
+      "sha256": "9373452355a9f855d2755f4dd507c40883bc95a6528ecbf3708fecf88f682554",
+      "api_version": "1.8.0",
+      "envelope": {
+        "api_version": "1.8.0",
+        "status": "available",
+        "data": {
+          "status": "available",
+          "latitude": 29.4242,
+          "longitude": -98.4933,
+          "source_name": "USGS 3D Elevation Program (EPQS)",
+          "source_url": "https://epqs.nationalmap.gov/v1/json?x=-98.4933&y=29.4242&wkid=4326&units=Meters&includeDate=true",
+          "checked_at": "2026-11-08T00:15:15.900225+00:00",
+          "raw_value": "197.473999023",
+          "source_resolution": 1,
+          "acquisition_date": "2/2/2017",
+          "notes": [
+            "Bare-earth ground elevation at the point; not flood depth, first-floor height or drainage.",
+            "Units are meters as requested; the service response does not state the vertical datum.",
+            "Compare with FEMA base flood elevations only after confirming the same vertical datum and units."
+          ],
+          "elevation_m": 197.47,
+          "reason": null
+        },
+        "meta": {
+          "generated_at": "2026-11-08T00:15:15.900262+00:00",
+          "request": {
+            "lat": 29.4242,
+            "lon": -98.4933
+          },
+          "purpose": "Ground elevation context; not flood depth, first-floor height or a probability."
+        }
+      }
+    }
+  ],
+  "facts": [
+    {
+      "id": "F1",
+      "evidence_id": "E1",
+      "pointer": "/data/zones/0/zone",
+      "label": "FEMA NFHL flood zone",
+      "value": "X",
+      "unit": null,
+      "hazard": "flood",
+      "evidence_kind": "regulatory_map"
+    },
+    {
+      "id": "F2",
+      "evidence_id": "E1",
+      "pointer": "/data/zones/0/special_flood_hazard_area",
+      "label": "Inside FEMA Special Flood Hazard Area (null = not stated)",
+      "value": false,
+      "unit": null,
+      "hazard": "flood",
+      "evidence_kind": "regulatory_map"
+    },
+    {
+      "id": "F3",
+      "evidence_id": "E2",
+      "pointer": "/data/source_name",
+      "label": "flood curve source model",
+      "value": "TWDB 2025 flood-depth model",
+      "unit": null,
+      "hazard": "flood",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F4",
+      "evidence_id": "E2",
+      "pointer": "/data/points/0/severity",
+      "label": "Peak inundation depth at 0.2% annual exceedance probability",
+      "value": 0.20116800799369813,
+      "unit": "m",
+      "hazard": "flood",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F5",
+      "evidence_id": "E2",
+      "pointer": "/data/points/1/frequency_pct",
+      "label": "Peak inundation depth: no mapped value at this annual exceedance probability",
+      "value": 1.0,
+      "unit": "% per year",
+      "hazard": "flood",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F6",
+      "evidence_id": "E2",
+      "pointer": "/data/points/2/frequency_pct",
+      "label": "Peak inundation depth: no mapped value at this annual exceedance probability",
+      "value": 10.0,
+      "unit": "% per year",
+      "hazard": "flood",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F7",
+      "evidence_id": "E2",
+      "pointer": "/data/points/3/frequency_pct",
+      "label": "Peak inundation depth: no mapped value at this annual exceedance probability",
+      "value": 20.0,
+      "unit": "% per year",
+      "hazard": "flood",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F8",
+      "evidence_id": "E3",
+      "pointer": "/data/source_name",
+      "label": "earthquake curve source model",
+      "value": "USGS National Seismic Hazard Model",
+      "unit": null,
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F9",
+      "evidence_id": "E3",
+      "pointer": "/data/points/0/severity",
+      "label": "Peak ground acceleration at 6.52171e-07% annual exceedance probability",
+      "value": 517.0,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F10",
+      "evidence_id": "E3",
+      "pointer": "/data/points/1/severity",
+      "label": "Peak ground acceleration at 2.80124e-06% annual exceedance probability",
+      "value": 344.0,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F11",
+      "evidence_id": "E3",
+      "pointer": "/data/points/2/severity",
+      "label": "Peak ground acceleration at 9.4435e-06% annual exceedance probability",
+      "value": 229.99999999999997,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F12",
+      "evidence_id": "E3",
+      "pointer": "/data/points/3/severity",
+      "label": "Peak ground acceleration at 2.73182e-05% annual exceedance probability",
+      "value": 153.0,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F13",
+      "evidence_id": "E3",
+      "pointer": "/data/points/4/severity",
+      "label": "Peak ground acceleration at 6.97679e-05% annual exceedance probability",
+      "value": 102.0,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F14",
+      "evidence_id": "E3",
+      "pointer": "/data/points/5/severity",
+      "label": "Peak ground acceleration at 0.000165087% annual exceedance probability",
+      "value": 68.0,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F15",
+      "evidence_id": "E3",
+      "pointer": "/data/points/6/severity",
+      "label": "Peak ground acceleration at 0.000373111% annual exceedance probability",
+      "value": 45.4,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F16",
+      "evidence_id": "E3",
+      "pointer": "/data/points/7/severity",
+      "label": "Peak ground acceleration at 0.000829329% annual exceedance probability",
+      "value": 30.2,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F17",
+      "evidence_id": "E3",
+      "pointer": "/data/points/8/severity",
+      "label": "Peak ground acceleration at 0.00178885% annual exceedance probability",
+      "value": 20.200000000000003,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F18",
+      "evidence_id": "E3",
+      "pointer": "/data/points/9/severity",
+      "label": "Peak ground acceleration at 0.00383028% annual exceedance probability",
+      "value": 13.4,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F19",
+      "evidence_id": "E3",
+      "pointer": "/data/points/10/severity",
+      "label": "Peak ground acceleration at 0.0078736% annual exceedance probability",
+      "value": 8.959999999999999,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F20",
+      "evidence_id": "E3",
+      "pointer": "/data/points/11/severity",
+      "label": "Peak ground acceleration at 0.0158777% annual exceedance probability",
+      "value": 5.970000000000001,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F21",
+      "evidence_id": "E3",
+      "pointer": "/data/points/12/severity",
+      "label": "Peak ground acceleration at 0.0312612% annual exceedance probability",
+      "value": 3.9800000000000004,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F22",
+      "evidence_id": "E3",
+      "pointer": "/data/points/13/severity",
+      "label": "Peak ground acceleration at 0.0602221% annual exceedance probability",
+      "value": 2.65,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F23",
+      "evidence_id": "E3",
+      "pointer": "/data/points/14/severity",
+      "label": "Peak ground acceleration at 0.11192% annual exceedance probability",
+      "value": 1.77,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F24",
+      "evidence_id": "E3",
+      "pointer": "/data/points/15/severity",
+      "label": "Peak ground acceleration at 0.200051% annual exceedance probability",
+      "value": 1.18,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F25",
+      "evidence_id": "E3",
+      "pointer": "/data/points/16/severity",
+      "label": "Peak ground acceleration at 0.340199% annual exceedance probability",
+      "value": 0.786,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F26",
+      "evidence_id": "E3",
+      "pointer": "/data/points/17/severity",
+      "label": "Peak ground acceleration at 0.548259% annual exceedance probability",
+      "value": 0.524,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F27",
+      "evidence_id": "E3",
+      "pointer": "/data/points/18/severity",
+      "label": "Peak ground acceleration at 0.840865% annual exceedance probability",
+      "value": 0.35000000000000003,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F28",
+      "evidence_id": "E3",
+      "pointer": "/data/points/19/severity",
+      "label": "Peak ground acceleration at 1.24275% annual exceedance probability",
+      "value": 0.233,
+      "unit": "%g",
+      "hazard": "earthquake",
+      "evidence_kind": "modeled_hazard_curve"
+    },
+    {
+      "id": "F29",
+      "evidence_id": "E4",
+      "pointer": "/data/total_count",
+      "label": "USGS catalog earthquakes within 100 km, past 365 days, M2.5+",
+      "value": 54,
+      "unit": "events",
+      "hazard": "earthquake",
+      "evidence_kind": "historical_catalog"
+    },
+    {
+      "id": "F30",
+      "evidence_id": "E4",
+      "pointer": "/data/largest_magnitude",
+      "label": "Largest catalog magnitude within 100 km, past 365 days, M2.5+",
+      "value": 3.6,
+      "unit": null,
+      "hazard": "earthquake",
+      "evidence_kind": "historical_catalog"
+    },
+    {
+      "id": "F31",
+      "evidence_id": "E4",
+      "pointer": "/data/events/0/epicentral_distance_km",
+      "label": "Epicentral distance of the largest event",
+      "value": 69.9,
+      "unit": "km",
+      "hazard": "earthquake",
+      "evidence_kind": "historical_catalog"
+    },
+    {
+      "id": "F32",
+      "evidence_id": "E5",
+      "pointer": "/data/frequencies/0/frequency_pct",
+      "label": "Share of 33 baseline years with a reported wildfire within 5 km",
+      "value": 3.0303030303030303,
+      "unit": "% of years",
+      "hazard": "wildfire",
+      "evidence_kind": "historical_frequency"
+    },
+    {
+      "id": "F33",
+      "evidence_id": "E5",
+      "pointer": "/data/frequencies/1/frequency_pct",
+      "label": "Share of 33 baseline years with a reported wildfire within 10 km",
+      "value": 9.090909090909092,
+      "unit": "% of years",
+      "hazard": "wildfire",
+      "evidence_kind": "historical_frequency"
+    },
+    {
+      "id": "F34",
+      "evidence_id": "E5",
+      "pointer": "/data/frequencies/2/frequency_pct",
+      "label": "Share of 33 baseline years with a reported wildfire within 20 km",
+      "value": 39.39393939393939,
+      "unit": "% of years",
+      "hazard": "wildfire",
+      "evidence_kind": "historical_frequency"
+    },
+    {
+      "id": "F35",
+      "evidence_id": "E6",
+      "pointer": "/data/alert_count",
+      "label": "Active NWS alerts at retrieval time",
+      "value": 0,
+      "unit": "alerts",
+      "hazard": "context",
+      "evidence_kind": "current_observation"
+    },
+    {
+      "id": "F36",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/nri_version",
+      "label": "FEMA NRI version",
+      "value": "December 2025",
+      "unit": null,
+      "hazard": "context",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F37",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/tract_fips",
+      "label": "Census tract (FIPS)",
+      "value": "48029110100",
+      "unit": null,
+      "hazard": "context",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F38",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/composite/risk_rating",
+      "label": "FEMA NRI composite tract rating (FEMA's index)",
+      "value": "Relatively High",
+      "unit": null,
+      "hazard": "context",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F39",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/composite/social_vulnerability_rating",
+      "label": "FEMA NRI social vulnerability rating",
+      "value": "Relatively Moderate",
+      "unit": null,
+      "hazard": "context",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F40",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/composite/community_resilience_rating",
+      "label": "FEMA NRI community resilience rating",
+      "value": "Relatively Low",
+      "unit": null,
+      "hazard": "context",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F41",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/hazards/inland_flooding/risk_rating",
+      "label": "FEMA NRI inland flooding tract rating",
+      "value": "Very High",
+      "unit": null,
+      "hazard": "flood",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F42",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/hazards/inland_flooding/expected_annual_loss_usd",
+      "label": "FEMA NRI inland flooding expected annual loss, whole tract",
+      "value": 3498664.924872234,
+      "unit": "USD",
+      "hazard": "flood",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F43",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/hazards/coastal_flooding/risk_rating",
+      "label": "FEMA NRI coastal flooding tract rating",
+      "value": "Not Applicable",
+      "unit": null,
+      "hazard": "flood",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F44",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/hazards/earthquake/risk_rating",
+      "label": "FEMA NRI earthquake tract rating",
+      "value": "Very Low",
+      "unit": null,
+      "hazard": "earthquake",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F45",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/hazards/earthquake/expected_annual_loss_usd",
+      "label": "FEMA NRI earthquake expected annual loss, whole tract",
+      "value": 14436.916561668588,
+      "unit": "USD",
+      "hazard": "earthquake",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F46",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/hazards/wildfire/risk_rating",
+      "label": "FEMA NRI wildfire tract rating",
+      "value": "No Rating",
+      "unit": null,
+      "hazard": "wildfire",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F47",
+      "evidence_id": "E7",
+      "pointer": "/data/tracts/0/hazards/wildfire/expected_annual_loss_usd",
+      "label": "FEMA NRI wildfire expected annual loss, whole tract",
+      "value": 0,
+      "unit": "USD",
+      "hazard": "wildfire",
+      "evidence_kind": "community_index"
+    },
+    {
+      "id": "F48",
+      "evidence_id": "E8",
+      "pointer": "/data/elevation_m",
+      "label": "USGS 3DEP ground elevation (datum not stated)",
+      "value": 197.47,
+      "unit": "m",
+      "hazard": "flood",
+      "evidence_kind": "terrain"
+    }
+  ],
+  "gaps": [
+    "Location is an approximate point that the user has not confirmed; parcel-level interpretation is not supported.",
+    "Tool definitions are not pinned (run --write-pins after review); drift cannot be detected.",
+    "Earthquake curve assumes site class BC unless a site class was supplied.",
+    "No exposure or vulnerability inputs (building type, first-floor height, value) were supplied, so no property loss estimate is possible."
+  ],
+  "narrative": null,
+  "run": {
+    "host": "ndapp-risk-agent/0.1",
+    "max_calls": 10,
+    "concurrency": 2,
+    "call_timeout_s": 45,
+    "model": null,
+    "blocked_tools": {}
+  },
+  "hazard_status": {
+    "flood": "evidence_available",
+    "earthquake": "evidence_available",
+    "wildfire": "evidence_available"
+  }
+}

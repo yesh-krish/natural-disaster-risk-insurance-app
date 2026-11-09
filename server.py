@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import http.client
 import json
 import math
 import urllib.error
@@ -9,6 +10,10 @@ import urllib.request
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urlsplit
+
+# Malformed, truncated or unreachable upstream data. http.client.IncompleteRead is not an OSError,
+# so without it a cut-off provider response drops the connection instead of returning a 502.
+PROVIDER_ERRORS = (OSError, ValueError, LookupError, TypeError, AttributeError, http.client.HTTPException)
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data" / "twdb"
@@ -72,6 +77,32 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
+    def send_head(self):
+        """Expose only browser assets and public documentation, never the workspace."""
+        path = Path(self.translate_path(self.path)).resolve()
+        try:
+            relative = path.relative_to(ROOT)
+        except ValueError:
+            self.send_error(404, "Not found")
+            return None
+        assets = {"index.html", "script.js", "damage_model.js", "hazard_chart.js",
+                  "hazard_trigger.js", "fire_history.js", "fire_proximity.js",
+                  "docs/api-explorer.js", "examples/api_client.py"}
+        if path == ROOT:
+            self.path = "/index.html"
+        elif not (relative.as_posix() in assets or (
+                relative.parts[0] == "docs" and
+                not any(part.startswith(".") for part in relative.parts) and
+                path.suffix.lower() in {".md", ".html", ".txt"} and path.is_file())):
+            self.send_error(404, "Not found")
+            return None
+        return super().send_head()
+
+    def end_headers(self):
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
+        super().end_headers()
+
     def do_GET(self):
         url = urlsplit(self.path)
         if url.path in {"/api/docs", "/api/docs/"}:
@@ -81,8 +112,12 @@ class Handler(SimpleHTTPRequestHandler):
             from api_spec import openapi_document
             return self.send_json(200, openapi_document())
         if url.path == "/api/v1" or url.path.startswith("/api/v1/"):
-            from api_v1 import dispatch
-            code, payload = dispatch(url.path, url.query)
+            from api_v1 import dispatch, error_response
+            try:
+                code, payload = dispatch(url.path, url.query)
+            except Exception as exc:  # noqa: BLE001 - always answer with JSON instead of dropping the socket
+                print(f"Unexpected v1 failure: {type(exc).__name__}")
+                code, payload = error_response(500, "internal_error", "The lookup could not complete. Retry later.")
             return self.send_json(code, payload)
         if url.path == "/api/potential-fire":
             from hazard_engine import coordinates
@@ -97,7 +132,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(400, {"error": "Supply one valid lat and lon."})
             try:
                 code, payload = potential_fire_request(lat, lon)
-            except (OSError, ValueError, KeyError, TypeError):
+            except PROVIDER_ERRORS:
                 return self.send_json(502, {"error": "Potential fire data are unavailable; no estimate was substituted."})
             return self.send_json(code, payload)
         if url.path == "/api/monitoring-station":
@@ -114,7 +149,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(400, {"error": "Supply valid lat, lon and peril."})
             try:
                 return self.send_json(200, nearest_station(peril, lat, lon))
-            except (OSError, ValueError, KeyError, TypeError) as exc:
+            except PROVIDER_ERRORS as exc:
                 print(f"Station lookup failed: {type(exc).__name__}")
                 return self.send_json(502, {"error": "Monitoring-station service is unavailable. Try selecting the location again."})
         if url.path == "/api/disaster-area":
@@ -129,7 +164,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(400, {"error": "Supply valid south, west, north, east, peril and site_class."})
             try:
                 payload = area_disaster(*bounds, peril, site_class)
-            except (OSError, ValueError, KeyError, TypeError) as exc:
+            except PROVIDER_ERRORS as exc:
                 print(f"Area government lookup failed: {type(exc).__name__}: {exc}")
                 return self.send_json(502, {"error": "Area hazard lookup failed. Try again shortly."})
             return self.send_json(200, payload)
@@ -154,7 +189,7 @@ class Handler(SimpleHTTPRequestHandler):
                     payload = most_relevant(lat, lon, site_class)
                 else:
                     payload = disaster_at(peril, lat, lon, site_class)
-            except (OSError, ValueError, KeyError, TypeError) as exc:
+            except PROVIDER_ERRORS as exc:
                 print(f"{peril} government lookup failed: {type(exc).__name__}: {exc}")
                 return self.send_json(502, {"error": "Government data service is unavailable. Try again shortly."})
             return self.send_json(200, payload)
@@ -172,7 +207,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(400, {"error": "Supply valid lat/lon; earthquake_model also requires site_class."})
             try:
                 bundle = hazard_bundle(lat, lon, earthquake=provider)
-            except (urllib.error.URLError, TimeoutError, OSError, ValueError) as exc:
+            except PROVIDER_ERRORS as exc:
                 print(f"Hazard provider failed: {type(exc).__name__}")
                 return self.send_json(502, {"error": "Hazard provider unavailable; no risk estimate was substituted."})
             return self.send_json(200, bundle)
@@ -185,7 +220,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(400, {"error": str(exc)})
             try:
                 return self.send_json(200, geocode_address(address))
-            except (urllib.error.URLError, TimeoutError, ValueError, KeyError, TypeError) as exc:
+            except PROVIDER_ERRORS as exc:
                 print(f"Census geocoding failed: {type(exc).__name__}")
                 return self.send_json(502, {"error": "Address search is unavailable. Try again shortly."})
         if url.path != "/api/depths":
@@ -234,8 +269,12 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     import argparse
+    import os
     parser = argparse.ArgumentParser(description="Run the local NDApp research map and API.")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8000")))
     args = parser.parse_args()
-    print(f"Map: http://127.0.0.1:{args.port}/\nAPI explorer: http://127.0.0.1:{args.port}/api/docs", flush=True)
-    ThreadingHTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
+    if not 1 <= args.port <= 65535:
+        parser.error("port must be between 1 and 65535")
+    print(f"Map: http://{args.host}:{args.port}/\nAPI explorer: http://{args.host}:{args.port}/api/docs", flush=True)
+    ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()

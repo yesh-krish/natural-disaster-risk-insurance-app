@@ -1,2 +1,3 @@
--r requirements.txt
+-r requirements-api.txt
 jsonschema>=4.23,<5
+httpx>=0.27,<1

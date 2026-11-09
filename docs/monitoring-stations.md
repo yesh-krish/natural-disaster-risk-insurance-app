@@ -17,6 +17,27 @@ Checks therefore follow README instructions and the existing test conventions.
 
 ## Network selection and scope
 
+The map has two separate station sections. **Monitoring station** follows the
+selected hazard: USGS stream gauges for Flood, USGS precipitation gauges for
+Rainfall, EarthScope seismic stations for Earthquake, and NIFC RAWS fire-weather
+stations for all wildfire views. These searches show the nearest station within
+200 km of the selected point (or area center), with a purple map marker. RAWS
+provide weather context for fire; they do not locate historical fires or supply
+the FSim or potential-intensity curve. Station metadata does not guarantee live
+readings. Errors and empty searches stay explicit, without substituting METAR.
+
+Heat shows the actual qualifying GHCN-Daily station returned with its historical
+curve, rather than a separate nearest-weather-station result. Wind points to the
+METAR observations below; its historical curve still uses HURDAT2 footprints.
+Automatic selection waits for the chosen hazard before searching its network.
+Location, hazard and address changes clear the previous hazard station and
+cancel pending requests; failed searches offer retry.
+
+**Nearby weather stations (METAR)** retains the independent multi-station weather
+search described below, including the 1–50 count, orange markers and live reports.
+The count applies to this weather list. The two sections can show different
+station names because they search different networks and serve different roles.
+
 The first multi-station network is **NOAA Aviation Weather Center (AWC) METAR**.
 It provides weather context, public station metadata, direct station-data links,
 and recent observations without requiring an API key. It also reuses the AWC

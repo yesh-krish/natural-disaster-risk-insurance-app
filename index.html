@@ -106,6 +106,9 @@
       @media (max-width:700px) { .hazard-controls select { min-width:0; width:100%; } }
       @media (max-width: 540px) { main { padding: 14px; } dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
       @media (max-width: 700px) { .chart-grid { grid-template-columns: 1fr; } .scenario-table { font-size: .85rem; } }
+      .trigger-workspace.history-mode { grid-template-columns: 1fr; }
+      #fire-proximity-value { font-size: 2rem; font-weight: 700; color: #1d4ed8; }
+      #fire-proximity-rows tr[data-selected="true"] { background: #eef5ff; font-weight: 600; }
     </style>
   </head>
   <body>
@@ -113,7 +116,7 @@
       <h1>NDApp · Parametric insurance pool</h1>
       <p class="note" style="margin:6px 0 12px"><a class="source-link" href="/api/docs">Explore the research API ↗</a></p>
       <p class="intro">Explore hazard data at a location. Where annual probabilities are available, choose a trigger and payout to calculate an expected annual pool contribution.</p>
-      <section class="trigger-workspace" aria-labelledby="trigger-heading">
+      <section class="trigger-workspace" id="trigger-workspace" aria-labelledby="trigger-heading">
       <div class="trigger-setup">
       <h2 id="trigger-heading">Set your trigger and payout</h2>
       <p id="hazard-selection-description">Use a government model’s supported levels for your selected location.</p>
@@ -127,6 +130,7 @@
             <option value="auto">Choose most relevant</option>
             <option value="flood" selected>Flood</option>
             <option value="earthquake">Earthquake</option>
+            <option value="nearest_fire">Wildfire / Nearby fire frequency</option>
             <option value="potential_fire_intensity">Wildfire / Potential intensity (kW/m)</option>
             <option value="wildfire">Wildfire / Flame length (FSim)</option>
             <option value="cyclone">Wind (tropical cyclones)</option>
@@ -220,8 +224,49 @@
         <p class="note">Sources: <a href="https://www.weather.gov/ama/heatindex" target="_blank" rel="noopener noreferrer">NWS Heat Index and bands</a> · <a href="https://www.osha.gov/heat-exposure/hazards" target="_blank" rel="noopener noreferrer">OSHA worksite heat assessment</a> · <a href="docs/heat-and-wind.md">Methods and limitations</a></p>
         </details>
       </section>
+      <section id="nearest-fire-panel" aria-labelledby="fire-proximity-heading" hidden>
+        <h2 id="fire-proximity-heading">Annual nearby-fire frequency</h2>
+        <p class="note">Historical share of years with at least one reported wildfire within a chosen radius. Each year counts once, regardless of how many fires occurred.</p>
+        <p id="fire-proximity-status" role="status" aria-live="polite">Select a location to calculate annual nearby-fire frequencies.</p>
+        <button id="fire-proximity-refresh" type="button" disabled>Refresh annual frequencies</button>
+        <div id="fire-proximity-content" hidden>
+          <label for="fire-proximity-radius">Show radius on map
+            <select id="fire-proximity-radius" disabled><option value="5">5 km</option><option value="10" selected>10 km</option><option value="20">20 km</option></select>
+          </label>
+          <button id="fire-proximity-show" type="button" disabled>Show selected radius</button>
+          <p><output id="fire-proximity-value" aria-live="polite">—</output> historical annual frequency</p>
+          <p id="fire-proximity-calculation" aria-live="polite"></p>
+          <div class="table-scroll"><table class="scenario-table"><caption>At least one reported wildfire within each radius</caption>
+            <thead><tr><th scope="col">Radius</th><th scope="col">Years with fire / baseline years</th><th scope="col">Annual frequency</th><th scope="col">95% reference interval</th></tr></thead>
+            <tbody id="fire-proximity-rows"></tbody>
+          </table></div>
+          <p class="note">The blue circle shows the selected radius. Radii are nested; do not add their frequencies. Intervals assume independent, comparable years and exclude reporting gaps and climate changes.</p>
+          <div id="fire-proximity-chart"></div>
+          <p id="fire-proximity-coverage" class="note"></p>
+          <p class="note">This describes reported fire points. It is not a calibrated future probability, a fire-intensity exceedance, or the chance that your property burns. Zero recorded years does not establish zero future risk.</p>
+          <details id="fire-proximity-year-details"><summary>Inspect each baseline year</summary>
+            <div class="table-scroll"><table class="scenario-table"><thead><tr><th scope="col">Year</th><th scope="col">Nearest reported fire within 20 km</th><th scope="col">Within 5 km</th><th scope="col">Within 10 km</th><th scope="col">Within 20 km</th></tr></thead><tbody id="fire-proximity-years"></tbody></table></div>
+          </details>
+          <button id="fire-proximity-export" type="button" disabled>Export annual frequencies and years CSV</button>
+          <p id="fire-proximity-checked" class="note"></p>
+        </div>
+        <h3 id="nearest-fire-heading">Nearest recorded wildfire — all available history</h3>
+        <p class="note">Select a map point to find the closest reported US wildfire location across the Forest Service archive and NIFC incident history. Red marks the fire; the dashed line connects it to your selection. Searches include old and recent fires and check for updates every 5 minutes while this page is visible.</p>
+        <p id="nearest-fire-status" role="status" aria-live="polite">Select a location to find the nearest recorded wildfire.</p>
+        <div id="nearest-fire-details" class="note"></div>
+        <button id="nearest-fire-show" type="button" hidden>Show selection and fire</button>
+        <button id="nearest-fire-refresh" type="button" disabled>Refresh fire history</button>
+        <p class="note">Reported locations can be approximate. Distance is to the recorded point; it does not establish that your selected property burned. <a href="docs/fire-history.md">Sources and historical coverage</a></p>
+      </section>
+      <section aria-labelledby="hazard-station-heading">
+        <h2 id="hazard-station-heading">Monitoring station for the selected hazard</h2>
+        <p id="hazard-station-status" role="status" aria-live="polite">Select a location to find a hazard-specific station.</p>
+        <div id="hazard-station-details" class="note"></div>
+        <button id="hazard-station-show" type="button" hidden>Show selection and hazard station</button>
+        <button id="hazard-station-retry" type="button" hidden>Retry hazard station search</button>
+      </section>
       <section aria-labelledby="station-heading">
-        <h2 id="station-heading">Nearest monitoring stations</h2>
+        <h2 id="station-heading">Nearby weather stations (METAR)</h2>
         <p id="station-coverage" class="note">Network: NOAA Aviation Weather Center METAR weather stations, worldwide catalog, within 200 km. Choose 1–50 stations above. Address search covers US street addresses. This network is independent of the selected hazard. Orange marks stations; blue marks your selection.</p>
         <p id="station-status" role="status" aria-live="polite">Select a location to find monitoring stations.</p>
         <p id="station-details" class="note"></p>
@@ -320,6 +365,8 @@
     <script src="damage_model.js?v=1"></script>
     <script src="hazard_chart.js?v=1"></script>
     <script src="hazard_trigger.js?v=4"></script>
-    <script src="script.js?v=24"></script>
+    <script src="fire_history.js?v=1"></script>
+    <script src="fire_proximity.js?v=1"></script>
+    <script src="script.js?v=27"></script>
   </body>
 </html>

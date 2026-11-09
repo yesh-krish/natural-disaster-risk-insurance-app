@@ -170,6 +170,122 @@ function renderHeatStations(stations) {
     heatList.append(item);
   }
 }
+
+let pendingHazardStationRequest;
+let hazardStationMarker;
+let hazardStationPoint;
+const hazardStationStatus = document.getElementById("hazard-station-status");
+const hazardStationDetails = document.getElementById("hazard-station-details");
+const hazardStationShow = document.getElementById("hazard-station-show");
+const hazardStationRetry = document.getElementById("hazard-station-retry");
+const hazardStationNetworks = {
+  flood: "USGS stream gauges",
+  rainfall: "USGS precipitation gauges",
+  earthquake: "EarthScope seismic stations",
+  wildfire: "NIFC RAWS fire-weather stations",
+  nearest_fire: "NIFC RAWS fire-weather stations",
+  potential_fire_intensity: "NIFC RAWS fire-weather stations",
+  fireline_intensity: "NIFC RAWS fire-weather stations",
+};
+
+function clearHazardStation() {
+  pendingHazardStationRequest?.abort();
+  pendingHazardStationRequest = null;
+  if (hazardStationMarker) map.removeLayer(hazardStationMarker);
+  hazardStationMarker = null;
+  hazardStationPoint = null;
+  hazardStationDetails.replaceChildren();
+  hazardStationShow.hidden = true;
+  hazardStationRetry.hidden = true;
+}
+
+function renderHazardStation(station, network, message) {
+  hazardStationDetails.replaceChildren();
+  hazardStationStatus.textContent = station ? network : `No eligible station found. ${network}`;
+  const note = document.createElement("p");
+  note.textContent = message;
+  if (station) {
+    const title = document.createElement("strong");
+    title.textContent = `${station.name} (${station.id}) · ${station.distance_km.toFixed(2)} km`;
+    const position = document.createElement("p");
+    position.textContent = `Coordinates: ${station.latitude.toFixed(5)}, ${station.longitude.toFixed(5)}. Purple marks this hazard station; orange marks nearby METAR weather stations.`;
+    hazardStationDetails.append(title, position);
+    try {
+      const url = new URL(station.url);
+      if (url.protocol === "https:" && ["waterdata.usgs.gov", "service.earthscope.org", "services3.arcgis.com", "www.weather.gov", "aviationweather.gov", "www.ncei.noaa.gov"].includes(url.hostname)) {
+        const link = document.createElement("a");
+        link.href = url.href;
+        link.textContent = `View ${station.id} station data`;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        hazardStationDetails.append(link);
+      }
+    } catch { /* A missing or invalid provider URL does not hide the station. */ }
+    hazardStationPoint = {lat: station.latitude, lng: station.longitude};
+    const popup = document.createElement("span");
+    popup.textContent = `${network}: ${title.textContent}`;
+    if (hazardStationMarker) map.removeLayer(hazardStationMarker);
+    hazardStationMarker = L.circleMarker(hazardStationPoint, {radius: 13, color: "#7e22ce", weight: 3, fillColor: "#c084fc", fillOpacity: 0.8}).addTo(map).bindPopup(popup);
+    hazardStationShow.hidden = false;
+  }
+  hazardStationDetails.append(note);
+}
+
+async function loadHazardStation(lat, lng, version, peril) {
+  clearHazardStation();
+  document.getElementById("hazard-station-heading").textContent = `Monitoring station · ${disasterTypes[peril].name}`;
+  if (peril === "auto") {
+    hazardStationStatus.textContent = "Waiting for automatic hazard selection…";
+    return;
+  }
+  if (peril === "heat") {
+    hazardStationStatus.textContent = "Waiting for the qualifying GHCN-Daily historical heat station…";
+    return;
+  }
+  if (peril === "cyclone") {
+    hazardStationStatus.textContent = "Wind observations: NOAA AWC METAR weather stations, listed below. The wind curve uses NOAA HURDAT2 storm footprints, independently of these stations.";
+    return;
+  }
+  const network = hazardStationNetworks[peril];
+  if (!network) return;
+  hazardStationStatus.textContent = `Finding the nearest station in ${network}…`;
+  const controller = new AbortController();
+  pendingHazardStationRequest = controller;
+  const current = () => !controller.signal.aborted && version === locationVersion && pendingHazardStationRequest === controller;
+  const timeout = setTimeout(() => {
+    if (!current()) return;
+    controller.abort();
+    hazardStationStatus.textContent = `${network} search timed out. Retry the hazard station search.`;
+    hazardStationRetry.hidden = false;
+  }, 15000);
+  try {
+    const stationPeril = ["nearest_fire", "potential_fire_intensity", "fireline_intensity"].includes(peril) ? "wildfire" : peril;
+    const params = new URLSearchParams({peril: stationPeril, lat, lon: lng});
+    const response = await fetch(`/api/v1/monitoring-stations?${params}`, {signal: controller.signal});
+    if (!current()) return;
+    if (response.status === 404) throw new Error("Restart the Python server to enable hazard station lookup.");
+    const payload = await response.json();
+    if (!current()) return;
+    if (!response.ok) throw new Error(payload.error?.message || "Hazard station service unavailable.");
+    if (!payload.data || payload.data.peril !== stationPeril || !["available", "not_found"].includes(payload.data.status)) throw new Error("Unexpected hazard station response.");
+    renderHazardStation(payload.data.station, payload.data.network, payload.data.message);
+  } catch (error) {
+    if (current()) {
+      hazardStationStatus.textContent = `${network}: ${error.message}`;
+      hazardStationRetry.hidden = false;
+    }
+  } finally {
+    clearTimeout(timeout);
+    if (pendingHazardStationRequest === controller) pendingHazardStationRequest = null;
+  }
+}
+
+hazardStationShow.addEventListener("click", () => {
+  if (hazardStationPoint && selectedPoint) map.fitBounds(L.latLngBounds([selectedPoint, hazardStationPoint]), {padding: [45, 45], maxZoom: 14});
+});
+hazardStationRetry.addEventListener("click", () => {
+  if (selectedPoint) loadHazardStation(selectedPoint.lat, selectedPoint.lng, locationVersion, resolvedDisaster || disasterSelect.value);
+});
 let pendingRequest;
 let pendingDepthRequest;
 let pendingGeocodeRequest;
@@ -206,6 +322,7 @@ const disasterTypes = {
   auto: { name: "Choose most relevant", metric: "Location-based selection", unit: "", source: "FEMA county context + local government curves", note: "Select a location to choose a disaster using regional hazard data and available local curves." },
   flood: { name: "Flood", metric: "Peak inundation depth", unit: "m", source: "TWDB + FEMA", note: "Flood depths cover installed Texas tiles. FEMA polygons provide flood-zone context; missing data does not establish no flood risk." },
   earthquake: { name: "Earthquake", metric: "Peak ground acceleration", unit: "%g", source: "USGS NSHM", note: "Site class affects modeled shaking. BC is the initial assumption; select the appropriate site class." },
+  nearest_fire: { name: "Wildfire / Nearby fire frequency", metric: "Historical annual frequency", unit: "%", source: "USFS FPA FOD", note: "Annual frequencies count years with at least one reported fire within each radius. The nearest-fire result uses all available history. Distance is to reported incident points; property burn extent is unknown." },
   wildfire: { name: "Fire / Wildfire", metric: "Flame length", unit: "m", source: "USDA Forest Service", note: "The graph uses burn probability and conditional flame-length probabilities. Wildfire Hazard Potential is shown as context." },
   fireline_intensity: { name: "Wildfire / Fireline intensity", metric: "Fireline intensity", unit: "kW/m", source: "Texas A&M Forest Service / TxWRAP", note: "Native weather-weighted heading fireline intensity for Texas. This is modeled fire behavior, not a live reading or annual exceedance probability. Heat flux at buildings and ember exposure are separate." },
   potential_fire_intensity: { name: "Wildfire / Potential intensity", metric: "Potential surface-fire intensity", unit: "kW/m", source: "ERA5 + LANDFIRE + Rothermel–Byram", note: "Historical weather is replayed on a fixed landscape to estimate potential surface-fire intensity. The annual curve measures potential conditions, not actual wildfire occurrence or damage. Research prototype; Point mode covers supported LANDFIRE cells in CONUS, Alaska and Hawaii." },
@@ -490,6 +607,13 @@ function resetHazardView(message) {
 
 function configureDisasterView(peril) {
   const type = disasterTypes[peril];
+  const history = peril === "nearest_fire";
+  document.getElementById("nearest-fire-panel").hidden = !history;
+  document.getElementById("trigger-workspace").classList.toggle("history-mode", history);
+  if (!history) {
+    globalThis.FireHistory.clear();
+    globalThis.FireProximity.clear();
+  }
   document.getElementById("potential-fire-prototype").hidden = peril !== "potential_fire_intensity";
   const intensity = peril === "fireline_intensity";
   document.getElementById("heat-observation-panel").hidden = peril !== "heat";
@@ -497,6 +621,11 @@ function configureDisasterView(peril) {
   document.getElementById("hazard-selection-description").textContent = intensity
     ? "Select a Texas location to sample the native fireline-intensity model."
     : "Use a government model’s supported levels for your selected location.";
+  if (history) {
+    document.getElementById("trigger-heading").textContent = "Explore wildfire proximity";
+    document.getElementById("hazard-selection-description").textContent = "Select a point to see annual nearby-fire frequencies within 5, 10 and 20 km, plus the nearest recorded wildfire. Results check for updates every 5 minutes while this page is visible.";
+  }
+  document.getElementById("trigger-help").hidden = history;
   if (peril === "heat") document.getElementById("hazard-selection-description").textContent = "Select a point to load historical annual heat exceedance from a qualifying NOAA station. First lookup downloads the historical station inventory.";
   if (peril === "potential_fire_intensity") {
     const description = document.getElementById("hazard-selection-description");
@@ -511,12 +640,13 @@ function configureDisasterView(peril) {
   document.getElementById("hazard-curve-layout").hidden = intensity;
   document.getElementById("hazard-axis-note").hidden = intensity;
   for (const id of ["trigger-level-control", "trigger-payout-control", "payout-help", "trigger-result", "comparison-panel"]) {
-    document.getElementById(id).hidden = intensity;
+    document.getElementById(id).hidden = intensity || history;
   }
-  document.getElementById("export-area").hidden = intensity || !selectedArea;
+  document.getElementById("export-area").hidden = intensity || history || !selectedArea;
   resolvedDisaster = peril === "auto" ? null : peril;
   document.getElementById("flood-panel").hidden = peril !== "flood";
-  hazardPanel.hidden = peril === "flood";
+  hazardPanel.hidden = peril === "flood" || history;
+  if (history && selectedArea) areaSummary.textContent = "Nearest recorded wildfire is measured from the selected area center.";
   document.getElementById("site-class-control").hidden = peril !== "earthquake";
   document.getElementById("metric-summary").textContent = peril === "auto" ? "Choose most relevant · Select a location to compare hazards" : `${disasterSelect.value === "auto" ? "Automatically selected: " : ""}${type.name} · ${type.metric} (${type.unit}) · ${type.source}`;
   document.getElementById("location-note").textContent = type.note;
@@ -591,6 +721,13 @@ function waitForFireProgress(signal) {
 async function loadSelectedHazard(lat, lng, version, preferredSeverity = null) {
   const peril = disasterSelect.value;
   let type = disasterTypes[peril];
+  if (peril === "nearest_fire") {
+    resetHazardView("Historical fire-proximity frequencies are shown below the map.");
+    status.textContent = "Annual nearby-fire frequencies and the nearest recorded wildfire are shown below the map.";
+    globalThis.FireHistory.load(map, { lat, lng }, Boolean(selectedArea));
+    globalThis.FireProximity.load(map, { lat, lng }, Boolean(selectedArea));
+    return;
+  }
   const controller = new AbortController();
   pendingHazardRequest = controller;
   resetHazardView(peril === "auto" ? "Comparing regional hazards and checking local government curves…" : `Loading ${type.source} data for the selected location…`);
@@ -649,6 +786,7 @@ async function loadSelectedHazard(lat, lng, version, preferredSeverity = null) {
     }
     if (peril === "auto") {
       configureDisasterView(data.peril);
+      loadHazardStation(lat, lng, version, data.peril);
       showRelevance(data.selection, data.peril);
       type = disasterTypes[data.peril];
       marker?.bindPopup(`${type.name} (automatic): ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
@@ -656,6 +794,12 @@ async function loadSelectedHazard(lat, lng, version, preferredSeverity = null) {
     loadTriggerLevels(data);
     if (data.peril === "heat") {
       renderHistoricalHeat(data);
+      if (data.status === "available" && data.station) {
+        renderHazardStation({...data.station, url: data.station.url || data.source_url}, "NOAA GHCN-Daily historical heat station",
+          `This is the station used for the 1991–2020 heat curve (${data.baseline.complete_years} complete years). The METAR stations below provide separate current weather context.`);
+      } else {
+        hazardStationStatus.textContent = data.reason || "No qualifying historical heat station available for this selection.";
+      }
       if (data.area) areaSummary.textContent = data.reason;
     }
     if (data.peril === "potential_fire_intensity") renderPotentialFireHistory(data);
@@ -747,6 +891,7 @@ async function loadSelectedHazard(lat, lng, version, preferredSeverity = null) {
       resetTrigger(`Could not load ${type.source} trigger levels. Select the hazard or location again to retry.`, "error");
       status.textContent = "Government data lookup failed. Try another location or retry.";
       if (peril === "auto") relevanceStatus.textContent = "Automatic selection failed. Retry or select a disaster manually.";
+      if (["auto", "heat"].includes(peril)) hazardStationStatus.textContent = "Hazard station unavailable because the hazard lookup failed. Select the hazard or location again to retry.";
     }
   } finally {
     if (pendingHazardRequest === controller) pendingHazardRequest = null;
@@ -1143,6 +1288,7 @@ async function selectLocation(latlng) {
   results.hidden = true;
   results.replaceChildren();
   marker.bindPopup(`${disasterTypes[disasterSelect.value].name}: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+  loadHazardStation(lat, lng, version, disasterSelect.value);
   loadSelectedHazard(lat, lng, version, preferredSeverity);
   loadNearestStations(lat, lng, version);
 }
@@ -1229,7 +1375,9 @@ function beginArea() {
   cancelArea.hidden = false;
   document.getElementById("map").classList.add("selecting-area");
   map.doubleClickZoom.disable();
-  selectionHelp.textContent = disasterSelect.value === "fireline_intensity"
+  selectionHelp.textContent = disasterSelect.value === "nearest_fire"
+    ? "Click two opposite corners to draw an area. Find the nearest recorded wildfire from its center. Press Escape to cancel."
+    : disasterSelect.value === "fireline_intensity"
     ? "Click two opposite corners to draw an area. Average native fireline intensity across a 5×5 grid. Press Escape to cancel."
     : "Click two opposite corners to draw an area. Compare exceedance across a 5×5 grid. Press Escape to cancel.";
 }
@@ -1305,6 +1453,11 @@ searchForm.addEventListener("submit", async (event) => {
   }
   clearStation();
   stationStatus.textContent = "Waiting for a unique address match…";
+  // Leave the current point's hazard lookup and fire-history panels alone until the address matches:
+  // selectLocation() replaces them on a match, and a failed or ambiguous search must not strand them
+  // half-cleared ("Loading…" with an aborted request, or fire panels waiting forever).
+  clearHazardStation();
+  hazardStationStatus.textContent = "Waiting for a unique address match…";
   pendingGeocodeRequest?.abort();
   const controller = new AbortController();
   pendingGeocodeRequest = controller;
@@ -1319,6 +1472,7 @@ searchForm.addEventListener("submit", async (event) => {
     if (data.status === "no_match" || data.status === "ambiguous") {
       searchStatus.textContent = data.message || "No unique address match found. Include street number, city, state and ZIP code, or click the map.";
       stationStatus.textContent = "Stations were not searched: enter a unique address or select a point on the map.";
+      hazardStationStatus.textContent = "Hazard station was not searched: enter a unique address or select a point on the map.";
       return;
     }
     if (data.status !== "matched" || !Number.isFinite(data.latitude) || !Number.isFinite(data.longitude)) {
@@ -1336,6 +1490,7 @@ searchForm.addEventListener("submit", async (event) => {
     if (error.name !== "AbortError") {
       searchStatus.textContent = "Address search failed. Check your connection or click the map instead.";
       stationStatus.textContent = "Stations were not searched because address lookup failed.";
+      hazardStationStatus.textContent = "Hazard station was not searched because address lookup failed.";
       console.error("Address search failed:", error);
     }
   } finally {

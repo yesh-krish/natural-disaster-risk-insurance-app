@@ -1,6 +1,7 @@
 """Versioned research API, sharing providers with the interactive map."""
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+import http.client
 import math
 from urllib.parse import parse_qs
 from address_lookup import geocode_address, normalize_address
@@ -9,8 +10,21 @@ from area_hazard import PERILS, SITE_CLASSES, area_disaster, validate_area
 from disaster_data import disaster_at
 from hazard_engine import coordinates
 from monitoring_stations import nearest_station, nearest_stations, station_count
+from fire_history import nearest_fire
+from fire_proximity import fire_proximity
+from risk_context import (active_weather_alerts, elevation_context, flood_zone_context,
+                          national_risk_index, recent_earthquakes)
 
-VERSION = "1.4.0"
+VERSION = "1.8.0"
+# Failures a provider can raise on malformed, truncated or unreachable upstream data. Each means
+# "no answer" (502), never a substituted estimate. http.client.IncompleteRead is not an OSError.
+PROVIDER_ERRORS = (OSError, ValueError, LookupError, TypeError, AttributeError, http.client.HTTPException)
+CONTEXT_PROVIDERS = {
+    "weather-alerts": (active_weather_alerts, "Agency context snapshot; not an annual probability, property loss estimate or safety determination."),
+    "flood-zone-context": (flood_zone_context, "Agency context snapshot; not an annual probability, property loss estimate or safety determination."),
+    "elevation-context": (elevation_context, "Ground elevation context; not flood depth, first-floor height or a probability."),
+    "risk-index": (national_risk_index, "FEMA census-tract community index; relative rankings, not property-level probability or loss."),
+}
 PREFIX = "/api/v1"
 
 
@@ -161,6 +175,48 @@ def dispatch(path, raw_query):
             result = {**lookup, "match_status": lookup["status"],
                       "status": "available" if lookup["status"] == "matched" else "unavailable"}
             return 200, envelope(result, {"address": address})
+        if resource in CONTEXT_PROVIDERS and len(relative) == 1:
+            query = parameters(raw_query, ("lat", "lon", "address"))
+            lat, lon, location = resolve_location(query)
+            request = {"lat": lat, "lon": lon}
+            if location:
+                request["address"] = location["normalized_address"]
+            provider, purpose = CONTEXT_PROVIDERS[resource]
+            payload = envelope(provider(lat, lon), request, location)
+            payload["meta"]["purpose"] = purpose
+            return 200, payload
+        if resource == "recent-earthquakes" and len(relative) == 1:
+            query = parameters(raw_query, ("lat", "lon", "address", "radius_km", "days", "min_magnitude"))
+            radius = number(query, "radius_km") if "radius_km" in query else 100
+            days = number(query, "days") if "days" in query else 365
+            magnitude = number(query, "min_magnitude") if "min_magnitude" in query else 2.5
+            if not (1 <= radius <= 300 and 1 <= days <= 3650 and days == int(days) and 0 <= magnitude <= 9.5):
+                raise InvalidRequest("radius_km must be 1-300, days an integer 1-3650 and min_magnitude 0-9.5.")
+            lat, lon, location = resolve_location(query)
+            request = {"lat": lat, "lon": lon, "radius_km": radius, "days": int(days), "min_magnitude": magnitude}
+            if location:
+                request["address"] = location["normalized_address"]
+            payload = envelope(recent_earthquakes(lat, lon, radius, int(days), magnitude), request, location)
+            payload["meta"]["purpose"] = "Historical catalog snapshot; not a shaking probability, hazard curve or loss estimate."
+            return 200, payload
+        if resource == "fire-proximity" and len(relative) == 1:
+            query = parameters(raw_query, ("lat", "lon", "address"))
+            lat, lon, location = resolve_location(query)
+            request = {"lat": lat, "lon": lon, "radii_km": [5, 10, 20]}
+            if location:
+                request["address"] = location["normalized_address"]
+            payload = envelope(fire_proximity(lat, lon), request, location)
+            payload["meta"]["purpose"] = "Historical annual reported-fire frequencies; not calibrated future probabilities or property damage estimates."
+            return 200, payload
+        if resource == "nearest-fire" and len(relative) == 1:
+            query = parameters(raw_query, ("lat", "lon", "address"))
+            lat, lon, location = resolve_location(query)
+            request = {"lat": lat, "lon": lon, "time_window": "all_available_history"}
+            if location:
+                request["address"] = location["normalized_address"]
+            payload = envelope(nearest_fire(lat, lon), request, location)
+            payload["meta"]["purpose"] = "Reported historical wildfire context; source coverage and location precision vary."
+            return 200, payload
         if resource == "monitoring-stations" and len(relative) == 1:
             query = parameters(raw_query, ("peril", "lat", "lon", "address", "n", "network"))
             if "peril" not in query or "n" in query or "network" in query:
@@ -227,6 +283,6 @@ def dispatch(path, raw_query):
         status, result = error_response(422, exc.code, str(exc))
         result["error"]["details"] = exc.lookup
         return status, result
-    except (OSError, ValueError, KeyError, TypeError) as exc:
+    except PROVIDER_ERRORS as exc:
         print(f"v1 provider failure: {type(exc).__name__}")
         return error_response(502, "provider_unavailable", "The data provider could not complete this lookup. Retry later; no estimate was substituted.")

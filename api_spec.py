@@ -1,5 +1,6 @@
 """OpenAPI 3.1 contract consumed by the local API explorer."""
 from api_v1 import VERSION, PERILS, SITE_CLASSES
+from risk_context_schemas import context_schemas
 
 
 def openapi_document():
@@ -120,6 +121,31 @@ def openapi_document():
             "peril": {"type": "string"}, "status": {"enum": ["available", "not_found"]},
             "station": {"type": ["object", "null"], "description": "Station metadata including ID, name, coordinates, distance_km and URL; no live readings."},
             "network": {"type": "string"}, "search_radius_km": {"type": "number"}, "message": {"type": "string"}}},
+        "FireProximity": {"type": "object", "required": ["status", "frequency_basis", "baseline", "radii_km", "frequencies", "annual_records", "source_url", "checked_at"], "properties": {
+            "status": {"enum": ["available", "unavailable"]}, "frequency_basis": {"const": "historical_annual_reported_fire_frequency"},
+            "radii_km": {"const": [5, 10, 20]}, "baseline": {"type": ["object", "null"], "properties": {
+                "start_year": {"type": "integer"}, "end_year": {"type": "integer"}, "year_count": {"type": "integer", "minimum": 20},
+                "local_reporting_completeness_verified": {"const": False}, "coverage_assumption": {"type": "string"}}},
+            "source_url": {"type": "string", "format": "uri"}, "source_name": {"type": "string"},
+            "checked_at": {"type": "string", "format": "date-time"}, "refresh_seconds": {"const": 300},
+            "frequencies": {"type": "array", "maxItems": 3, "items": {"type": "object", "required": ["radius_km", "years_with_fire", "total_years", "frequency_pct", "qualifying_years", "reference_interval"], "properties": {
+                "radius_km": {"enum": [5, 10, 20]}, "years_with_fire": {"type": "integer", "minimum": 0}, "total_years": {"type": "integer", "minimum": 20},
+                "frequency_pct": {"type": "number", "minimum": 0, "maximum": 100}, "qualifying_years": {"type": "array", "items": {"type": "integer"}},
+                "reference_interval": {"type": "object", "required": ["minimum_pct", "maximum_pct", "method"], "properties": {
+                    "minimum_pct": {"type": "number", "minimum": 0, "maximum": 100}, "maximum_pct": {"type": "number", "minimum": 0, "maximum": 100}, "method": {"const": "wilson_95_binomial_reference"}}}}}},
+            "annual_records": {"type": "array", "items": {"type": "object", "required": ["year", "nearest_distance_within_20_km", "within_radii", "nearest_fire"], "properties": {
+                "year": {"type": "integer"}, "nearest_distance_within_20_km": {"type": ["number", "null"], "minimum": 0, "maximum": 20.00000001},
+                "nearest_fire": {"type": ["object", "null"]}, "within_radii": {"type": "object", "required": ["5", "10", "20"], "additionalProperties": {"type": "boolean"}}}}},
+            "notes": {"type": "array", "items": {"type": "string"}}, "reason": {"type": "string"}}},
+        "NearestFire": {"type": "object", "required": ["status", "time_window", "fire", "checked_at", "sources", "refresh_seconds"], "properties": {
+            "status": {"enum": ["available", "not_found"]}, "time_window": {"const": "all_available_history"},
+            "checked_at": {"type": "string", "format": "date-time"}, "refresh_seconds": {"const": 300},
+            "sources": {"type": "array", "minItems": 2, "items": {"type": "object"}},
+            "fire": {"type": ["object", "null"], "description": "Nearest dated reported wildfire point across both full-history sources; null only when both searches complete without a result.", "required": ["id", "name", "latitude", "longitude", "distance_km", "discovery_date", "source_name", "record_url"], "properties": {
+                "id": {"type": "string"}, "name": {"type": "string"}, "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+                "longitude": {"type": "number", "minimum": -180, "maximum": 180}, "distance_km": {"type": "number", "minimum": 0},
+                "discovery_date": {"type": "string", "format": "date"}, "discovered_at": {"type": "string", "format": "date-time"},
+                "reported_acres": {"type": ["number", "null"], "minimum": 0}, "source_name": {"type": "string"}, "record_url": {"type": "string", "format": "uri"}}}}},
         "Health": {"type": "object", "required": ["status", "service", "provider_health_checked"], "properties": {
             "status": {"const": "available"}, "service": {"type": "string"}, "provider_health_checked": {"const": False}}},
         "AddressMatch": {"type": "object", "required": ["status", "normalized_address", "source_name", "source_url", "approximate", "note"], "properties": {
@@ -139,6 +165,8 @@ def openapi_document():
                 "code": {"enum": ["invalid_request", "not_found", "method_not_allowed", "provider_unavailable", "address_not_found", "address_ambiguous"]},
                 "message": {"type": "string"}, "details": {"$ref": "#/components/schemas/AddressMatch"}}}}},
     }
+
+    schemas.update(context_schemas())
 
     # Historical potential-fire years have hourly model coverage, not daily heat observations.
     historical_year = schemas["Hazard"]["properties"]["annual_maxima"]["items"]
@@ -168,9 +196,19 @@ def openapi_document():
         return {"get": operation}
 
     return {"openapi": "3.1.0", "info": {"title": "NDApp Research API", "version": VERSION,
-            "description": "Local research API backed by the same providers as the map. No authentication on this loopback-only server. Hazard coverage varies. Frequencies are percentages, not fractions. No forecasts, binding quotes or payouts are issued. Unknown, blank and duplicate query parameters are rejected."},
+            "description": "Research API backed by the same providers as the map. Hazard coverage varies. Frequencies are percentages, not fractions. No forecasts, binding quotes or payouts are issued. Unknown, blank and duplicate query parameters are rejected. Access controls depend on the deployment; local servers default to loopback."},
             "servers": [{"url": "/"}], "paths": {
                 "/api/v1/health": operation("health", "Service health", "Confirms the API is responding; does not contact or verify data providers.", [], "Health"),
+                "/api/v1/weather-alerts": operation("weatherAlerts", "Active NWS point alerts", "Resolve NWS point metadata to verify coverage, then query actual active alerts by point, including county and zone products. Return all pages within a bounded page budget; incomplete queries fail. Exclude expired/cancelled products and preserve agency descriptions, instructions, severity and timestamps. Empty verified results mean no returned active alerts, never safety or zero long-term risk. Unverified point coverage returns unavailable. No application cache or automatic retry.", [lat, lon, address], "WeatherAlerts"),
+                "/api/v1/flood-zone-context": operation("floodZoneContext", "FEMA mapped flood-zone context", "Query NFHL Flood Hazard Zones layer 28 using point intersection. Retain all intersecting polygons, raw attributes, provider units and vertical datum. Missing numeric codes -9999 and -8888 become null in normalized fields. Base flood elevation is not flood depth. No intersecting polygon returns unavailable because coverage is not established. Truncation or malformed responses fail. Regulatory context does not supply an annual depth curve, property loss estimate or zero-risk conclusion.", [lat, lon, address], "FloodZoneContext"),
+                "/api/v1/elevation-context": operation("elevationContext", "USGS ground elevation", "Query USGS EPQS (3D Elevation Program) for bare-earth elevation at a WGS84 point, in meters, with source resolution and acquisition date when supplied. The response does not state the vertical datum. The no-data value returns unavailable. Elevation is terrain context only: not flood depth, first-floor height or drainage. The upstream service is slow (measured 11-29 s); requests wait up to 30 s, then return 502.", [lat, lon, address], "ElevationContext"),
+                "/api/v1/recent-earthquakes": operation("recentEarthquakes", "Recent USGS earthquakes nearby", "Count and list USGS ComCat earthquakes within radius_km (1-300, default 100) over the past days (1-3650, default 365) at or above min_magnitude (0-9.5, default 2.5). Returns the full count and up to the 100 largest events with epicentral great-circle distances. Historical catalog context only: not a ground-shaking probability or hazard curve; catalog completeness varies.", [lat, lon, address,
+                    parameter("radius_km", {"type": "number", "minimum": 1, "maximum": 300, "default": 100}, "Search radius in km.", 100, False),
+                    parameter("days", {"type": "integer", "minimum": 1, "maximum": 3650, "default": 365}, "Look-back window in days ending now.", 365, False),
+                    parameter("min_magnitude", {"type": "number", "minimum": 0, "maximum": 9.5, "default": 2.5}, "Minimum catalog magnitude.", 2.5, False)], "RecentEarthquakes"),
+                "/api/v1/risk-index": operation("riskIndex", "FEMA National Risk Index tract context", "Return FEMA National Risk Index attributes for the census tract(s) intersecting a point: composite and 18 per-hazard risk ratings, national percentile scores, expected annual loss in USD, social vulnerability and community resilience ratings, population, building value and index version. These describe the whole tract, are relative rankings rather than probabilities, and are FEMA's own index; NDApp does not combine hazards. No intersecting tract returns unavailable.", [lat, lon, address], "RiskIndexContext"),
+                "/api/v1/fire-proximity": operation("fireProximity", "Historical annual nearby-fire frequencies", "Share of published baseline calendar years with at least one FPA FOD reported wildfire within 5, 10 or 20 km of the exact selection. Each year counts once per radius. Only complete published edge years before the current year are included, with at least 20 years required. Zero-record years remain in the denominator under an explicit reporting-coverage assumption; local completeness is not verified. Live WFIGS data is excluded. Returns year-by-year nearest records within 20 km, qualifying years and Wilson 95% binomial reference intervals. Geographic eligibility is checked with FEMA US county polygons; no county coverage returns unavailable rather than zero. Full pagination is required, errors return 502, snapshots cache for up to 5 minutes. This is not future burn probability, intensity exceedance or property loss probability.", [lat, lon, address], "FireProximity"),
+                "/api/v1/nearest-fire": operation("nearestFire", "Nearest recorded wildfire — all history", "Search the current-edition USFS FPA FOD archive (currently 1992–2024) and the full NIFC WFIGS wildfire history without a date filter. Both sources must succeed; failed or truncated queries never become a nearest result from partial coverage. Searches expand until the nearest great-circle point is established, with complete pagination. Results cache for up to 5 minutes. Source dates and locations can be approximate; this does not establish property burn extent or current fire activity. No radius or recency filter is imposed. Provider time/page limits return 502 rather than an unverified result.", [lat, lon, address], "NearestFire"),
                 "/api/v1/geocode": operation("geocodeAddress", "Resolve a street address", "Check a full US street address before running a hazard calculation. Returns a matched approximate point or unavailable with match_status=no_match/ambiguous. Multiple matches are never selected automatically.", [{**address, "required": True}], "Geocode"),
                 "/api/v1/hazards/{peril}": operation("hazardLookup", "Hazard lookup", "Source severity–frequency points, units, provenance and model details. Missing coverage remains explicit. Wind (API key: cyclone) covers tropical cyclones only and reports historical frequency; wildfire is a research estimate. fireline_intensity returns Texas scenario intensity without annual probabilities. potential_fire_intensity returns 1991–2020 historical-weather potential surface-intensity exceedance in kW/m, fixed LANDFIRE fuels, annual maxima and provenance. It is not actual wildfire arrival AEP. First request may take several minutes; sources are cached. Point mode only.", [peril, lat, lon, address, site], "Hazard"),
                 "/api/v1/trigger-comparisons/{peril}": operation("triggerComparisons", "Trigger comparisons", "Compare supported point thresholds for one fixed payout. No interpolation or extrapolation. Duplicate rounded thresholds retain a range; alternative rows must not be added together. Contributions rounded to cents, assuming at most one payout per year, excluding fees. fireline_intensity returns unavailable comparisons and frequency_basis=unavailable because the source has no annual probabilities.", [peril, lat, lon, address, site, payout], "TriggerComparisons"),
