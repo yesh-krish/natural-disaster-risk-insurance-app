@@ -9,13 +9,14 @@ from address_lookup import geocode_address, normalize_address
 from area_hazard import PERILS, SITE_CLASSES, area_disaster, validate_area
 from disaster_data import disaster_at
 from hazard_engine import coordinates
-from monitoring_stations import nearest_station, nearest_stations, station_count
+from monitoring_stations import nearest_hazard_stations, nearest_station, nearest_stations, station_count
 from fire_history import nearest_fire
 from fire_proximity import fire_proximity
 from risk_context import (active_weather_alerts, elevation_context, flood_zone_context,
                           national_risk_index, recent_earthquakes)
 
-VERSION = "1.8.0"
+VERSION = "1.12.0"
+ASSESSMENT_HAZARDS = {"flood", "earthquake", "wildfire"}
 # Failures a provider can raise on malformed, truncated or unreachable upstream data. Each means
 # "no answer" (502), never a substituted estimate. http.client.IncompleteRead is not an OSError.
 PROVIDER_ERRORS = (OSError, ValueError, LookupError, TypeError, AttributeError, http.client.HTTPException)
@@ -185,6 +186,52 @@ def dispatch(path, raw_query):
             payload = envelope(provider(lat, lon), request, location)
             payload["meta"]["purpose"] = purpose
             return 200, payload
+        if resource == "assessment" and len(relative) == 1:
+            query = parameters(raw_query, ("lat", "lon", "address", "hazards"))
+            hazards = [item.strip() for item in query.get("hazards", "flood,earthquake,wildfire").split(",")]
+            if not hazards or len(set(hazards)) != len(hazards) or not set(hazards) <= ASSESSMENT_HAZARDS:
+                raise InvalidRequest("hazards must be a comma-separated list of distinct values from flood, earthquake, wildfire.")
+            if "address" in query:
+                if "lat" in query or "lon" in query:
+                    raise InvalidRequest("Use either address or lat and lon, not both.")
+                try:
+                    normalize_address(query["address"])
+                except ValueError as exc:
+                    raise InvalidRequest(str(exc)) from exc
+                lat = lon = None
+                request = {"address": query["address"], "hazards": hazards}
+            else:
+                if "lat" not in query or "lon" not in query:
+                    raise InvalidRequest("Supply a full US street address using address, or both lat and lon.")
+                lat, lon = point_parameters(query)
+                request = {"lat": lat, "lon": lon, "hazards": hazards}
+            try:
+                from risk_agent import web_assessment
+            except ImportError:
+                return error_response(502, "provider_unavailable",
+                                      "The assessment agent is not installed on this server (requirements-agent.txt).")
+            result = web_assessment(hazards, lat=lat, lon=lon, address=query.get("address"))
+            payload = envelope(result, request)
+            payload["meta"]["purpose"] = ("Evidence screening gathered by the NDApp agent over MCP; not a warning, "
+                                          "quote, safety determination or loss estimate.")
+            return 200, payload
+        if resource == "satellite-fires" and len(relative) == 1:
+            query = parameters(raw_query, ("lat", "lon", "address", "radius_km", "window"))
+            radius = number(query, "radius_km") if "radius_km" in query else 25
+            if not 1 <= radius <= 100:
+                raise InvalidRequest("radius_km must be between 1 and 100.")
+            window = query.get("window", "24h")
+            if window not in ("24h", "48h", "7d"):
+                raise InvalidRequest("window must be 24h, 48h or 7d.")
+            lat, lon, location = resolve_location(query)
+            request = {"lat": lat, "lon": lon, "radius_km": radius, "window": window}
+            if location:
+                request["address"] = location["normalized_address"]
+            from satellite_fire import satellite_fire_detections
+            payload = envelope(satellite_fire_detections(lat, lon, radius, window), request, location)
+            payload["meta"]["purpose"] = ("Satellite thermal-anomaly observations; not confirmed fires, perimeters, "
+                                          "fire intensity, probabilities or a safety determination.")
+            return 200, payload
         if resource == "recent-earthquakes" and len(relative) == 1:
             query = parameters(raw_query, ("lat", "lon", "address", "radius_km", "days", "min_magnitude"))
             radius = number(query, "radius_km") if "radius_km" in query else 100
@@ -219,9 +266,24 @@ def dispatch(path, raw_query):
             return 200, payload
         if resource == "monitoring-stations" and len(relative) == 1:
             query = parameters(raw_query, ("peril", "lat", "lon", "address", "n", "network"))
-            if "peril" not in query or "n" in query or "network" in query:
+            if "peril" in query and "n" in query:
+                if "network" in query:
+                    raise InvalidRequest("Use peril with n for hazard stations, or network=awc_metar for weather stations, not both.")
+                peril = query["peril"]
+                if peril not in PERILS - {"auto", "heat", "potential_fire_intensity"}:
+                    raise InvalidRequest("peril must be flood, earthquake, wildfire, fireline_intensity, cyclone or rainfall.")
+                try:
+                    n = station_count(query["n"])
+                except ValueError as exc:
+                    raise InvalidRequest(str(exc)) from exc
+                lat, lon, location = resolve_location(query)
+                request = {"peril": peril, "n": n, "lat": lat, "lon": lon}
+                if location:
+                    request["address"] = location["normalized_address"]
+                return 200, envelope(nearest_hazard_stations(peril, lat, lon, n), request, location)
+            if "peril" not in query or "network" in query:
                 if "peril" in query:
-                    raise InvalidRequest("Multi-station search uses network=awc_metar, independent of peril. Omit peril.")
+                    raise InvalidRequest("Weather-station search uses network=awc_metar, independent of peril. Omit peril.")
                 if query.get("network", "awc_metar") != "awc_metar":
                     raise InvalidRequest("network must be awc_metar.")
                 try:

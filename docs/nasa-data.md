@@ -9,6 +9,20 @@ This evaluation changes documentation and saves research samples only. No NASA
 provider, UI, credentials, production data, calculation, or dependency was added.
 The sample reproduction script does not import the app.
 
+**Implemented November 10, 2026 (API 1.11.0):** the section 7 recommendation is now
+built as `satellite_fire.py`, `GET /api/v1/satellite-fires` and the map's
+"Satellite fire observations" section (`satellite_fire.js`) for the four wildfire
+hazard options. Differences from the proposal: it reads FIRMS's public rolling US
+files for both NOAA-20 and NOAA-21 VIIRS (no MAP_KEY). Since API 1.12.0 the user
+picks the 24-hour, 48-hour or 7-day file; the window is the file's own span (the
+24-hour file covered about 30 hours when checked) and each source reports its
+oldest and newest detection time. Age colour bands scale with the window
+(24 h: 6/12 hours; 48 h: 12/24 hours; 7 d: 1/3 days). Longer periods need the
+MAP_KEY Area API (1–5 days per request) or archive downloads; files are cached 10 minutes; the default radius is 25 km
+(1–100 km). One failed satellite gives a partial result; both failing returns 502.
+Search areas outside the contiguous US and Hawaii return unavailable. Raw-response
+archiving, NRT revision tracking and FEDS histories are not yet implemented.
+
 ## 1. App and research context read before product selection
 
 Read `README.md`, `docs/heat-and-wind.md`, `docs/fireline-intensity.md`,

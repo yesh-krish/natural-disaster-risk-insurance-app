@@ -1,6 +1,16 @@
 # NDApp Research API v1
 
-The current contract is **1.8.0**. Version 1.8.0 adds read-only USGS
+The current contract is **1.12.0**. Version 1.12.0 adds `window=24h|48h|7d` to
+`/api/v1/satellite-fires`, and `hazards/auto` no longer selects the wildfire
+flame-length model. Version 1.11.0 added `/api/v1/satellite-fires`:
+NASA FIRMS VIIRS active-fire detections near a point (see
+[NASA data](nasa-data.md)). Version 1.10.0 lets `/api/v1/monitoring-stations`
+take `peril` with `n` to return the nearest n stations in that hazard's network;
+the map now lists only those hazard stations (METAR weather readings appear only in
+the Heat screening panel). Version 1.9.0 added `/api/v1/assessment`,
+which runs the NDApp assessment agent (through its MCP tools, no AI model) and
+returns cited facts, per-hazard evidence status, gaps and evidence fingerprints.
+Version 1.8.0 added read-only USGS
 `/api/v1/elevation-context`, USGS `/api/v1/recent-earthquakes` and FEMA National
 Risk Index `/api/v1/risk-index` snapshots, also exposed as MCP tools by
 `ndapp_mcp_server.py` (see [risk assessment tools](risk-assessment-tools.md)).
@@ -9,7 +19,7 @@ Version 1.7.0 added read-only NWS
 [risk assessment tools](risk-assessment-tools.md) for semantics and agent handlers.
 Version 1.5.0 added `/api/v1/nearest-fire`
 ([recorded wildfire history](fire-history.md)); version 1.6.0 added
-`/api/v1/fire-proximity` for annual reported nearby-fire frequencies.
+`/api/v1/fire-proximity` for annual reported nearby-fire frequencies, including size-aware exceedance (`size_exceedance`, see [fire-history.md](fire-history.md)).
 The [student handoff](student-api-handoff.md) covers the standalone API server,
 JavaScript client and remote deployment setup. The map server and standalone
 server share the same v1 calculations and response contract.
@@ -53,13 +63,15 @@ Use `server.py --port 8001` to run a separate instance on another port.
 | `/api/v1/geocode` | `address` | Matched address and approximate coordinates, or explicit match failure |
 | `/api/v1/weather-alerts` | `address` OR both `lat`, `lon` | Actual active NWS point-alert products with agency text, timestamps and verified point coverage |
 | `/api/v1/flood-zone-context` | `address` OR both `lat`, `lon` | All intersecting FEMA NFHL flood-zone attributes, source units and elevation datum; no polygon means unavailable coverage |
+| `/api/v1/assessment` | `address` OR both `lat`, `lon`; optional `hazards` (comma list of `flood`, `earthquake`, `wildfire`; default all) | Full agent evidence screening: facts with evidence IDs and JSON Pointers, `hazard_status`, gaps, evidence sources and SHA-256 fingerprints. `assessment_status` is complete, partial, unavailable, awaiting_input or failed. Typically 10–40 s; needs `requirements-agent.txt` on the server |
+| `/api/v1/satellite-fires` | `address` OR both `lat`, `lon`; optional `radius_km` (1–100, default 25), `window` (`24h` default, `48h`, `7d`) | NASA FIRMS VIIRS (NOAA-20, NOAA-21) detections in the chosen rolling US file, nearest first, with time, age, confidence, FRP (MW) and per-satellite status. Thermal anomalies, not confirmed fires; none found is not "no fire"; contiguous US and Hawaii only |
 | `/api/v1/elevation-context` | `address` OR both `lat`, `lon` | USGS 3DEP bare-earth elevation in meters (datum not stated by the service); no-data returns unavailable; upstream can take up to 30 s |
 | `/api/v1/recent-earthquakes` | `address` OR both `lat`, `lon`; optional `radius_km` (1–300, default 100), `days` (1–3650, default 365), `min_magnitude` (0–9.5, default 2.5) | Full USGS ComCat count plus up to the 100 largest events with epicentral distances; historical catalog, not a probability |
 | `/api/v1/risk-index` | `address` OR both `lat`, `lon` | FEMA National Risk Index ratings, scores and expected annual loss for the intersecting census tract; tract-wide relative index, not property risk |
 | `/api/v1/hazards/{peril}` | `address` OR both `lat`, `lon` | Source severity–frequency points, units, sources and model details |
 | `/api/v1/trigger-comparisons/{peril}` | `payout_usd`, plus `address` OR both `lat`, `lon` | Alternative supported point thresholds and annual contributions |
 | `/api/v1/areas/{peril}` | `south`, `west`, `north`, `east` | 25-point grid means and per-threshold/per-sample coverage |
-| `/api/v1/monitoring-stations` | `address` OR both `lat`, `lon`; optional `n`, `network=awc_metar` | Nearest n METAR stations within 200 km; legacy `peril` without n/network retains the single-station lookup |
+| `/api/v1/monitoring-stations` | `address` OR both `lat`, `lon`; optional `n`, and either `peril` or `network=awc_metar` | `peril` + `n` (1.10.0): nearest n stations in that hazard's own network (USGS stream or precipitation gauges, EarthScope seismic, NIFC RAWS, METAR wind for cyclone). `network=awc_metar` (or neither): nearest n METAR weather stations with observations. `peril` alone: legacy single station |
 
 Hazards are `flood`, `earthquake`, `wildfire`, `fireline_intensity`, `potential_fire_intensity`, `cyclone`, `rainfall` and `heat`.
 

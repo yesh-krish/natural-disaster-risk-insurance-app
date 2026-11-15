@@ -9,11 +9,12 @@ from hazard_providers import fetch_json
 
 NRI_LAYER = "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Counties/FeatureServer/0"
 NRI_FIELDS = ("COUNTY", "STATE", "STCOFIPS", "NRI_VER", "ERQK_EALT", "HRCN_EALT",
-              "WFIR_EALT", "IFLD_EALT", "CFLD_EALT")
+              "IFLD_EALT", "CFLD_EALT")
+# Wildfire flame length (FSim) was removed from the map on 2026-11-10, so automatic
+# selection no longer chooses it. Wildfire evidence is in the nearby-fire views instead.
 NAMES = {"flood": "Flood", "earthquake": "Earthquake", "cyclone": "Wind (tropical cyclones)",
-         "wildfire": "Fire / Wildfire", "rainfall": "Rainfall"}
-FIELDS = {"flood": ("IFLD_EALT", "CFLD_EALT"), "cyclone": ("HRCN_EALT",),
-          "wildfire": ("WFIR_EALT",), "earthquake": ("ERQK_EALT",)}
+         "rainfall": "Rainfall"}
+FIELDS = {"flood": ("IFLD_EALT", "CFLD_EALT"), "cyclone": ("HRCN_EALT",), "earthquake": ("ERQK_EALT",)}
 
 
 def valid_number(value):
@@ -111,7 +112,7 @@ def most_relevant(lat, lon, site_class="BC"):
                               f"Flooding is the highest remaining county-ranked choice for {area}, mainly from inland flooding, but no usable flood-depth curve is available at this coordinate. Showing Rainfall as related context; rainfall depth does not measure local inundation.")
 
     # No county inference is claimed when ranking/data cannot support one.
-    for peril in ("rainfall", "earthquake", "wildfire", "cyclone", "flood"):
+    for peril in ("rainfall", "earthquake", "cyclone", "flood"):
         data = check(peril)
         if usable_curve(data):
             return choose(data, "available_data_fallback",

@@ -32,6 +32,10 @@ function hazardTriggerBasis(peril) {
     label: "Observed annual heat exceedance frequency",
     note: "Share of included complete 1991–2020 years with a daily maximum air temperature at or above this level at the selected historical station. This station proxy is not a calibrated future probability, a multi-day heat-wave metric or a construction exposure limit.",
   };
+  if (peril === "nearest_fire") return {
+    label: "Observed annual reported-fire frequency",
+    note: "Share of published 1992–2024 archive years with at least one USFS FPA FOD reported wildfire of at least this final size whose reported point lies within the selected radius. This is a historical reporting frequency, not a calibrated future probability or the chance that this property burns. Sizes never reported within the radius are not offered: zero observed years does not mean zero future risk.",
+  };
   if (peril === "cyclone") return {
     label: "Observed annual exceedance frequency",
     note: "Share of complete historical years with a sampled wind footprint at this level. This is not a calibrated future probability. Zero observed years does not mean zero future risk.",

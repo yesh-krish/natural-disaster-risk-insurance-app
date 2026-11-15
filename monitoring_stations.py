@@ -308,9 +308,17 @@ def _candidates(peril, lat, lon, radius_km=RADIUS_KM):
 
 
 def nearest_station(peril, lat, lon):
+    """Legacy single-station contract: the nearest station in the hazard's network."""
+    result = nearest_hazard_stations(peril, lat, lon, 1)
+    return {key: result[key] for key in ("peril", "station", "search_radius_km", "network", "status", "message")}
+
+
+def nearest_hazard_stations(peril, lat, lon, n=1):
+    """Nearest n unique stations in the network relevant to one hazard, within 200 km."""
     coordinates(lat, lon)
+    n = station_count(n)
     if peril == "fireline_intensity":
-        result = nearest_station("wildfire", lat, lon)
+        result = nearest_hazard_stations("wildfire", lat, lon, n)
         result["peril"] = peril
         result["message"] += " RAWS do not measure the modeled fireline intensity."
         return result
@@ -318,8 +326,9 @@ def nearest_station(peril, lat, lon):
         raise ValueError("Unknown hazard")
     result = {"peril": peril, "station": None, "search_radius_km": RADIUS_KM}
     result["network"] = NETWORKS[peril]
-    stations = []
+    found = {}
     for radius in SEARCH_RADII_KM:
+        found = {}  # Each larger circle contains the smaller one, so search it afresh.
         for candidate in _candidates(peril, lat, lon, radius):
             row = dict(candidate)
             try:
@@ -328,14 +337,18 @@ def nearest_station(peril, lat, lon):
             except (ValueError, TypeError):
                 continue
             row["distance_km"] = distance_km(lat, lon, row["latitude"], row["longitude"])
-            if row["distance_km"] <= radius:
-                stations.append(row)
+            prior = found.get(row["id"])
+            if row["distance_km"] <= radius and (prior is None or row["distance_km"] < prior["distance_km"]):
+                found[row["id"]] = row
         # The entire circle was searched, so anything outside it is farther.
-        if stations:
+        if len(found) >= n:
             break
-    result["status"] = "available" if stations else "not_found"
-    result["station"] = min(stations, key=lambda row: (row["distance_km"], row["id"])) if stations else None
-    result["message"] = "Nearest in this network within 200 km, by straight-line distance. Station context is separate from the hazard model; current readings and sensor availability are not checked."
+    stations = sorted(found.values(), key=lambda row: (row["distance_km"], row["id"]))[:n]
+    result.update(status="available" if stations else "not_found", station=stations[0] if stations else None,
+                  stations=stations, requested_count=n, returned_count=len(stations),
+                  fewer_than_requested=len(stations) < n)
+    result["message"] = ("Nearest in this network within 200 km, by straight-line distance. Station context is separate "
+                         "from the hazard model; current readings and sensor availability are not checked.")
     if peril == "flood":
         result["message"] += " A nearby stream gauge may be on a different watershed; it does not measure flood depth at your location."
     elif peril == "earthquake":

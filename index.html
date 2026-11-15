@@ -120,10 +120,6 @@
       <div class="trigger-setup">
       <h2 id="trigger-heading">Set your trigger and payout</h2>
       <p id="hazard-selection-description">Use a government model’s supported levels for your selected location.</p>
-      <aside id="potential-fire-prototype" class="prototype-note" hidden aria-label="Potential fire intensity prototype">
-        <strong>Research prototype — accuracy not yet validated</strong>
-        <p>Uses historical hourly weather (1991–2020), mapped fuels and assumed live fuel moisture with Rothermel–Byram methods to estimate potential surface-fire intensity (kW/m). The curve counts years whose modeled peak reaches each threshold; it does not predict actual wildfire occurrence or damage.</p>
-      </aside>
       <div class="hazard-controls">
         <label for="disaster-select">1. Select a hazard
           <select id="disaster-select">
@@ -131,8 +127,6 @@
             <option value="flood" selected>Flood</option>
             <option value="earthquake">Earthquake</option>
             <option value="nearest_fire">Wildfire / Nearby fire frequency</option>
-            <option value="potential_fire_intensity">Wildfire / Potential intensity (kW/m)</option>
-            <option value="wildfire">Wildfire / Flame length (FSim)</option>
             <option value="cyclone">Wind (tropical cyclones)</option>
             <option value="rainfall">Rainfall</option>
             <option value="heat">Heat (historical annual exceedance)</option>
@@ -242,6 +236,24 @@
           </table></div>
           <p class="note">The blue circle shows the selected radius. Radii are nested; do not add their frequencies. Intervals assume independent, comparable years and exclude reporting gaps and climate changes.</p>
           <div id="fire-proximity-chart"></div>
+          <div id="fire-proximity-size" hidden>
+            <h3>Burned-area exceedance curve</h3>
+            <p id="fire-proximity-curve-summary"></p>
+            <div id="fire-proximity-curve-chart"></div>
+            <div class="table-scroll"><table class="scenario-table"><caption id="fire-proximity-curve-caption">Reported fires of at least each size within the selected radius</caption>
+              <thead><tr><th scope="col">Burned area at least</th><th scope="col">Fires reported</th><th scope="col">Expected fires per year</th><th scope="col">Annual probability (rate-based)</th><th scope="col">Years that had one</th><th scope="col">Return period</th></tr></thead>
+              <tbody id="fire-proximity-curve-rows"></tbody>
+            </table></div>
+            <p class="note">Rate-based probability = 1 − e<sup>−rate</sup>, assuming fires occur independently at the archive's average rate. "Years that had one" is what was actually observed. When fires cluster in a few years, the rate-based figure is higher. The curve stops above the largest reported fire; larger sizes are not extrapolated.</p>
+            <h3>By reported fire size</h3>
+            <div class="table-scroll"><table class="scenario-table"><caption>Share of years with at least one reported wildfire of at least this size</caption>
+              <thead><tr><th scope="col">Reported size</th><th scope="col">Within 5 km</th><th scope="col">Within 10 km</th><th scope="col">Within 20 km</th></tr></thead>
+              <tbody id="fire-proximity-size-rows"></tbody>
+            </table></div>
+            <p id="fire-proximity-reach"></p>
+            <p id="fire-proximity-burned"></p>
+            <p class="note">Footprints treat each reported area as a circle centered on the reported point. Real perimeters are irregular and points can be off by about 1.6 km. Burned-area share averages over the whole circle; it is not the chance that this property burns.</p>
+          </div>
           <p id="fire-proximity-coverage" class="note"></p>
           <p class="note">This describes reported fire points. It is not a calibrated future probability, a fire-intensity exceedance, or the chance that your property burns. Zero recorded years does not establish zero future risk.</p>
           <details id="fire-proximity-year-details"><summary>Inspect each baseline year</summary>
@@ -258,21 +270,31 @@
         <button id="nearest-fire-refresh" type="button" disabled>Refresh fire history</button>
         <p class="note">Reported locations can be approximate. Distance is to the recorded point; it does not establish that your selected property burned. <a href="docs/fire-history.md">Sources and historical coverage</a></p>
       </section>
-      <section aria-labelledby="hazard-station-heading">
-        <h2 id="hazard-station-heading">Monitoring station for the selected hazard</h2>
-        <p id="hazard-station-status" role="status" aria-live="polite">Select a location to find a hazard-specific station.</p>
-        <div id="hazard-station-details" class="note"></div>
-        <button id="hazard-station-show" type="button" hidden>Show selection and hazard station</button>
-        <button id="hazard-station-retry" type="button" hidden>Retry hazard station search</button>
+      <section class="panel" id="satellite-fire-panel" aria-labelledby="satellite-fire-heading" hidden>
+        <h2 id="satellite-fire-heading">Satellite fire observations — NASA FIRMS (VIIRS)</h2>
+        <p class="note" id="satellite-fire-legend" style="margin-top:0">Hot spots detected by the NOAA-20 and NOAA-21 satellites in about the last 24 hours, in ~375 m pixels. Marker colour shows age: red under 6 hours, orange under 12 hours, amber older.</p>
+        <label for="satellite-fire-window">Time window
+          <select id="satellite-fire-window" disabled><option value="24h" selected>Last 24 hours</option><option value="48h">Last 48 hours</option><option value="7d">Last 7 days</option></select>
+        </label>
+        <label for="satellite-fire-radius">Search radius
+          <select id="satellite-fire-radius" disabled><option value="10">10 km</option><option value="25" selected>25 km</option><option value="50">50 km</option><option value="100">100 km</option></select>
+        </label>
+        <button id="satellite-fire-refresh" type="button" disabled>Refresh detections</button>
+        <button id="satellite-fire-show" type="button" hidden>Show selection and detections</button>
+        <p id="satellite-fire-status" role="status" aria-live="polite">Select a location to check recent satellite fire detections.</p>
+        <div id="satellite-fire-content" hidden>
+          <ol id="satellite-fire-list" aria-label="Satellite detections, nearest first"></ol>
+          <p id="satellite-fire-sources" class="note"></p>
+        </div>
+        <p class="note">A detection means something hot was seen from space, not a confirmed wildfire: prescribed or farm burns, gas flares and industry can appear too. No detection does not mean no fire, because clouds, smoke and small or short fires can be missed. Fire radiative power (MW) is not fireline intensity (kW/m). Confirm with agency incident reports.</p>
       </section>
-      <section aria-labelledby="station-heading">
-        <h2 id="station-heading">Nearby weather stations (METAR)</h2>
-        <p id="station-coverage" class="note">Network: NOAA Aviation Weather Center METAR weather stations, worldwide catalog, within 200 km. Choose 1–50 stations above. Address search covers US street addresses. This network is independent of the selected hazard. Orange marks stations; blue marks your selection.</p>
-        <p id="station-status" role="status" aria-live="polite">Select a location to find monitoring stations.</p>
-        <p id="station-details" class="note"></p>
-        <ol id="station-list" aria-label="Stations sorted by distance"></ol>
-        <button id="station-show" type="button" hidden>Show selection and stations</button>
-        <button id="station-retry" type="button" hidden>Retry station search</button>
+      <section aria-labelledby="hazard-station-heading">
+        <h2 id="hazard-station-heading">Nearest monitoring stations for the selected hazard</h2>
+        <p id="station-coverage" class="note">Stations come from the network that monitors the selected hazard (for example, USGS stream gauges for flood or seismic stations for earthquake), within 200 km. Set how many with Stations (n) above.</p>
+        <p id="hazard-station-status" role="status" aria-live="polite">Select a location to find hazard-specific stations.</p>
+        <div id="hazard-station-details" class="note"></div>
+        <button id="hazard-station-show" type="button" hidden>Show selection and stations</button>
+        <button id="hazard-station-retry" type="button" hidden>Retry station search</button>
       </section>
       <p id="area-summary" class="note" role="status" aria-live="polite" hidden></p>
       <button class="scenario-button" id="export-area" type="button" disabled hidden>Export area averages and samples CSV</button>
@@ -295,16 +317,6 @@
             <tbody id="heat-history-rows"></tbody>
           </table></div>
           <button class="scenario-button" id="export-heat" type="button" disabled>Export historical heat data CSV</button>
-        </details>
-        <details id="fire-history-details" hidden>
-          <summary>Potential fire intensity: annual maxima and model inputs</summary>
-          <p class="note" id="fire-history-context"></p>
-          <p class="note">PYRETECHNICS developed by Spatial Informatics Group, LLC and contributors. This implementation uses its Community License for academic research; commercial use requires a separate licence. <a href="/docs/licenses/pyretechnics-2026.10.20.txt">Model licence</a>.</p>
-          <div class="table-scroll"><table class="scenario-table">
-            <thead><tr><th scope="col">Year</th><th scope="col">Valid / expected hours</th><th scope="col">Maximum potential intensity (kW/m)</th><th scope="col">Peak time (UTC)</th><th scope="col">Included</th></tr></thead>
-            <tbody id="fire-history-rows"></tbody>
-          </table></div>
-          <button class="scenario-button" id="export-potential-fire" type="button" disabled>Export curve, annual maxima and provenance JSON</button>
         </details>
         <p class="note" id="location-note">A missing polygon can also mean FEMA has no digital map here. A missing polygon or blank attribute does not establish that a location has no flood risk.</p>
       </section>
@@ -364,9 +376,10 @@
     <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js"></script>
     <script src="damage_model.js?v=1"></script>
     <script src="hazard_chart.js?v=1"></script>
-    <script src="hazard_trigger.js?v=4"></script>
+    <script src="hazard_trigger.js?v=5"></script>
     <script src="fire_history.js?v=1"></script>
-    <script src="fire_proximity.js?v=1"></script>
-    <script src="script.js?v=27"></script>
+    <script src="fire_proximity.js?v=2"></script>
+    <script src="satellite_fire.js?v=1"></script>
+    <script src="script.js?v=32"></script>
   </body>
 </html>

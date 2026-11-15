@@ -2,6 +2,15 @@
 
 Implemented and verified November 2, 2026 (America/Chicago; saved evidence uses UTC).
 
+**Update, November 9, 2026 (API 1.10.0):** the map no longer shows the general
+METAR weather-station list. Its station section lists the nearest n stations from
+the selected hazard's own network (flood: USGS stream gauges; rainfall: USGS
+precipitation gauges; earthquake: EarthScope seismic; wildfire: NIFC RAWS; wind:
+METAR wind stations; heat: the GHCN-Daily station behind the curve). Stations (n)
+sets the count. METAR observations are still fetched for Heat and shown in the heat
+screening panel. The API's METAR route described below is unchanged; `peril` with
+`n` now returns hazard stations. The map description below predates this change.
+
 ## App and architecture
 
 This is the existing **NDApp natural disaster research map / parametric insurance

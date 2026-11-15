@@ -69,8 +69,10 @@ TOOLS = {
         "rankings, not property-level probability or loss.", {}, ["lat", "lon"]),
     "get_wildfire_history": (
         "/api/v1/fire-proximity", "FireProximity", "historical_frequency",
-        "Historical annual share of years with a reported wildfire within 5/10/20 km (FPA FOD). "
-        "Not future burn probability or property loss probability.", {}, ["lat", "lon"]),
+        "Historical annual share of years with a reported wildfire within 5/10/20 km (FPA FOD), "
+        "also split by reported fire size (10/100/1,000/5,000+ acres), a burned-area exceedance curve "
+        "(annual probability and return period of a fire at least each size), equivalent-circle footprint "
+        "reach and mean annual burned-area share. Not future burn probability or property loss probability.", {}, ["lat", "lon"]),
 }
 
 

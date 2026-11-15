@@ -22,6 +22,9 @@ from api_spec import openapi_document
 from api_v1 import dispatch
 
 FIXTURES = json.loads((Path(__file__).parent / "fixtures" / "agent_san_antonio.json").read_text())
+from api_v1 import VERSION as API_VERSION  # noqa: E402
+for _envelope in FIXTURES.values():  # recorded live under 1.8.0; replay under the current contract
+    _envelope["api_version"] = API_VERSION
 LAT, LON = 29.4242, -98.4933
 
 
@@ -247,6 +250,45 @@ class AgentHostTests(unittest.TestCase):
 def dispatch_like(data):
     from api_v1 import envelope
     return envelope(data, {"address": "x"})
+
+
+class AssessmentRouteTests(unittest.TestCase):
+    PATH = "/api/v1/assessment"
+
+    def test_invalid_requests_stop_before_the_agent_runs(self):
+        for query in ("lat=29&lon=-98&hazards=auto", "lat=29&lon=-98&hazards=flood,flood", "lat=29",
+                      "lat=29&lon=-98&address=1%20Main%20St", "lat=nan&lon=1", "lat=29&lon=-98&hazards=",
+                      "lat=29&lon=-98&url=x"):
+            with self.subTest(query=query), patch("risk_agent.web_assessment") as agent:
+                code, payload = dispatch(self.PATH, query)
+                self.assertEqual(code, 400)
+                agent.assert_not_called()
+                assert_contract(self, self.PATH, payload, code)
+
+    def test_point_assessment_returns_facts_without_raw_envelopes(self):
+        with patch("agent_tools.call_tool", side_effect=fake_call_tool()):
+            code, payload = dispatch(self.PATH, f"lat={LAT}&lon={LON}&hazards=flood,earthquake")
+        self.assertEqual(code, 200)
+        assert_contract(self, self.PATH, payload)
+        data = payload["data"]
+        self.assertEqual((payload["status"], data["assessment_status"]), ("available", "complete"))
+        self.assertEqual(data["scope"]["hazards"], ["flood", "earthquake"])
+        self.assertTrue(any(f["hazard"] == "flood" for f in data["facts"]))
+        self.assertFalse(any("envelope" in e for e in data["evidence"]))
+        self.assertTrue(all(e["sha256"] for e in data["evidence"]))
+        json.dumps(payload, allow_nan=False)
+
+    def test_ambiguous_address_is_unavailable_with_candidates(self):
+        def ambiguous(name, arguments):
+            body = dispatch_like({"status": "unavailable", "match_status": "ambiguous", "normalized_address": "x",
+                                  "approximate": True, "note": "choose", "candidates": [{"address": "A"}]})
+            return {"isError": False, "structuredContent": body, "content": [{"type": "text", "text": json.dumps(body)}]}
+        with patch("agent_tools.call_tool", side_effect=fake_call_tool({"resolve_location": ambiguous})):
+            code, payload = dispatch(self.PATH, "address=1%20Main%20St%2C%20Springfield%2C%20TX&hazards=flood")
+        self.assertEqual((code, payload["status"]), (200, "unavailable"))
+        self.assertEqual(payload["data"]["assessment_status"], "awaiting_input")
+        self.assertEqual(len(payload["data"]["location"]["candidates"]), 1)
+        assert_contract(self, self.PATH, payload)
 
 
 class FakeResponse:

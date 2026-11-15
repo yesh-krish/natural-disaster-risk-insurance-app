@@ -8,6 +8,7 @@ const nodes = new Map(), events = {}, layers = new Set(), requests = [], downloa
 const stationRequests = [], hazardStationRequests = [], timers = new Map();
 const fireLoads = [], fireClears = [];
 const proximityLoads = [], proximityClears = [];
+let proximityCurve = null;
 function node(id = '') {
   if (id && nodes.has(id)) return nodes.get(id);
   const n = { value: '', textContent: '', hidden: false, disabled: false, children: [], dataset: {},
@@ -40,7 +41,7 @@ class LocalURL extends URL {
 }
 const context = vm.createContext({
   FireHistory: { load(...args) { fireLoads.push(args); }, clear(...args) { fireClears.push(args); } },
-  FireProximity: { load(...args) { proximityLoads.push(args); }, clear(...args) { proximityClears.push(args); } },
+  FireProximity: { load(...args) { proximityLoads.push(args); }, clear(...args) { proximityClears.push(args); }, onCurve(fn) { proximityCurve = fn; } },
   console, Intl, AbortController, URLSearchParams, URL: LocalURL, Blob,
   setTimeout(fn, ms) { const id = Symbol(); timers.set(id, {fn, ms}); return id; },
   clearTimeout(id) { timers.delete(id); },
@@ -75,6 +76,7 @@ const data = {
 
 (async () => {
   assert.equal(node('nearest-fire-panel').hidden, true);
+  assert.equal(node('satellite-fire-panel').hidden, true, 'satellite fire observations are only for wildfire hazards');
   assert.equal(fireLoads.length, 0, 'other hazards never request nearest fire');
   assert.equal(proximityLoads.length, 0, 'other hazards never request annual fire frequencies');
   node('selection-mode').value = 'area'; node('selection-mode').change();
@@ -156,103 +158,63 @@ const data = {
   await flush();
   assert.equal(node('trigger-select').disabled, true, 'an outdated maximum response must never be labeled as an average');
   assert.match(node('trigger-help').textContent, /updated backend/);
-  const stationData = {data: { status: 'available', network: 'NOAA AWC METAR', message: 'Network context',
-    requested_count: 5, returned_count: 2, search_radius_km: 200, fewer_than_requested: true,
-    coverage: 'METAR stations within 200 km', catalog_fetched_at: '2026-11-03T00:00:00Z',
-    stations: [
-      { id: 'KAAA', name: 'First airport', latitude: 2.1, longitude: 2.1, distance_km: 1.23,
-        network: 'NOAA AWC METAR', measured_variables: ['Air temperature', 'Wind'], variables_note: 'Report availability varies.',
-        observation: {status: 'stale', observed_at: '2026-11-02T20:00:00Z', age_minutes: 180,
-          values: [{variable: 'Wind speed', value: 0, unit: 'kn'}], message: 'Older than two hours.',
-          heat: {status: 'unavailable', air_temperature_c: 0, heat_index_f: null, category: null, reason: 'Report is older than 2 hours; Heat Index withheld.'}},
-        url: 'https://aviationweather.gov/data/metar/?id=KAAA'},
-      { id: 'KBBB', name: '<script>Airport</script>', latitude: 2.2, longitude: 2.2, distance_km: 2.34,
-        network: 'NOAA AWC METAR', measured_variables: ['Wind'], variables_note: 'Report availability varies.',
-        observation: {status: 'available', observed_at: '2026-11-02T22:59:00Z', age_minutes: 1,
-          values: [], message: 'Latest report.',
-          heat: {status: 'available', air_temperature_c: 37.7777778, relative_humidity_pct: 55,
-            heat_index_c: 51.1, heat_index_f: 124, category: 'Danger', reason: 'Shade screening only; not WBGT.'}},
-        url: 'https://aviationweather.gov/data/metar/?id=KBBB'},
-    ] }};
-  stationRequests.at(-1).resolve({ok: true, json: async () => stationData});
+  // Only stations from the selected hazard's network are requested and shown; no METAR list.
+  assert.equal(stationRequests.length, 0, 'non-heat hazards never request METAR weather stations');
+  const listedStations = () => node('hazard-station-details').children[0]?.children || [];
+  const multiStation = (peril, network, stations, extra = {}) => ({data: {peril, network, status: stations.length ? 'available' : 'not_found',
+    station: stations[0] || null, stations, requested_count: 5, returned_count: stations.length, search_radius_km: 200,
+    fewer_than_requested: stations.length < 5, message: 'Station context only, within 200 km.', ...extra}});
+  const gauges = [
+    {id: 'G1', name: 'First gauge', latitude: 2.1, longitude: 2.1, distance_km: 1.23, url: 'https://waterdata.usgs.gov/monitoring-location/USGS-G1/'},
+    {id: 'G2', name: '<script>Gauge</script>', latitude: 2.2, longitude: 2.2, distance_km: 2.34, url: 'https://evil.example/x'},
+  ];
+  let stationParams = new URL(hazardStationRequests.at(-1).url, 'http://localhost').searchParams;
+  assert.equal(stationParams.get('peril'), 'rainfall');
+  assert.equal(stationParams.get('n'), '5', 'Stations (n) sets how many hazard stations are requested');
+  hazardStationRequests.at(-1).resolve({ok: true, json: async () => multiStation('rainfall', 'USGS precipitation gauges', gauges)});
   await flush();
-  assert.match(node('station-status').textContent, /2 of 5.*area center.*Fewer eligible/);
-  assert.equal(node('station-list').children.length, 2);
-  assert.match(node('station-list').children[0].children[0].textContent, /First airport.*1.23 km/);
-  assert.match(node('station-list').children[0].children[2].textContent, /STALE.*UTC.*0 kn/);
-  assert.equal(node('station-list').children[1].children[0].textContent, '<script>Airport</script> (KBBB) · 2.34 km');
-  assert.equal(node('station-list').children[0].children[3].href, 'https://aviationweather.gov/data/metar/?id=KAAA');
-  assert.match(node('heat-status').textContent, /2 nearby stations.*No area average/);
-  assert.equal(node('heat-list').children.length, 2);
-  assert.match(node('heat-list').children[0].children[1].textContent, /0.0 °C.*32.0 °F.*UTC.*180 minutes.*Heat Index unavailable.*older than 2 hours/);
-  assert.match(node('heat-list').children[1].children[1].textContent, /37.8 °C.*100.0 °F.*55.0%.*51.1 °C.*124.0 °F.*Danger.*not WBGT/);
-  assert.equal(node('heat-list').children[1].children[0].textContent, '<script>Airport</script> (KBBB) · 2.34 km');
-  const stationLayer = [...layers].find(l => l.popup?.textContent?.startsWith('1. First airport'));
-  assert.ok(stationLayer, 'station has a separate map highlight');
-  assert.ok([...layers].some(l => l.popup?.textContent?.startsWith('2. <script>Airport')));
-  node('station-show').click();
+  assert.match(node('hazard-station-status').textContent, /USGS precipitation gauges: 2 of 5.*area center.*Fewer eligible/);
+  assert.equal(listedStations().length, 2);
+  assert.equal(listedStations()[0].children[0].textContent, 'First gauge (G1) · 1.23 km');
+  assert.equal(listedStations()[0].children[2].href, 'https://waterdata.usgs.gov/monitoring-location/USGS-G1/');
+  assert.equal(listedStations()[1].children[0].textContent, '<script>Gauge</script> (G2) · 2.34 km', 'provider text stays inert');
+  assert.equal(listedStations()[1].children.length, 2, 'unsafe provider URL is omitted');
+  const firstStationLayer = [...layers].find(l => l.popup?.textContent === 'USGS precipitation gauges: 1. First gauge (G1) · 1.23 km');
+  assert.ok(firstStationLayer, 'every hazard station gets a map marker');
+  assert.ok([...layers].some(l => l.popup?.textContent?.startsWith('USGS precipitation gauges: 2. <script>Gauge')));
+  node('hazard-station-show').click();
   assert.equal(map.fitted.points.length, 3, 'fit includes selection and every station');
+  const staleStationRequest = hazardStationRequests.at(-1);
   node('redraw-area').click();
   events.click({ latlng: { lat: 1, lng: 1 } }); events.click({ latlng: { lat: 3, lng: 3 } });
-  assert.ok(!layers.has(stationLayer), 'new location removes old station immediately');
-  assert.equal(node('station-list').children.length, 0);
-  assert.equal(node('heat-list').children.length, 0, 'location changes clear heat snapshot immediately');
-  stationRequests[0].resolve({ok: true, json: async () => stationData});
+  assert.ok(!layers.has(firstStationLayer), 'new location removes old station markers immediately');
+  assert.equal(listedStations().length, 0);
+  staleStationRequest.resolve({ok: true, json: async () => multiStation('rainfall', 'Old', gauges)});
   await flush();
-  assert.match(node('station-status').textContent, /Finding/, 'stale station response cannot overwrite current selection');
-  stationRequests.at(-1).resolve({ok: false, status: 502, json: async () => ({error: {message: 'Station service unavailable'}})});
+  assert.match(node('hazard-station-status').textContent, /Finding the nearest 5 stations/, 'stale response cannot overwrite current selection');
+  hazardStationRequests.at(-1).resolve({ok: false, status: 502, json: async () => ({error: {message: 'Station service unavailable'}})});
   await flush();
-  assert.match(node('station-status').textContent, /Station service unavailable/);
-  assert.match(node('heat-status').textContent, /unavailable.*failed/);
-  assert.equal(node('station-retry').hidden, false);
-  node('station-retry').click();
-  const stalledRequest = stationRequests.at(-1);
-  [...timers.values()].filter(t => t.ms === 15000).at(-1).fn();
-  assert.equal(stalledRequest.options.signal.aborted, true);
-  assert.match(node('station-status').textContent, /taking too long/);
-  assert.match(node('heat-status').textContent, /timed out/);
-  stalledRequest.resolve({ok: true, json: async () => stationData});
-  await flush();
-  assert.match(node('station-status').textContent, /taking too long/, 'late results cannot replace timeout');
-  node('station-retry').click();
-  stationRequests.at(-1).resolve({ok: true, json: async () => stationData});
-  await flush();
-  assert.match(node('station-status').textContent, /2 of 5/);
-  assert.equal(node('station-retry').hidden, true);
-  for (const peril of ['earthquake', 'wildfire']) {
-    node('disaster-select').value = peril; node('disaster-select').change();
-    const params = new URL(stationRequests.at(-1).url, 'http://localhost').searchParams;
-    assert.equal(params.get('network'), 'awc_metar', 'multi-station network is explicit and independent of hazard');
-    assert.equal(params.has('peril'), false);
-    stationRequests.at(-1).resolve({ok: true, json: async () => stationData});
-    await flush();
-    assert.match(node('station-status').textContent, /2 of 5/);
-  }
-  const staleCountRequest = stationRequests.at(-1);
+  assert.match(node('hazard-station-status').textContent, /Station service unavailable/);
+  assert.equal(node('hazard-station-retry').hidden, false);
   node('station-count').value = '3'; node('station-count').input();
-  const nextCountRequest = stationRequests.at(-1);
-  assert.equal(new URL(nextCountRequest.url, 'http://localhost').searchParams.get('n'), '3');
-  assert.equal(node('station-list').children.length, 0, 'count changes immediately remove old results');
-  staleCountRequest.resolve({ok: true, json: async () => stationData});
-  await flush();
-  assert.match(node('station-status').textContent, /Finding/);
-  const beforeInvalid = stationRequests.length;
+  const countRequest = hazardStationRequests.at(-1);
+  assert.equal(new URL(countRequest.url, 'http://localhost').searchParams.get('n'), '3');
+  assert.match(node('hazard-station-status').textContent, /nearest 3 stations/);
+  const beforeInvalid = hazardStationRequests.length;
   for (const invalid of ['', '0', '-1', '1.5', '1e1', '51']) {
     node('station-count').value = invalid; node('station-count').input();
-    assert.match(node('station-status').textContent, /positive integer/);
+    assert.match(node('hazard-station-status').textContent, /positive integer/);
   }
-  assert.equal(stationRequests.length, beforeInvalid, 'invalid counts never call the backend');
-  assert.equal(nextCountRequest.options.signal.aborted, true);
-  nextCountRequest.resolve({ok: true, json: async () => stationData});
-  await flush();
-  assert.match(node('station-status').textContent, /positive integer/, 'aborted same-location count response is ignored');
+  assert.equal(hazardStationRequests.length, beforeInvalid, 'invalid counts never call the backend');
+  assert.equal(countRequest.options.signal.aborted, true);
+  node('station-count').value = '1'; node('station-count').input();
+  assert.match(node('hazard-station-status').textContent, /nearest 1 station in/);
   node('station-count').value = '5'; node('station-count').input();
-  stationRequests.at(-1).resolve({ok: true, json: async () => ({data: {...stationData.data, status: 'not_found', stations: [], returned_count: 0}})});
+  hazardStationRequests.at(-1).resolve({ok: true, json: async () => multiStation('rainfall', 'USGS precipitation gauges', [])});
   await flush();
-  assert.match(node('station-status').textContent, /0 of 5/);
-  assert.match(node('heat-status').textContent, /No eligible.*does not imply low heat hazard/);
-  assert.equal(node('station-list').children.length, 0);
-  assert.equal(node('station-show').hidden, true);
+  assert.match(node('hazard-station-status').textContent, /No eligible station/);
+  assert.equal(node('hazard-station-show').hidden, true);
+  assert.equal(stationRequests.length, 0, 'still no METAR requests outside Heat');
   // Point comparisons retain historical zeros and duplicate-level ranges,
   // without reusing the prior area's sample counts or calculating missing data.
   node('selection-mode').value = 'point'; node('selection-mode').change();
@@ -264,6 +226,11 @@ const data = {
   })});
   await flush();
   assert.equal(comparisonRows().length, 2, 'duplicate levels merge and missing severity is omitted');
+  assert.equal(node('trigger-select').value, '0', 'points pre-select the most frequent level');
+  assert.equal(node('trigger-probability').textContent, '2–10%', 'the probability shows without a manual choice');
+  assert.match(node('trigger-help').textContent, /Initially selected the level with the highest probability; you can change it/);
+  assert.doesNotMatch(node('trigger-help').textContent, /average/, 'point wording does not claim an area average');
+  assert.equal(comparisonButton(0).attributes['aria-pressed'], 'true');
   assert.match(node('comparison-frequency').textContent, /observed annual exceedance frequency/);
   assert.match(node('comparison-note').textContent, /Zero observed years does not mean zero future risk/);
   assert.equal(node('comparison-coverage').hidden, true);
@@ -294,6 +261,7 @@ const data = {
   await flush();
   assert.match(node('comparison-status').textContent, /Only one threshold/);
   assert.match(node('comparison-context').textContent, /Site class BC/);
+  assert.equal(node('trigger-probability').textContent, '1%', 'a single available level is selected automatically');
   node('site-class').value = 'D'; node('site-class').change();
   assert.equal(comparisonRows().length, 0, 'site-class changes clear stale comparisons');
   requests.at(-1).resolve({ok: true, json: async () => ({
@@ -379,32 +347,24 @@ const data = {
   node('address-input').value = '100 Dolorosa St, San Antonio, TX';
   let addressSearch = node('address-search').submit({preventDefault() {}});
   assert.match(requests.at(-1).url, /^\/api\/geocode\?/);
-  assert.equal(node('station-list').children.length, 0);
+  assert.equal(listedStations().length, 0);
   requests.at(-1).resolve({ok: true, json: async () => ({status: 'matched',
     matched_address: '100 DOLOROSA, SAN ANTONIO, TX, 78205', latitude: 29.424206, longitude: -98.493261})});
   await addressSearch;
   assert.match(node('search-status').textContent, /Matched: 100 DOLOROSA/);
-  let stationParams = new URL(stationRequests.at(-1).url, 'http://localhost').searchParams;
+  stationParams = new URL(hazardStationRequests.at(-1).url, 'http://localhost').searchParams;
   assert.equal(stationParams.get('lat'), '29.424206');
   assert.equal(stationParams.get('lon'), '-98.493261');
   assert.equal(stationParams.get('n'), '5');
-  const stationCountBeforeAmbiguity = stationRequests.length;
+  const stationCountBeforeAmbiguity = hazardStationRequests.length;
   for (const status of ['ambiguous', 'no_match']) {
     addressSearch = node('address-search').submit({preventDefault() {}});
     requests.at(-1).resolve({ok: true, json: async () => ({status, message: 'Refine the address.'})});
     await addressSearch;
-    assert.match(node('station-status').textContent, /Stations were not searched/);
-    assert.equal(stationRequests.length, stationCountBeforeAmbiguity);
-    assert.equal(node('station-list').children.length, 0);
+    assert.match(node('hazard-station-status').textContent, /Stations were not searched/);
+    assert.equal(hazardStationRequests.length, stationCountBeforeAmbiguity);
+    assert.equal(listedStations().length, 0);
   }
-  node('heat-refresh').click();
-  assert.match(node('heat-status').textContent, /Loading/);
-  assert.equal(node('heat-list').children.length, 0);
-  const legacyStationData = JSON.parse(JSON.stringify(stationData));
-  for (const station of legacyStationData.data.stations) delete station.observation.heat;
-  stationRequests.at(-1).resolve({ok: true, json: async () => legacyStationData});
-  await flush();
-  assert.match(node('heat-list').children[0].children[1].textContent, /Heat Index unavailable.*restart the Python server/);
   node('disaster-select').value = 'cyclone'; node('disaster-select').change();
   assert.match(requests.at(-1).url, /peril=cyclone/, 'Wind keeps its existing API identifier');
   assert.equal(node('heat-list').children.length, 0, 'hazard changes clear the previous heat snapshot');
@@ -412,6 +372,57 @@ const data = {
   node('disaster-select').value = 'heat'; node('disaster-select').change();
   assert.match(requests.at(-1).url, /^\/api\/disaster\?.*peril=heat/);
   assert.equal(node('heat-observation-panel').hidden, false);
+  // Heat is the one hazard whose relevant current readings come from METAR weather stations.
+  const heatStationParams = new URL(stationRequests.at(-1).url, 'http://localhost').searchParams;
+  assert.equal(heatStationParams.get('network'), 'awc_metar');
+  assert.equal(heatStationParams.get('n'), '5');
+  assert.equal(heatStationParams.has('peril'), false);
+  const stationData = {data: { status: 'available', network: 'NOAA AWC METAR', message: 'Network context',
+    requested_count: 5, returned_count: 2, search_radius_km: 200, fewer_than_requested: true,
+    coverage: 'METAR stations within 200 km', catalog_fetched_at: '2026-11-03T00:00:00Z',
+    stations: [
+      { id: 'KAAA', name: 'First airport', latitude: 2.1, longitude: 2.1, distance_km: 1.23,
+        observation: {status: 'stale', observed_at: '2026-11-02T20:00:00Z', age_minutes: 180, values: [], message: 'Older than two hours.',
+          heat: {status: 'unavailable', air_temperature_c: 0, heat_index_f: null, category: null, reason: 'Report is older than 2 hours; Heat Index withheld.'}}},
+      { id: 'KBBB', name: '<script>Airport</script>', latitude: 2.2, longitude: 2.2, distance_km: 2.34,
+        observation: {status: 'available', observed_at: '2026-11-02T22:59:00Z', age_minutes: 1, values: [], message: 'Latest report.',
+          heat: {status: 'available', air_temperature_c: 37.7777778, relative_humidity_pct: 55,
+            heat_index_c: 51.1, heat_index_f: 124, category: 'Danger', reason: 'Shade screening only; not WBGT.'}}},
+    ] }};
+  const heatRequest = stationRequests.at(-1);
+  stationRequests.at(-1).resolve({ok: true, json: async () => stationData});
+  await flush();
+  assert.match(node('heat-status').textContent, /2 nearby stations.*No area average/);
+  assert.equal(node('heat-list').children.length, 2);
+  assert.match(node('heat-list').children[0].children[1].textContent, /0.0 °C.*32.0 °F.*UTC.*180 minutes.*Heat Index unavailable.*older than 2 hours/);
+  assert.match(node('heat-list').children[1].children[1].textContent, /37.8 °C.*100.0 °F.*55.0%.*51.1 °C.*124.0 °F.*Danger.*not WBGT/);
+  assert.equal(node('heat-list').children[1].children[0].textContent, '<script>Airport</script> (KBBB) · 2.34 km');
+  node('heat-refresh').click();
+  assert.match(node('heat-status').textContent, /Loading/);
+  assert.equal(node('heat-list').children.length, 0);
+  heatRequest.resolve({ok: true, json: async () => stationData});
+  await flush();
+  assert.match(node('heat-status').textContent, /Loading/, 'stale heat response is ignored');
+  stationRequests.at(-1).resolve({ok: false, status: 502, json: async () => ({error: {message: 'down'}})});
+  await flush();
+  assert.match(node('heat-status').textContent, /unavailable.*failed/);
+  node('heat-refresh').click();
+  const stalledHeat = stationRequests.at(-1);
+  [...timers.values()].filter(t => t.ms === 15000).at(-1).fn();
+  assert.equal(stalledHeat.options.signal.aborted, true);
+  assert.match(node('heat-status').textContent, /timed out/);
+  node('station-count').value = '2'; node('station-count').input();
+  assert.equal(new URL(stationRequests.at(-1).url, 'http://localhost').searchParams.get('n'), '2', 'Heat count changes refresh the readings');
+  node('station-count').value = '5';
+  const legacyStationData = JSON.parse(JSON.stringify(stationData));
+  for (const station of legacyStationData.data.stations) delete station.observation.heat;
+  stationRequests.at(-1).resolve({ok: true, json: async () => legacyStationData});
+  await flush();
+  assert.match(node('heat-list').children[0].children[1].textContent, /Heat Index unavailable.*restart the Python server/);
+  node('heat-refresh').click();
+  stationRequests.at(-1).resolve({ok: true, json: async () => ({data: {...stationData.data, status: 'not_found', stations: [], returned_count: 0}})});
+  await flush();
+  assert.match(node('heat-status').textContent, /No eligible.*does not imply low heat hazard/);
   const historicalHeat = {peril: 'heat', status: 'available', metric: 'Annual maximum daily air temperature', unit: '°C',
     source_name: 'NOAA GHCN-Daily', source_url: 'https://www.ncei.noaa.gov/pub/data/ghcn/daily/all/USW00012921.dly',
     frequency_label: 'Observed annual exceedance frequency, 1991–2020 (%)', frequency_basis: 'historical_annual_frequency', notes: ['Historical station proxy.'],
@@ -436,7 +447,8 @@ const data = {
   assert.match(node('trigger-result-label').textContent, /Observed annual heat exceedance frequency/);
   assert.match(node('trigger-location').textContent, /USW00012921.*13.40 km.*30 included years/);
   assert.match(node('hazard-station-status').textContent, /GHCN-Daily historical heat/);
-  assert.match(node('hazard-station-details').children[0].textContent, /USW00012921.*13.40 km/);
+  assert.match(listedStations()[0].children[0].textContent, /USW00012921.*13.40 km/);
+  assert.equal(listedStations().length, 1, 'heat shows the one station its curve actually uses');
   assert.match(node('trigger-method').textContent, /not a calibrated future probability/);
   node('export-heat').click();
   const heatCsv = await blobs.at(-1).text();
@@ -460,57 +472,47 @@ const data = {
   assert.equal(node('heat-observation-panel').hidden, true);
   assert.equal(node('heat-history-rows').children.length, 0);
   node('selection-mode').value = 'point'; node('selection-mode').change();
-  node('disaster-select').value = 'potential_fire_intensity'; node('disaster-select').change();
-  const potentialFire = {peril: 'potential_fire_intensity', status: 'available', unit: 'kW/m',
-    metric: 'Potential surface-fire intensity', annual_probability_available: true,
-    actual_wildfire_probability_available: false, source_name: 'ERA5 / LANDFIRE research model',
-    frequency_label: 'Annual potential-intensity exceedance frequency, 1991–2020 (%)',
-    points: [{severity: 50, frequency_pct: 100}, {severity: 100, frequency_pct: 10}],
-    baseline: {complete_years: 30}, landscape: {fuel_vintage: 'LANDFIRE 2023', fuel_model: 188},
-    annual_maxima: Array.from({length: 30}, (_, i) => ({year: 1991+i, complete: true, valid_hours: 8760,
-      expected_hours: 8760, maximum_kw_m: 50+i, peak: {time_utc: `${1991+i}-07-01T12:00Z`}}))};
-  assert.match(requests.at(-1).url, /^\/api\/potential-fire\?/);
-  requests.at(-1).resolve({ok: true, status: 202, json: async () => ({status: 'processing',
-    progress: {phase: 'calculating', completed_years: 6, total_years: 30}})}); await flush();
-  assert.match(node('hazard-status').textContent, /6 \/ 30 years ready/);
-  assert.equal(node('trigger-select').disabled, true);
-  const progressTimer = [...timers.values()].filter(timer => timer.ms === 1000).at(-1);
-  assert.ok(progressTimer, 'background preparation is polled without blocking the UI');
-  progressTimer.fn(); await flush();
-  assert.match(requests.at(-1).url, /^\/api\/potential-fire\?/);
-  requests.at(-1).resolve({ok: true, status: 200, json: async () => potentialFire}); await flush();
-  assert.equal(node('fire-history-rows').children.length, 30);
-  assert.equal(node('hazard-curve-layout').hidden, false);
-  assert.match(node('fire-history-context').textContent, /not measurements of historical fires/);
-  assert.match(node('frequency-column').textContent, /potential-intensity/);
-  node('trigger-select').value = '1'; node('trigger-select').change();
-  node('trigger-payout').value = '10000'; node('trigger-payout').input();
-  assert.equal(node('trigger-probability').textContent, '10%');
-  assert.equal(node('pool-contribution').textContent, '$1,000.00');
-  assert.match(node('pool-calculation').textContent, /without an actual fire/);
-  assert.match(node('trigger-result-label').textContent, /potential-intensity/);
-  node('export-potential-fire').click();
-  const potentialExport = JSON.parse(await blobs.at(-1).text());
-  assert.equal(potentialExport.actual_wildfire_probability_available, false);
-  assert.equal(potentialExport.annual_maxima.length, 30);
+  // Potential intensity and flame length were removed from the map (2026-11-10).
   events.click({latlng: {lat: 30.1, lng: -97.3}});
-  requests.at(-1).resolve({ok: true, status: 202, json: async () => ({status: 'processing',
-    progress: {phase: 'calculating', completed_years: 2, total_years: 30}})}); await flush();
-  const staleProgressTimer = [...timers.values()].filter(timer => timer.ms === 1000).at(-1);
-  const fireRequestsBeforeSwitch = requests.filter(request => request.url.startsWith('/api/potential-fire?')).length;
-  node('disaster-select').value = 'rainfall'; node('disaster-select').change();
-  staleProgressTimer.fn(); await flush();
-  assert.equal(requests.filter(request => request.url.startsWith('/api/potential-fire?')).length,
-    fireRequestsBeforeSwitch, 'switching hazards stops polling the old fire point');
-  assert.equal(node('fire-history-details').hidden, true);
-  assert.equal(node('export-potential-fire').disabled, true);
+  assert.match(requests.at(-1).url, /^\/api\/disaster\?.*peril=rainfall/);
+  assert.equal(requests.filter(request => request.url.startsWith('/api/potential-fire?')).length, 0,
+    'the map never requests the removed potential-intensity model');
+  requests.at(-1).resolve({ok: true, json: async () => ({peril: 'rainfall', status: 'available', unit: 'mm',
+    points: [{severity: 10, frequency_pct: 5}]})}); await flush();
   const requestsBeforeHistory = requests.length;
   node('disaster-select').value = 'nearest_fire'; node('disaster-select').change();
   assert.equal(node('nearest-fire-panel').hidden, false);
+  assert.equal(node('satellite-fire-panel').hidden, false, 'wildfire views show satellite fire observations');
   assert.equal(node('hazard-panel').hidden, true);
   for (const id of ['trigger-level-control', 'trigger-payout-control', 'trigger-result', 'comparison-panel', 'trigger-help']) {
-    assert.equal(node(id).hidden, true, `${id} is hidden for occurrence records`);
+    assert.equal(node(id).hidden, false, `${id} is shown for nearby-fire triggers`);
   }
+  assert.equal(node('trigger-select').disabled, true, 'fire triggers wait for the archive curve');
+  const fireCurve = radius => ({curve: {radius_km: radius, points: [
+      {min_acres: 1, empirical_years_pct: 45.5, annual_probability_pct: 99.9},
+      {min_acres: 10, empirical_years_pct: radius === 5 ? 6.1 : 21.2, annual_probability_pct: 30},
+      {min_acres: 100, empirical_years_pct: radius === 5 ? 0 : 3.0, annual_probability_pct: 3},
+      {min_acres: 300, empirical_years_pct: 0, annual_probability_pct: 0}]},
+    baseline: {start_year: 1992, end_year: 2024}, source_name: 'USFS FPA FOD', source_url: 'https://apps.fs.usda.gov/fpa'});
+  proximityCurve(fireCurve(10));
+  assert.equal(node('trigger-select').disabled, false);
+  assert.equal(node('trigger-select').children.length, 4, 'never-observed sizes are not offered as zero-probability triggers');
+  assert.match(node('trigger-select').children[3].textContent, /^100 acres/);
+  assert.match(node('trigger-help').textContent, /within 10 km/);
+  node('trigger-select').value = '1'; node('trigger-select').change();
+  assert.equal(node('trigger-probability').textContent, '21.2%', 'trigger uses the observed share of years, not the Poisson rate');
+  assert.match(node('trigger-explanation').textContent, /Reported fire size within 10 km at or above 10 acres/);
+  node('trigger-payout').value = '10000'; node('trigger-payout').input();
+  assert.equal(node('pool-contribution').textContent, '$2,120.00');
+  assert.match(node('pool-calculation').textContent, /21\.2% × \$10,000\.00.*observed annual frequency.*1992–2024/);
+  proximityCurve(fireCurve(5));
+  assert.equal(node('trigger-select').children.length, 3);
+  assert.equal(node('trigger-select').value, '1', 'changing radius keeps the chosen size when it is still available');
+  assert.equal(node('trigger-probability').textContent, '6.1%');
+  assert.equal(node('pool-contribution').textContent, '$610.00');
+  proximityCurve(null, 'Annual fire frequency unavailable: boom');
+  assert.equal(node('trigger-select').disabled, true);
+  assert.match(node('trigger-help').textContent, /boom/);
   assert.equal(requests.length, requestsBeforeHistory, 'history hazard does not request a modeled hazard curve');
   assert.equal(fireLoads.length, 1, 'selecting history reuses the current map selection');
   assert.equal(proximityLoads.length, 1, 'selecting history calculates annual fire frequencies');
@@ -523,40 +525,42 @@ const data = {
   const clearsBeforeSwitch = fireClears.length;
   node('disaster-select').value = 'rainfall'; node('disaster-select').change();
   assert.equal(node('nearest-fire-panel').hidden, true);
+  assert.equal(node('satellite-fire-panel').hidden, true);
   assert.equal(node('trigger-result').hidden, false);
   assert.ok(fireClears.length > clearsBeforeSwitch, 'switching hazards cancels and clears history');
   assert.equal(fireLoads.length, 2, 'other hazards do not restart fire requests');
   assert.equal(proximityLoads.length, 2, 'other hazards do not restart annual frequency requests');
   assert.ok(proximityClears.length > proximityClearsBeforeSwitch);
-  // The hazard station uses the right network independently of the METAR list.
+  // Each hazard uses its own monitoring network, and the n box sets how many stations.
   node('selection-mode').value = 'point'; node('selection-mode').change();
   const hazardStation = {id: 'TEST-1', name: '<script>Gauge</script>', latitude: 31.1, longitude: -98.1,
     distance_km: 2.5, url: 'https://waterdata.usgs.gov/monitoring-location/USGS-TEST/'};
   function resolveHazardStation(request, peril, network, station = hazardStation) {
-    request.resolve({ok: true, json: async () => ({data: {peril, network, station,
-      status: station ? 'available' : 'not_found', message: 'Station context only, within 200 km.'}})});
+    request.resolve({ok: true, json: async () => multiStation(peril, network, station ? [station] : [])});
   }
+  const metarBefore = stationRequests.length;
   for (const [peril, stationPeril, network] of [
     ['flood', 'flood', 'USGS stream gauges'], ['rainfall', 'rainfall', 'USGS precipitation gauges'],
-    ['earthquake', 'earthquake', 'EarthScope seismic stations'], ['wildfire', 'wildfire', 'NIFC RAWS'],
-    ['nearest_fire', 'wildfire', 'NIFC RAWS'], ['potential_fire_intensity', 'wildfire', 'NIFC RAWS'],
+    ['earthquake', 'earthquake', 'EarthScope seismic stations'], ['nearest_fire', 'wildfire', 'NIFC RAWS'],
+    ['cyclone', 'cyclone', 'NOAA METAR wind stations'],
   ]) {
     node('disaster-select').value = peril; node('disaster-select').change();
     const request = hazardStationRequests.at(-1);
     const params = new URL(request.url, 'http://localhost').searchParams;
     assert.equal(params.get('peril'), stationPeril);
     assert.equal(params.has('network'), false);
-    assert.equal(params.has('n'), false, 'weather count must not alter hazard network search');
+    assert.equal(params.get('n'), '5');
     resolveHazardStation(request, stationPeril, network);
     await flush();
-    assert.equal(node('hazard-station-status').textContent, network);
-    assert.equal(node('hazard-station-details').children[0].textContent, '<script>Gauge</script> (TEST-1) · 2.50 km');
+    assert.match(node('hazard-station-status').textContent, new RegExp(`^${network}: 1 of 5`));
+    assert.equal(listedStations()[0].children[0].textContent, '<script>Gauge</script> (TEST-1) · 2.50 km');
     assert.equal(node('hazard-station-show').hidden, false);
     node('hazard-station-show').click();
     assert.equal(map.fitted.points.length, 2);
     assert.equal(map.fitted.points[1].lat, hazardStation.latitude);
   }
-  const oldHazardMarker = [...layers].find(l => l.popup?.textContent?.startsWith('NIFC RAWS:'));
+  assert.equal(stationRequests.length, metarBefore, 'no hazard except Heat requests the METAR weather list');
+  const oldHazardMarker = [...layers].find(l => l.popup?.textContent?.startsWith('NOAA METAR wind stations:'));
   node('disaster-select').value = 'flood'; node('disaster-select').change();
   const oldHazardRequest = hazardStationRequests.at(-1);
   assert.ok(!layers.has(oldHazardMarker), 'switching hazards immediately removes the previous hazard marker');
@@ -582,11 +586,11 @@ const data = {
   await flush();
   assert.match(node('hazard-station-status').textContent, /timed out/);
   node('disaster-select').value = 'cyclone'; node('disaster-select').change();
-  const beforeWind = hazardStationRequests.length;
-  assert.match(node('hazard-station-status').textContent, /METAR.*HURDAT2/);
+  assert.match(hazardStationRequests.at(-1).url, /peril=cyclone/, 'wind looks up its own METAR wind stations');
+  const beforeHeat = hazardStationRequests.length;
   assert.equal(node('hazard-station-show').hidden, true);
   node('disaster-select').value = 'heat'; node('disaster-select').change();
-  assert.equal(hazardStationRequests.length, beforeWind, 'heat uses the actual historical curve station, not a separate nearest lookup');
+  assert.equal(hazardStationRequests.length, beforeHeat, 'heat uses the actual historical curve station, not a separate nearest lookup');
   assert.match(node('hazard-station-status').textContent, /Waiting.*GHCN-Daily/);
   node('disaster-select').value = 'auto'; node('disaster-select').change();
   assert.match(node('hazard-station-status').textContent, /Waiting.*automatic/);
@@ -595,7 +599,7 @@ const data = {
   assert.match(hazardStationRequests.at(-1).url, /peril=rainfall/);
   resolveHazardStation(hazardStationRequests.at(-1), 'rainfall', 'USGS precipitation gauges', {...hazardStation, url: 'javascript:alert(1)'});
   await flush();
-  assert.equal(node('hazard-station-details').children.length, 3, 'unsafe provider URL is omitted');
+  assert.equal(listedStations()[0].children.length, 2, 'unsafe provider URL is omitted');
   node('disaster-select').value = 'rainfall'; node('disaster-select').change();
   const pendingHazardLookup = requests.at(-1);
   assert.match(pendingHazardLookup.url, /^\/api\/(v1\/)?(hazards|disaster)/);
@@ -611,11 +615,10 @@ const data = {
   await flush();
   assert.match(node('hazard-status').textContent, /severity–frequency points loaded/, 'hazard view recovers instead of staying on Loading');
   console.log('Hazard stations: every network, actual historical heat station, auto selection, markers, safe links, empty/error/timeout states and stale response clearing passed.');
-  console.log('Nearest fire hazard: dropdown selection, existing/new point lookup, hidden probability controls and clearing on hazard switch passed.');
-  console.log('Potential intensity: hazard/API flow, annual maxima, conditional interpretation, triggers, illustrative payouts, provenance export and stale-data clearing passed.');
+  console.log('Nearest fire hazard: dropdown selection, existing/new point lookup, burned-area triggers and payouts per radius, and clearing on hazard switch passed.');
   console.log('Historical Heat: selector/API flow, station/baseline/coverage, triggers and historical contributions, CSV provenance, point-only areas and stale-data clearing passed.');
   console.log('Heat screening: units, bands, timestamps, stale/absent values, safe text, empty/error/timeout states, refresh and hazard switching passed.');
-  console.log('Nearby stations: address flow, count validation, partial/empty results, all map markers, safe links, observations, and stale-response handling passed.');
+  console.log('Hazard station lists: n stations per hazard network, no METAR list outside Heat, address flow, count validation, partial/empty results, all map markers, safe links and stale-response handling passed.');
   console.log('Native fireline intensity: units, probability/payout exclusion, missing coverage, CSV provenance, area samples and hazard switching passed.');
   console.log('Trigger comparison: area coverage, row/dropdown selection, shared payouts, ranges, historical zeros, invalid inputs, site-class resets, and unavailable data passed.');
   console.log('Area UI: arithmetic means, per-point table/markers, trigger changes, payout, all-threshold CSV, missing/zero values, and stale-response protection passed.');

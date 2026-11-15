@@ -144,7 +144,7 @@ def extract_facts(evidence_items, hazards):
         data, tool = env["data"], ev["tool"]
         if tool == "get_hazard_curve":
             hz = data["peril"]
-            _fact(facts, ev, "/data/source_name", f"{hz} curve source model", hazard=hz)
+            _fact(facts, ev, "/data/source_name", f"{hz.capitalize()} curve source model", hazard=hz)
             for i, point in enumerate(data.get("points", [])):
                 if point.get("severity") is None:
                     _fact(facts, ev, f"/data/points/{i}/frequency_pct",
@@ -158,7 +158,7 @@ def extract_facts(evidence_items, hazards):
             for i, zone in enumerate(data["zones"]):
                 _fact(facts, ev, f"/data/zones/{i}/zone", "FEMA NFHL flood zone", hazard="flood")
                 _fact(facts, ev, f"/data/zones/{i}/special_flood_hazard_area",
-                      "Inside FEMA Special Flood Hazard Area (null = not stated)", hazard="flood")
+                      "Inside FEMA Special Flood Hazard Area", hazard="flood")
                 if zone["static_base_flood_elevation"] is not None:
                     _fact(facts, ev, f"/data/zones/{i}/static_base_flood_elevation",
                           f"FEMA base flood elevation (datum {zone['vertical_datum']})", zone["length_unit"], "flood")
@@ -177,6 +177,33 @@ def extract_facts(evidence_items, hazards):
                 _fact(facts, ev, f"/data/frequencies/{i}/frequency_pct",
                       f"Share of {row['total_years']} baseline years with a reported wildfire within "
                       f"{row['radius_km']} km", "% of years", "wildfire")
+            size = data.get("size_exceedance")
+            if size:
+                for i, row in enumerate(size["threshold_frequencies"]):
+                    _fact(facts, ev, f"/data/size_exceedance/threshold_frequencies/{i}/frequency_pct",
+                          f"Share of {row['total_years']} baseline years with a reported wildfire of at least "
+                          f"{row['min_acres']:,} acres within {row['radius_km']} km", "% of years", "wildfire")
+                for c, curve in enumerate(size.get("area_exceedance", {}).get("curves", [])):
+                    base = f"/data/size_exceedance/area_exceedance/curves/{c}"
+                    _fact(facts, ev, f"{base}/expected_annual_reported_acres",
+                          f"Average reported acres burned per year by fires within {curve['radius_km']} km", "acres/year", "wildfire")
+                    for i, point in enumerate(curve["points"]):
+                        if point["min_acres"] in (10, 100, 1000):
+                            label = f"fire of at least {point['min_acres']:,} acres within {curve['radius_km']} km"
+                            _fact(facts, ev, f"{base}/points/{i}/annual_probability_pct",
+                                  f"Annual probability of a {label} at the historical rate (Poisson)", "% per year", "wildfire")
+                            _fact(facts, ev, f"{base}/points/{i}/empirical_years_pct",
+                                  f"Share of baseline years that had a {label}", "% of years", "wildfire")
+                _fact(facts, ev, "/data/size_exceedance/footprint_reach/frequency_pct",
+                      "Share of baseline years in which a reported fire's equivalent-circle footprint covered the point "
+                      "(approximate geometry)", "% of years", "wildfire")
+                if size["footprint_reach"]["closest_footprint_gap_km"] is not None:
+                    _fact(facts, ev, "/data/size_exceedance/footprint_reach/closest_footprint_gap_km",
+                          "Closest gap between the point and any reported fire's equivalent-circle footprint", "km", "wildfire")
+                for i, row in enumerate(size["burned_area"]):
+                    _fact(facts, ev, f"/data/size_exceedance/burned_area/{i}/mean_annual_burned_share_pct",
+                          f"Mean annual share of the {row['radius_km']} km circle covered by reported fire footprints "
+                          "(whole-circle average, not property burn probability)", "% per year", "wildfire")
         elif tool == "get_active_weather_alerts":
             _fact(facts, ev, "/data/alert_count", "Active NWS alerts at retrieval time", "alerts")
             for i, _ in enumerate(data["alerts"]):
@@ -499,6 +526,39 @@ def render_markdown(record):
     lines += [f"| {e['id']} | {e['tool']} | {'error' if e['is_error'] else e['status']} | {e['retrieved_at']} "
               f"| {(e['sha256'] or '')[:12]} |" for e in record["evidence"]]
     return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------- web
+def public_record(record):
+    """Browser-sized view: facts, gaps and evidence provenance, without raw agency envelopes."""
+    evidence = []
+    for e in record["evidence"]:
+        data = (e["envelope"] or {}).get("data") or {}
+        evidence.append({"id": e["id"], "tool": e["tool"], "status": "error" if e["is_error"] else e["status"],
+                         "retrieved_at": e["retrieved_at"], "sha256": e["sha256"],
+                         "source_name": data.get("source_name"), "source_url": data.get("source_url")})
+    ok = record["status"] in ("complete", "partial")
+    reasons = {"awaiting_input": "The address matched more than one place or none; choose a point on the map.",
+               "unavailable": "No requested hazard returned usable evidence here.",
+               "failed": "The assessment could not run; no evidence was substituted."}
+    return {"status": "available" if ok else "unavailable", "assessment_status": record["status"],
+            "assessment_id": record["assessment_id"], "schema_version": record["schema_version"],
+            "created_at": record["created_at"], "assessment_type": record["assessment_type"],
+            "scope": record["scope"], "location": record["location"],
+            "hazard_status": record.get("hazard_status", {}), "facts": record["facts"], "gaps": record["gaps"],
+            "evidence": evidence, "reason": None if ok else reasons.get(record["status"]),
+            "notes": ["Evidence screening, not a warning, insurance quote, safety determination or loss estimate.",
+                      "Each fact keeps its evidence kind; kinds are never combined into a score.",
+                      "Unavailable or failed sources are unknowns, not zero risk."]}
+
+
+def web_assessment(hazards, lat=None, lon=None, address=None):
+    """Run one assessment through the in-process MCP server. Call from a worker thread."""
+    from ndapp_mcp_server import build_server
+
+    async def run():
+        return await assess(build_server(), hazards=hazards, lat=lat, lon=lon, address=address)
+    return public_record(anyio.run(run))
 
 
 # ---------------------------------------------------------------- CLI

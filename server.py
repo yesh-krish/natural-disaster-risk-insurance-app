@@ -86,7 +86,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_error(404, "Not found")
             return None
         assets = {"index.html", "script.js", "damage_model.js", "hazard_chart.js",
-                  "hazard_trigger.js", "fire_history.js", "fire_proximity.js",
+                  "hazard_trigger.js", "fire_history.js", "fire_proximity.js", "satellite_fire.js",
                   "docs/api-explorer.js", "examples/api_client.py"}
         if path == ROOT:
             self.path = "/index.html"
@@ -97,6 +97,30 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_error(404, "Not found")
             return None
         return super().send_head()
+
+    def parse_request(self):
+        """Optional HTTP Basic auth for tunnelled/shared hosting, enabled by NDAPP_PASSWORD."""
+        if not super().parse_request():
+            return False
+        import os
+        password = os.environ.get("NDAPP_PASSWORD", "")
+        if not password:
+            return True
+        import base64
+        import hmac
+        expected = "Basic " + base64.b64encode(
+            f"{os.environ.get('NDAPP_USER', 'ndapp')}:{password}".encode()).decode()
+        if hmac.compare_digest(self.headers.get("Authorization", "").encode(), expected.encode()):
+            return True
+        body = b"Authentication required."
+        self.send_response(401)
+        self.send_header("WWW-Authenticate", 'Basic realm="NDApp", charset="UTF-8"')
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(body)
+        return False
 
     def end_headers(self):
         self.send_header("X-Content-Type-Options", "nosniff")
@@ -276,5 +300,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("port must be between 1 and 65535")
+    class Server(ThreadingHTTPServer):
+        # On Windows SO_REUSEADDR lets a second server bind a port that is already in use,
+        # so traffic can silently reach the older process. Fail loudly instead.
+        allow_reuse_address = os.name != "nt"
+
+    server = Server((args.host, args.port), Handler)
     print(f"Map: http://{args.host}:{args.port}/\nAPI explorer: http://{args.host}:{args.port}/api/docs", flush=True)
-    ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()
+    server.serve_forever()

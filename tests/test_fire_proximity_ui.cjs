@@ -33,7 +33,15 @@ const annual = Array.from({length: 33}, (_, index) => {
 const data = {status: 'available', frequency_basis: 'historical_annual_reported_fire_frequency', baseline: {start_year: 1992, end_year: 2024, year_count: 33, source_layer: 'Fire_FPA_FOD_7th_Fires', coverage_assumption: 'Zero-record years remain; local coverage not independently verified.'},
   county: {name: 'Bexar', state: 'Texas'}, checked_at: '2026-11-05T00:00:00Z', source_url: 'https://apps.fs.usda.gov/archive',
   frequencies: [5, 10, 20].map((radius, i) => ({radius_km: radius, years_with_fire: i + 1, total_years: 33,
-    frequency_pct: (i + 1) / 33 * 100, reference_interval: {minimum_pct: 1, maximum_pct: 25}})), annual_records: annual};
+    frequency_pct: (i + 1) / 33 * 100, reference_interval: {minimum_pct: 1, maximum_pct: 25}})), annual_records: annual,
+  size_exceedance: {size_thresholds_acres: [10, 100, 1000, 5000],
+    area_exceedance: {curves: [5, 10, 20].map(radius => ({radius_km: radius, fire_count: radius, total_years: 33, largest_reported_acres: 60, expected_annual_reported_acres: 9.9,
+      points: [{min_acres: 1, fires_at_or_above: 223, expected_annual_exceedances: 6.758, annual_probability_pct: 99.9, empirical_years_pct: 45.5, return_period_years: 1.0012},
+               {min_acres: 10, fires_at_or_above: 3, expected_annual_exceedances: 0.091, annual_probability_pct: 8.7, empirical_years_pct: 6.1, return_period_years: 11.5},
+               {min_acres: 100, fires_at_or_above: 0, expected_annual_exceedances: 0, annual_probability_pct: 0, empirical_years_pct: 0, return_period_years: null}]}))},
+    threshold_frequencies: [10, 100, 1000, 5000].flatMap(acres => [5, 10, 20].map(radius => ({min_acres: acres, radius_km: radius, years_with_fire: acres === 10 ? 2 : 0, total_years: 33, frequency_pct: acres === 10 ? 2 / 33 * 100 : 0}))),
+    footprint_reach: {years_with_reach: 0, total_years: 33, fires: [], closest_footprint_gap_km: 0.5624},
+    burned_area: [{radius_km: 5, overlapping_reported_acres: 327.3, total_years: 33, mean_annual_burned_share_pct: 0.0511, equivalent_return_interval_years: 1957}]}};
 async function resolve(request, value = {data}, ok = true) { request.resolve({ok, json: async () => value}); await flush(); }
 
 (async () => {
@@ -44,6 +52,16 @@ async function resolve(request, value = {data}, ok = true) { request.resolve({ok
   assert.match(node('fire-proximity-calculation').textContent, /2 of 33.*10 km/);
   assert.equal(node('fire-proximity-rows').children.length, 3);
   assert.equal(node('fire-proximity-years').children.length, 33);
+  assert.equal(node('fire-proximity-size').hidden, false);
+  assert.equal(node('fire-proximity-curve-rows').children.length, 3);
+  assert.match(node('fire-proximity-curve-rows').children[1].children.map(cell => cell.textContent).join(' | '), /10 acres.*0\.091.*8\.7%.*6\.1%.*1 in 11\.5 years/);
+  assert.match(node('fire-proximity-curve-rows').children[2].children.map(cell => cell.textContent).join(' | '), /Not observed/);
+  assert.match(node('fire-proximity-curve-summary').textContent, /Within 10 km: 10 reported fires, about 9\.9 reported acres per year/);
+  assert.match(node('fire-proximity-curve-chart').innerHTML, /<svg[^>]*Burned-area exceedance curve/);
+  assert.equal(node('fire-proximity-size-rows').children.length, 4);
+  assert.match(node('fire-proximity-size-rows').children[0].children[1].textContent, /2 \/ 33 \(6\.1%\)/);
+  assert.match(node('fire-proximity-reach').textContent, /closest footprint edge was 0\.56 km/);
+  assert.match(node('fire-proximity-burned').textContent, /0\.051% of the circle per year.*1,957 years/);
   assert.match(node('fire-proximity-years').children[0].children[1].textContent, /No eligible record/);
   assert.match(node('fire-proximity-years').children[8].children[1].textContent, /=HYPERLINK/);
   assert.equal(charts[0][3], 'Historical annual frequency (%)');

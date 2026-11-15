@@ -8,6 +8,8 @@ Claude to explain them under code-enforced citation checks. Install
 `requirements-agent.txt`, then run
 `python risk_agent.py --lat 29.4242 --lon -98.4933 --hazards flood earthquake`.
 See the [agent architecture](docs/ai-risk-agent-architecture.md).
+The same agent is also available over HTTP at `/api/v1/assessment` (no map panel
+yet); the server needs `requirements-agent.txt` installed.
 
 **Risk assessment tools:** the API now includes active NWS point alerts and FEMA
 flood-zone context, with validated agent-tool handler prototypes. These add
@@ -45,12 +47,10 @@ questions. A [Word report](<docs/Natural Disaster Risk Analysis Weekly Update.do
 The [presentation](<presentations/Natural Disaster Risk Analysis Since Last Week.pptx>)
 covers the same changes with editable charts, speaker notes and source links.
 
-**Potential wildfire intensity:** choose **Wildfire / Potential intensity (kW/m)**
-in Point mode for a historical-weather Rothermel–Byram curve. The 1991–2020
-annual frequencies describe potential surface-fire conditions on fixed fuels,
-not actual wildfire arrival or damage. The view includes annual maxima and a
-provenance export. A prepared example is **30.08, -97.30**; new points may take
-several minutes. See [method, assumptions and setup](docs/potential-fire-intensity.md).
+**Satellite fire observations:** with **Wildfire / Nearby fire frequency**
+selected, the map also shows NASA FIRMS VIIRS hot spots near the point for the
+last 24 hours, 48 hours or 7 days, within 10–100 km. Detections are thermal
+anomalies, not confirmed wildfires. See [NASA data](docs/nasa-data.md).
 
 **Historical Heat hazard:** choose **Heat (historical annual exceedance)** and
 select a **Point**. NOAA GHCN-Daily maximum temperatures supply a historical
@@ -65,11 +65,11 @@ WBGT and work-specific inputs; annual air-temperature maxima do not define
 multi-day heat waves or shutdown criteria.
 See [heat and wind rationale, sources and limitations](docs/heat-and-wind.md).
 
-The Texas-only fireline-intensity option has been removed from the map. It did
-not provide annual exceedance probabilities. Use **Wildfire / Potential intensity
-(kW/m)** for the historical-weather prototype, or **Wildfire / Flame length (FSim)**
-for the existing flame-length curve. The [TxWRAP research record](docs/fireline-intensity.md)
-and legacy research API remain available.
+The fireline-intensity, **potential intensity (kW/m)** and **flame length (FSim)**
+wildfire options have been removed from the map (the last two on November 10,
+2026), and "Choose most relevant" no longer selects flame length. Their research
+API routes remain available ([TxWRAP record](docs/fireline-intensity.md),
+[potential intensity method](docs/potential-fire-intensity.md)).
 
 The app includes a **versioned research API** for hazard lookup, point trigger
 comparisons, area analysis and nearest monitoring stations. After starting

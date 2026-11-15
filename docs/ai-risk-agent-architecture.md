@@ -45,6 +45,14 @@ flowchart LR
 | Evidence and facts | `EvidenceRegistry`, `extract_facts` | Each call stores tool, arguments, the full `{api_version,status,data,meta}` envelope, a SHA-256 and timestamps. Facts are pulled by code with a JSON Pointer into a specific evidence item; tables are rendered from facts, not model text. |
 | AI (optional) | `interpret_request`, `narrate` | Claude Opus 5.5 with JSON-schema structured output. It proposes a scope (validated by code; it never picks tools) and writes statements citing fact IDs. It sees extracted facts only, not raw agency text. Statements with unknown citations, unsupported numbers, or safety/zero-risk/overall-score wording are withheld and counted. Server-side refusal fallback is enabled. |
 
+**Web access (API 1.9.0).** `GET /api/v1/assessment` runs the same host
+in-process: `risk_agent.web_assessment()` connects the MCP client to an
+in-process `ndapp_mcp_server` instance (no subprocess) on the request's worker
+thread, then returns a browser-sized record without raw agency payloads. No AI
+model is called on this path. A map panel for it was built and then removed on
+November 9 at the user's request; the route remains for API clients. Bumping the API version changes every tool's output schema,
+so `--write-pins` must be re-run after review, or the host blocks the tools as drift.
+
 Agent loop for one assessment: discover → review tools against pins → resolve
 address (stop on ambiguity) → run the bounded plan → check each result's location
 against the request → extract facts → compute gaps → optional narrative → claim

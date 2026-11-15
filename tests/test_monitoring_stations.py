@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlsplit
 
-from monitoring_stations import distance_km, nearest_station, _candidates
+from monitoring_stations import distance_km, nearest_hazard_stations, nearest_station, _candidates
 
 
 class StationTests(unittest.TestCase):
@@ -20,6 +20,49 @@ class StationTests(unittest.TestCase):
         with patch("monitoring_stations._candidates", return_value=[]) as candidates:
             nearest_station("rainfall", 29.4, -98.49)
         self.assertEqual([c.args[3] for c in candidates.call_args_list], [20, 75, 200])
+
+    def test_nearest_n_hazard_stations_expand_until_enough_and_dedupe(self):
+        near = dict(id="near", name="Near", latitude=29.41, longitude=-98.49)
+        mid = dict(id="mid", name="Mid", latitude=29.7, longitude=-98.49)
+        far = dict(id="far", name="Far", latitude=30.5, longitude=-98.49)
+        with patch("monitoring_stations._candidates", side_effect=[[near], [near, mid, mid], [near, mid, far]]) as candidates:
+            result = nearest_hazard_stations("flood", 29.4, -98.49, 3)
+        self.assertEqual([c.args[3] for c in candidates.call_args_list], [20, 75, 200])
+        self.assertEqual([s["id"] for s in result["stations"]], ["near", "mid", "far"])
+        self.assertEqual((result["returned_count"], result["fewer_than_requested"]), (3, False))
+        self.assertEqual(result["station"]["id"], "near")
+        with patch("monitoring_stations._candidates", side_effect=[[near], [near, mid]]) as candidates:
+            result = nearest_hazard_stations("flood", 29.4, -98.49, 2)
+        self.assertEqual([c.args[3] for c in candidates.call_args_list], [20, 75], "stops once n stations are found")
+        with patch("monitoring_stations._candidates", return_value=[near]):
+            result = nearest_hazard_stations("earthquake", 29.4, -98.49, 5)
+        self.assertEqual((result["returned_count"], result["requested_count"], result["fewer_than_requested"]), (1, 5, True))
+        with patch("monitoring_stations._candidates", return_value=[near]):
+            result = nearest_hazard_stations("fireline_intensity", 29.4, -98.49, 2)
+        self.assertEqual(result["peril"], "fireline_intensity")
+        self.assertIn("fireline intensity", result["message"])
+        for bad in (0, 51, True, "x"):
+            with self.assertRaises(ValueError):
+                nearest_hazard_stations("flood", 29.4, -98.49, bad)
+
+    def test_hazard_station_api_route(self):
+        from api_spec import openapi_document
+        from api_v1 import dispatch
+        from jsonschema import Draft202012Validator, FormatChecker
+        rows = [dict(id=f"S{i}", name=f"Gauge {i}", latitude=29.4 + i / 100, longitude=-98.49,
+                     url="https://waterdata.usgs.gov/x") for i in range(1, 5)]
+        with patch("monitoring_stations._candidates", return_value=rows):
+            status, payload = dispatch("/api/v1/monitoring-stations", "peril=flood&n=3&lat=29.4&lon=-98.49")
+        self.assertEqual(status, 200)
+        self.assertEqual([s["id"] for s in payload["data"]["stations"]], ["S1", "S2", "S3"])
+        self.assertEqual(payload["meta"]["request"]["n"], 3)
+        spec = openapi_document()
+        schema = spec["paths"]["/api/v1/monitoring-stations"]["get"]["responses"]["200"]["content"]["application/json"]["schema"]
+        Draft202012Validator({**schema, "components": spec["components"]}, format_checker=FormatChecker()).validate(payload)
+        with patch("monitoring_stations._candidates", return_value=rows):
+            legacy = dispatch("/api/v1/monitoring-stations", "peril=flood&lat=29.4&lon=-98.49")[1]["data"]
+        self.assertNotIn("stations", legacy, "legacy single-station contract is unchanged")
+        self.assertEqual(legacy["station"]["id"], "S1")
 
     def test_nearby_clicks_reuse_catalog_but_recompute_distance(self):
         raw = '# comment\nagency_cd\tsite_no\tstation_nm\tdec_lat_va\tdec_long_va\n5s\t15s\t50s\t16s\t16s\nUSGS\t0123\tRiver\t29.4\t-98.49\n'

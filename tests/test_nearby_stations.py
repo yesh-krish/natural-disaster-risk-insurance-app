@@ -83,7 +83,8 @@ class NearbyStationTests(unittest.TestCase):
             for n in invalid:
                 self.assertEqual(dispatch("/api/v1/monitoring-stations", "address=test&n=" + n)[0], 400, n)
             for query in ["lat=nan&lon=0", "lat=91&lon=0", "lat=0", "n=1", "lat=0&lon=0&network=other",
-                          "lat=0&lon=0&peril=flood&n=2", "address=test&lat=0&lon=0"]:
+                          "lat=0&lon=0&peril=flood&n=2&network=awc_metar", "lat=0&lon=0&peril=heat&n=2",
+                          "lat=0&lon=0&peril=flood&n=0", "address=test&lat=0&lon=0"]:
                 self.assertEqual(dispatch("/api/v1/monitoring-stations", query)[0], 400, query)
             geocoder.assert_not_called()
             provider.assert_not_called()

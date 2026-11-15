@@ -117,9 +117,11 @@ origin, set `NDAPP_ALLOWED_ORIGINS` to its exact origin, for example
 `http://localhost:3000`, or a comma-separated list. Restart after changing it.
 Browser preflight for GET is supported; CORS does not authenticate clients.
 
-No public host or API-key authentication is configured by these files. A shared
-private deployment can use the host's access controls; a broadly public service
-should also configure request quotas at the hosting gateway. Hosting is separate
+API keys are supported (November 9, 2026): set `NDAPP_API_KEYS` and clients send
+`X-API-Key`; the server refuses to listen on the network without keys. See
+[sharing the API with another student](share-api.md). No public host is configured
+by these files, and a broadly public service should also configure request quotas
+at the hosting gateway. Hosting is separate
 from the API implementation and does not become free merely by omitting the map.
 
 See [the full API guide](api.md) and live OpenAPI contract for endpoints and

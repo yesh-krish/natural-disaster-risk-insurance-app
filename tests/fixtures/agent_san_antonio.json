@@ -1843,7 +1843,418 @@
     "fips": "48029"
    },
    "reason": "Years with at least one reported fire in the radius divided by all published baseline years.",
-   "checked_at": "2026-11-08T00:14:58.619690+00:00"
+   "checked_at": "2026-11-08T00:14:58.619690+00:00",
+   "size_exceedance": {
+    "basis": "reported_size_and_distance",
+    "size_thresholds_acres": [
+     10,
+     100,
+     1000,
+     5000
+    ],
+    "records_in_query": 13,
+    "records_missing_size": 0,
+    "threshold_frequencies": [
+     {
+      "min_acres": 10,
+      "radius_km": 5,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 10,
+      "radius_km": 10,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 10,
+      "radius_km": 20,
+      "years_with_fire": 3,
+      "total_years": 33,
+      "frequency_pct": 9.090909090909092,
+      "qualifying_years": [
+       2005,
+       2007,
+       2022
+      ],
+      "reference_interval": {
+       "minimum_pct": 3.140394152458165,
+       "maximum_pct": 23.57260564646973,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 100,
+      "radius_km": 5,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 100,
+      "radius_km": 10,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 100,
+      "radius_km": 20,
+      "years_with_fire": 1,
+      "total_years": 33,
+      "frequency_pct": 3.0303030303030303,
+      "qualifying_years": [
+       2022
+      ],
+      "reference_interval": {
+       "minimum_pct": 0.536941053687183,
+       "maximum_pct": 15.31872538211892,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 1000,
+      "radius_km": 5,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 1000,
+      "radius_km": 10,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 1000,
+      "radius_km": 20,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 5000,
+      "radius_km": 5,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 5000,
+      "radius_km": 10,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     },
+     {
+      "min_acres": 5000,
+      "radius_km": 20,
+      "years_with_fire": 0,
+      "total_years": 33,
+      "frequency_pct": 0.0,
+      "qualifying_years": [],
+      "reference_interval": {
+       "minimum_pct": 0,
+       "maximum_pct": 10.426999754245205,
+       "method": "wilson_95_binomial_reference"
+      }
+     }
+    ],
+    "area_exceedance": {
+     "method": "poisson_rate_of_reported_fire_size",
+     "thresholds_acres": [
+      0.1,
+      0.3,
+      1,
+      3,
+      10,
+      30,
+      100,
+      300,
+      1000,
+      3000,
+      10000,
+      30000,
+      100000
+     ],
+     "curves": [
+      {
+       "radius_km": 5,
+       "fire_count": 1,
+       "total_years": 33,
+       "largest_reported_acres": 1.0,
+       "expected_annual_reported_acres": 0.030303030303030304,
+       "points": [
+        {
+         "min_acres": 0.1,
+         "fires_at_or_above": 1,
+         "expected_annual_exceedances": 0.030303030303030304,
+         "annual_probability_pct": 2.984849630336983,
+         "empirical_years_pct": 3.0303030303030303,
+         "return_period_years": 33.502525213878265
+        },
+        {
+         "min_acres": 0.3,
+         "fires_at_or_above": 1,
+         "expected_annual_exceedances": 0.030303030303030304,
+         "annual_probability_pct": 2.984849630336983,
+         "empirical_years_pct": 3.0303030303030303,
+         "return_period_years": 33.502525213878265
+        },
+        {
+         "min_acres": 1,
+         "fires_at_or_above": 1,
+         "expected_annual_exceedances": 0.030303030303030304,
+         "annual_probability_pct": 2.984849630336983,
+         "empirical_years_pct": 3.0303030303030303,
+         "return_period_years": 33.502525213878265
+        },
+        {
+         "min_acres": 3,
+         "fires_at_or_above": 0,
+         "expected_annual_exceedances": 0.0,
+         "annual_probability_pct": 0.0,
+         "empirical_years_pct": 0.0,
+         "return_period_years": null
+        }
+       ]
+      },
+      {
+       "radius_km": 10,
+       "fire_count": 3,
+       "total_years": 33,
+       "largest_reported_acres": 3.2,
+       "expected_annual_reported_acres": 0.1303030303030303,
+       "points": [
+        {
+         "min_acres": 0.1,
+         "fires_at_or_above": 3,
+         "expected_annual_exceedances": 0.09090909090909091,
+         "annual_probability_pct": 8.68992837177377,
+         "empirical_years_pct": 9.090909090909092,
+         "return_period_years": 11.507574714288262
+        },
+        {
+         "min_acres": 0.3,
+         "fires_at_or_above": 2,
+         "expected_annual_exceedances": 0.06060606060606061,
+         "annual_probability_pct": 5.880605987516752,
+         "empirical_years_pct": 6.0606060606060606,
+         "return_period_years": 17.005050195894484
+        },
+        {
+         "min_acres": 1,
+         "fires_at_or_above": 2,
+         "expected_annual_exceedances": 0.06060606060606061,
+         "annual_probability_pct": 5.880605987516752,
+         "empirical_years_pct": 6.0606060606060606,
+         "return_period_years": 17.005050195894484
+        },
+        {
+         "min_acres": 3,
+         "fires_at_or_above": 1,
+         "expected_annual_exceedances": 0.030303030303030304,
+         "annual_probability_pct": 2.984849630336983,
+         "empirical_years_pct": 3.0303030303030303,
+         "return_period_years": 33.502525213878265
+        },
+        {
+         "min_acres": 10,
+         "fires_at_or_above": 0,
+         "expected_annual_exceedances": 0.0,
+         "annual_probability_pct": 0.0,
+         "empirical_years_pct": 0.0,
+         "return_period_years": null
+        }
+       ]
+      },
+      {
+       "radius_km": 20,
+       "fire_count": 13,
+       "total_years": 33,
+       "largest_reported_acres": 392.0,
+       "expected_annual_reported_acres": 13.36969696969697,
+       "points": [
+        {
+         "min_acres": 0.1,
+         "fires_at_or_above": 13,
+         "expected_annual_exceedances": 0.3939393939393939,
+         "annual_probability_pct": 32.560507257824526,
+         "empirical_years_pct": 39.39393939393939,
+         "return_period_years": 3.071205224420123
+        },
+        {
+         "min_acres": 0.3,
+         "fires_at_or_above": 9,
+         "expected_annual_exceedances": 0.2727272727272727,
+         "annual_probability_pct": 23.869961330312627,
+         "empirical_years_pct": 27.27272727272727,
+         "return_period_years": 4.189365814891762
+        },
+        {
+         "min_acres": 1,
+         "fires_at_or_above": 8,
+         "expected_annual_exceedances": 0.24242424242424243,
+         "annual_probability_pct": 21.52768059462441,
+         "empirical_years_pct": 24.242424242424242,
+         "return_period_years": 4.645182260134916
+        },
+        {
+         "min_acres": 3,
+         "fires_at_or_above": 6,
+         "expected_annual_exceedances": 0.18181818181818182,
+         "annual_probability_pct": 16.62470819248194,
+         "empirical_years_pct": 18.181818181818183,
+         "return_period_years": 6.0151431737744545
+        },
+        {
+         "min_acres": 10,
+         "fires_at_or_above": 3,
+         "expected_annual_exceedances": 0.09090909090909091,
+         "annual_probability_pct": 8.68992837177377,
+         "empirical_years_pct": 9.090909090909092,
+         "return_period_years": 11.507574714288262
+        },
+        {
+         "min_acres": 30,
+         "fires_at_or_above": 1,
+         "expected_annual_exceedances": 0.030303030303030304,
+         "annual_probability_pct": 2.984849630336983,
+         "empirical_years_pct": 3.0303030303030303,
+         "return_period_years": 33.502525213878265
+        },
+        {
+         "min_acres": 100,
+         "fires_at_or_above": 1,
+         "expected_annual_exceedances": 0.030303030303030304,
+         "annual_probability_pct": 2.984849630336983,
+         "empirical_years_pct": 3.0303030303030303,
+         "return_period_years": 33.502525213878265
+        },
+        {
+         "min_acres": 300,
+         "fires_at_or_above": 1,
+         "expected_annual_exceedances": 0.030303030303030304,
+         "annual_probability_pct": 2.984849630336983,
+         "empirical_years_pct": 3.0303030303030303,
+         "return_period_years": 33.502525213878265
+        },
+        {
+         "min_acres": 1000,
+         "fires_at_or_above": 0,
+         "expected_annual_exceedances": 0.0,
+         "annual_probability_pct": 0.0,
+         "empirical_years_pct": 0.0,
+         "return_period_years": null
+        }
+       ]
+      }
+     ]
+    },
+    "footprint_reach": {
+     "years_with_reach": 0,
+     "total_years": 33,
+     "frequency_pct": 0.0,
+     "qualifying_years": [],
+     "reference_interval": {
+      "minimum_pct": 0,
+      "maximum_pct": 10.426999754245205,
+      "method": "wilson_95_binomial_reference"
+     },
+     "fires": [],
+     "closest_footprint_gap_km": 3.2477204267503286,
+     "closest_footprint_fire_id": "201417361",
+     "omits_fires_reported_beyond_km": 20,
+     "omitted_fire_min_acres": 310521.7806160559
+    },
+    "burned_area": [
+     {
+      "radius_km": 5,
+      "circle_area_km2": 78.53981633974483,
+      "overlapping_reported_area_km2": 0.004046856420000001,
+      "overlapping_reported_acres": 1.0000000000000002,
+      "total_years": 33,
+      "mean_annual_burned_share_pct": 0.00015613992805482943,
+      "equivalent_return_interval_years": 640451.1725206152,
+      "omitted_fire_min_acres": 174668.50159653142
+     },
+     {
+      "radius_km": 10,
+      "circle_area_km2": 314.1592653589793,
+      "overlapping_reported_area_km2": 0.017401482606,
+      "overlapping_reported_acres": 4.3,
+      "total_years": 33,
+      "mean_annual_burned_share_pct": 0.0001678504226589416,
+      "equivalent_return_interval_years": 595768.5325773165,
+      "omitted_fire_min_acres": 77630.44515401397
+     }
+    ],
+    "notes": [
+     "Size thresholds use the final reported fire size in acres. Each year counts at most once per radius and threshold.",
+     "Footprints are equivalent circles of the reported area centered on the reported point. Real perimeters are irregular, the point can be the ignition location rather than the center, and points can be off by up to about 1.6 km.",
+     "Burned-area share is reported acres overlapping the circle divided by circle area and baseline years. It is an average for the whole circle, not this property's burn probability. Reburned land is counted again.",
+     "The burned-area exceedance curve uses each fire's reported size and the historical rate of such fires. Annual probability assumes fires occur independently at the 1992\u20132024 rate (Poisson). It is not extrapolated beyond the largest reported fire, and it is not the chance that this property burns.",
+     "Only fires reported within 20 km are retrieved. Larger fires reported farther away are omitted; each result states the smallest omitted fire size that could have affected it."
+    ]
+   }
   },
   "meta": {
    "generated_at": "2026-11-08T00:14:58.620628+00:00",

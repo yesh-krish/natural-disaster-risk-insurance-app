@@ -122,6 +122,28 @@ See the "Implemented reference architecture" section of
 `docs/ai-risk-agent-architecture.md` and the researched-tools table in
 `docs/risk-assessment-tools.md`.
 
+Follow-up (November 9): API 1.9.0 adds `/api/v1/assessment`. A map panel for it
+was built, then removed at the user's request ("don't put it on the frontend right
+now"); the route stays. Tool pins were re-generated for 1.9.0.
+Also November 9 (API 1.10.0): the map's general "Nearby weather stations (METAR)"
+list was removed at the user's request. The hazard station section now lists the
+nearest n stations from the selected hazard's own network (`peril` + `n` on
+`/api/v1/monitoring-stations`, `monitoring_stations.nearest_hazard_stations`), with
+Stations (n) controlling the count. METAR readings are fetched only for Heat, into
+the heat screening panel. Tool pins were re-generated for 1.10.0. `.claude/launch.json` starts the map on
+port 8765 for browser checks.
+
+November 10 (API 1.11.0): satellite active-fire observations from NASA FIRMS
+(VIIRS, NOAA-20 and NOAA-21) via `satellite_fire.py`, `/api/v1/satellite-fires`
+and a map section shown for wildfire hazards (`satellite_fire.js`). Tests:
+`tests/test_satellite_fire.py`, `tests/test_satellite_fire_ui.cjs`. Tool pins
+re-generated. Not yet exposed as an MCP tool for the agent.
+Later November 10 (API 1.12.0): satellite window choice (24h/48h/7d); the map's
+potential-intensity and flame-length options and their page code were removed at
+the user's request, and `hazard_relevance.py` no longer auto-selects flame length.
+Their backend routes (`/api/potential-fire`, `/api/v1/hazards/wildfire`,
+`/api/v1/hazards/potential_fire_intensity`) are untouched.
+
 ## Candidate next work, not yet implemented
 
 The tool guide prioritizes asset-profile validation, a typed backend wrapper

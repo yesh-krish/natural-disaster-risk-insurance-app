@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ndapp": {
+      "command": "C:\\Users\\Yeshas Krishna\\OneDrive\\Documents\\ChatGPT\\NDApp\\.venv\\Scripts\\python.exe",
+      "args": ["C:\\Users\\Yeshas Krishna\\OneDrive\\Documents\\ChatGPT\\NDApp\\ndapp_mcp_server.py"]
+    }
+  }
+}

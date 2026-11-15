@@ -84,6 +84,35 @@ class APIServerTests(unittest.TestCase):
             self.assertEqual(first.result().json()["status"], "unavailable")
             self.assertEqual(client.get("/api/v1/hazards/flood?lat=29&lon=-98").status_code, 200)
 
+    def test_api_keys_protect_data_but_not_health_or_docs(self):
+        from api_server import configured_keys, is_loopback
+        key = "k" * 32
+        curve = {"status": "available", "peril": "flood", "unit": "m", "points": []}
+        with TestClient(create_app(api_keys=[key, "x" * 24])) as client, \
+                patch("api_v1.disaster_at", return_value=curve) as provider:
+            self.assertEqual(client.get("/api/v1/health").status_code, 200, "health stays public")
+            self.assertEqual(client.get("/api/docs").status_code, 200)
+            for headers in ({}, {"X-API-Key": "wrong-key-of-enough-length"}, {"X-API-Key": key[:-1]},
+                            {"Authorization": "Bearer " + key}):
+                response = client.get("/api/v1/hazards/flood?lat=29&lon=-98", headers=headers)
+                self.assertEqual(response.status_code, 401, headers)
+                self.assertEqual(response.json()["error"]["code"], "unauthorized")
+                self.assertEqual(response.headers["www-authenticate"], "ApiKey")
+            provider.assert_not_called()
+            for good in (key, "x" * 24):
+                self.assertEqual(client.get("/api/v1/hazards/flood?lat=29&lon=-98", headers={"X-API-Key": good}).status_code, 200)
+            spec = client.get("/api/v1/openapi.json").json()
+            self.assertEqual(spec["components"]["securitySchemes"]["ApiKey"]["name"], "X-API-Key")
+            self.assertIn("401", spec["paths"]["/api/v1/hazards/{peril}"]["get"]["responses"])
+            self.assertNotIn("security", spec["paths"]["/api/v1/health"]["get"])
+        self.assertEqual(self.client.get("/api/v1/hazards/flood?lat=29&lon=-98&typo=1").status_code, 400,
+                         "without configured keys the local API stays open as before")
+        with self.assertRaises(ValueError):
+            configured_keys("short")
+        self.assertEqual(configured_keys(" " + "y" * 20 + " , ,"), ["y" * 20], "blank entries and spaces are ignored")
+        self.assertTrue(all(is_loopback(h) for h in ("127.0.0.1", "localhost", "::1")))
+        self.assertFalse(any(is_loopback(h) for h in ("0.0.0.0", "192.168.1.5", "example.com")))
+
     def test_unexpected_failure_has_no_private_details_and_slot_recovers(self):
         with patch("api_server.dispatch", side_effect=RuntimeError("private detail")), \
                 self.assertLogs("api_server", level="ERROR"):

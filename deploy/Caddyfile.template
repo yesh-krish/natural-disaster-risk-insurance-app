@@ -1,0 +1,7 @@
+# Caddy config for NDApp. setup_vm.sh fills in __SITE__ and __PORT__.
+# With a hostname, Caddy gets and renews a free Let's Encrypt certificate automatically.
+# With ":80" (WSL test), it serves plain HTTP.
+__SITE__ {
+	encode gzip
+	reverse_proxy 127.0.0.1:__PORT__
+}

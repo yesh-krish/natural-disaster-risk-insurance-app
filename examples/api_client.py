@@ -12,15 +12,17 @@ from pathlib import Path
 import sys
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import urlopen
+import os
+from urllib.request import Request, urlopen
 
 
-def fetch_comparison(base_url, peril, lat, lon, payout, site_class="BC", address=None):
+def fetch_comparison(base_url, peril, lat, lon, payout, site_class="BC", address=None, api_key=None):
     location = {"address": address} if address is not None else {"lat": lat, "lon": lon}
     query = urlencode({**location, "payout_usd": payout, "site_class": site_class})
     url = f"{base_url.rstrip('/')}/api/v1/trigger-comparisons/{peril}?{query}"
+    headers = {"Accept": "application/json", **({"X-API-Key": api_key} if api_key else {})}
     try:
-        with urlopen(url, timeout=90) as response:
+        with urlopen(Request(url, headers=headers), timeout=90) as response:
             return json.load(response)
     except HTTPError as exc:
         try:
@@ -39,6 +41,8 @@ def fetch_comparison(base_url, peril, lat, lon, payout, site_class="BC", address
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
+    parser.add_argument("--api-key", default=os.environ.get("NDAPP_API_KEY"),
+                        help="Key for a shared server (or set NDAPP_API_KEY); not needed for a local copy")
     parser.add_argument("--peril", default="flood", choices=["flood", "earthquake", "wildfire", "cyclone", "rainfall", "heat", "auto"])
     parser.add_argument("--address", help="Full US street address, city and state, enclosed in quotes; accepts extra spaces")
     parser.add_argument("--lat", type=float)
@@ -57,7 +61,8 @@ def main(argv=None):
     if args.address is None and args.lat is None:
         args.lat, args.lon = 29.39741277, -98.47084089
     try:
-        result = fetch_comparison(args.base_url, args.peril, args.lat, args.lon, args.payout, args.site_class, address=args.address)
+        result = fetch_comparison(args.base_url, args.peril, args.lat, args.lon, args.payout, args.site_class,
+                                  address=args.address, api_key=args.api_key)
         if args.output:
             args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
         data = result["data"]

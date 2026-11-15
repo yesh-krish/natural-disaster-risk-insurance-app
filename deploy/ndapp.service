@@ -1,0 +1,25 @@
+# systemd unit for NDApp. setup_vm.sh fills in __APP_DIR__ and __APP_USER__.
+[Unit]
+Description=NDApp research map and API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=__APP_USER__
+Group=__APP_USER__
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=/etc/ndapp.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=__APP_DIR__/.venv/bin/python server.py
+Restart=always
+RestartSec=3
+
+# Hardening: the app only needs to write under data/ (download caches).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=__APP_DIR__/data
+
+[Install]
+WantedBy=multi-user.target

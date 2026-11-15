@@ -61,6 +61,20 @@ class PublicServerTests(unittest.TestCase):
                     if method == "HEAD":
                         self.assertEqual(body, b"")
 
+    def test_optional_password_blocks_requests_without_credentials(self):
+        import base64
+        import os
+        with patch.dict(os.environ, {"NDAPP_PASSWORD": "s3cret", "NDAPP_USER": "ndapp"}):
+            status, headers, _ = request("/")
+            self.assertEqual(status, 401)
+            self.assertIn(b"WWW-Authenticate", headers)
+            token = base64.b64encode(b"ndapp:s3cret").decode()
+            sock = MemorySocket(
+                f"GET / HTTP/1.0\r\nHost: localhost\r\nAuthorization: Basic {token}\r\n\r\n".encode())
+            with patch.object(Handler, "log_message"):
+                Handler(sock, ("127.0.0.1", 12345), None)
+            self.assertEqual(int(bytes(sock.output).split()[1]), 200)
+
 
 if __name__ == "__main__":
     unittest.main()

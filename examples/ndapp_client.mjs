@@ -10,7 +10,7 @@ export class NdappApiError extends Error {
   }
 }
 
-export function createNdappClient(baseUrl, { timeoutMs = 120_000, fetchImpl = globalThis.fetch } = {}) {
+export function createNdappClient(baseUrl, { timeoutMs = 120_000, fetchImpl = globalThis.fetch, apiKey } = {}) {
   const origin = new URL(baseUrl);
   if (!["http:", "https:"].includes(origin.protocol) || origin.search || origin.hash) {
     throw new TypeError("Use an HTTP(S) base URL without a query or fragment.");
@@ -23,8 +23,9 @@ export function createNdappClient(baseUrl, { timeoutMs = 120_000, fetchImpl = gl
     for (const [key, value] of Object.entries(parameters)) {
       if (value !== undefined) url.searchParams.set(key, String(value));
     }
-    const response = await fetchImpl(url, { headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(timeoutMs) });
+    const headers = { Accept: "application/json" };
+    if (apiKey) headers["X-API-Key"] = apiKey;
+    const response = await fetchImpl(url, { headers, signal: AbortSignal.timeout(timeoutMs) });
     let payload;
     try {
       payload = await response.json();

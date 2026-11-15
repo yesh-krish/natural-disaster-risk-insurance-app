@@ -31,7 +31,28 @@ def context_schemas():
                     "epicentral_distance_km": {"type": "number", "minimum": 0}, "review_status": text,
                     "max_mmi": number, "pager_alert": text, "tsunami_flag": {"type": "boolean"},
                     "source_url": {"type": ["string", "null"]}}
+    detection_fields = {"satellite": {"enum": ["NOAA-20", "NOAA-21"]}, "instrument": {"const": "VIIRS"},
+                        "latitude": {"type": "number"}, "longitude": {"type": "number"},
+                        "distance_km": {"type": "number", "minimum": 0}, "acquired_at": timestamp,
+                        "age_hours": {"type": "number", "minimum": 0},
+                        "confidence": {"enum": ["low", "nominal", "high"]}, "frp_mw": number,
+                        "daynight": {"enum": ["day", "night", None]}, "pixel_scan_km": number,
+                        "pixel_track_km": number, "brightness_ti4_k": number, "version": text}
+    satellite_source = {"type": "object", "required": ["satellite", "status", "url"], "properties": {
+        "satellite": {"type": "string"}, "status": {"enum": ["ok", "failed"]}, "url": {"type": "string", "format": "uri"},
+        "retrieved_at": timestamp, "file_detection_count": {"type": "integer", "minimum": 0},
+        "oldest_acquired_at": text, "newest_acquired_at": text, "error": text}}
     return {
+        "SatelliteFires": {"type": "object", "required": [*base.keys(), "radius_km", "window", "window_description",
+                                                          "detection_count", "returned_count", "detections", "sources"],
+                           "properties": {**base, "radius_km": {"type": "number", "minimum": 1, "maximum": 100},
+                               "window": {"enum": ["24h", "48h", "7d"]}, "window_description": {"type": "string"},
+                               "detection_count": {"type": "integer", "minimum": 0},
+                               "returned_count": {"type": "integer", "minimum": 0, "maximum": 200},
+                               "nearest_km": number, "newest_age_hours": number,
+                               "sources": {"type": "array", "items": satellite_source},
+                               "detections": {"type": "array", "maxItems": 200, "items": {
+                                   "type": "object", "required": list(detection_fields), "properties": detection_fields}}}},
         "ElevationContext": {"type": "object", "required": [*base.keys(), "elevation_m", "raw_value",
                                                             "source_resolution", "acquisition_date"],
                              "properties": {**base, "status": {"enum": ["available", "unavailable"]},

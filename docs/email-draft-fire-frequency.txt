@@ -1,0 +1,25 @@
+To: [professor's email]
+Subject: Quick check on a wildfire feature in NDApp
+Attach: docs/screenshots/fire-frequency-map.jpg, docs/screenshots/fire-frequency-table.jpg
+
+Hi Professor [Name],
+
+I've added a wildfire feature to NDApp and wanted to check the approach with you before going further. I've attached two screenshots from a test in downtown San Antonio.
+
+For any point on the map, it shows how often a wildfire was reported nearby: the share of years from 1992 to 2024 with at least one fire within 5, 10 or 20 km. Each year counts once, however many fires it had. For the San Antonio point, that came to 3% of years within 5 km, 9% within 10 km and 39% within 20 km. Each number comes with a 95% Wilson interval, since it's based on only 33 years.
+
+The data comes from the Forest Service's Fire Program Analysis Fire-Occurrence Database (FPA FOD, 7th edition), which the app queries live. I include fires of every size. In the app, I describe the result as a historical frequency, not a prediction or the chance that a particular home burns.
+
+A few things I wasn't sure about:
+1. Is "share of years with at least one fire nearby" a reasonable measure, or would something like an annual fire count be better?
+2. I count years with no reported fire as zeros, but the archive may have missed fires, especially in the 1990s. Is that okay?
+3. Should I leave out very small fires?
+
+I'd also like your advice on hosting. Right now NDApp only runs on my laptop, and I'm stuck between free and paid options. Free hosting tiers usually put the app to sleep when nobody is using it, so the first visitor waits a while, and their limited memory may not handle the flood map files or the heavier fire calculations. Paid hosting avoids those problems, but it's a monthly cost and I'm not sure who would cover it.
+4. Would a free tier be good enough for a research demo, or is it worth paying for reliability? I've seen two options that might avoid the cost entirely. One is NSF's Jetstream2 research cloud, which is free through an ACCESS "Explore" allocation but needs a faculty PI to request it. The other is a virtual server through TAMU Technology Services, which is set up for departments. Would either work for this, and would you be open to sponsoring one?
+5. Should it be open to anyone, or only to people in the class or lab? It pulls live data from several government sites, so I'd need to limit heavy use either way.
+
+Thanks so much. I'm happy to show you a demo whenever works for you.
+
+Best,
+[Your name]

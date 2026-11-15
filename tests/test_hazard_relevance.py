@@ -20,17 +20,24 @@ class RelevanceTests(unittest.TestCase):
 
     def test_ranking_uses_shared_loss_units_and_preserves_missing_values(self):
         ranks = rank_county({"IFLD_EALT": 80, "CFLD_EALT": 40, "HRCN_EALT": 100,
-                             "ERQK_EALT": None, "WFIR_EALT": -9999})
+                             "ERQK_EALT": -9999, "WFIR_EALT": 900})
         self.assertEqual([(r["peril"], r["annual_loss_total"]) for r in ranks],
-                         [("flood", 120), ("cyclone", 100), ("wildfire", None), ("earthquake", None)])
+                         [("flood", 120), ("cyclone", 100), ("earthquake", None)])
 
     def test_largest_supported_county_hazard_with_local_curve_wins(self):
-        with patch("hazard_relevance.county_at", return_value=self.county(WFIR_EALT=500, ERQK_EALT=100)), \
+        with patch("hazard_relevance.county_at", return_value=self.county(HRCN_EALT=500, ERQK_EALT=100)), \
              patch("hazard_relevance.disaster_at", side_effect=lambda peril, *args: curve(peril)) as fetch:
             data = most_relevant(29.4, -98.5)
-        self.assertEqual(data["peril"], "wildfire")
+        self.assertEqual(data["peril"], "cyclone")
         self.assertEqual(data["selection"]["method"], "fema_county_expected_annual_loss")
         self.assertEqual(fetch.call_count, 1)
+
+    def test_flame_length_is_never_chosen_automatically(self):
+        with patch("hazard_relevance.county_at", return_value=self.county(WFIR_EALT=10**9, ERQK_EALT=100)), \
+             patch("hazard_relevance.disaster_at", side_effect=lambda peril, *args: curve(peril)) as fetch:
+            data = most_relevant(29.4, -98.5)
+        self.assertEqual(data["peril"], "earthquake")
+        self.assertNotIn("wildfire", [c.args[0] for c in fetch.call_args_list])
 
     def test_missing_inland_flood_curve_shows_rainfall_context(self):
         with patch("hazard_relevance.county_at", return_value=self.county(IFLD_EALT=500, ERQK_EALT=100)), \
@@ -57,10 +64,10 @@ class RelevanceTests(unittest.TestCase):
 
     def test_provider_failure_does_not_hide_next_ranked_curve(self):
         def fetch(peril, *args):
-            if peril == "wildfire":
-                raise OSError("Fire service offline")
+            if peril == "cyclone":
+                raise OSError("Wind service offline")
             return curve(peril)
-        with patch("hazard_relevance.county_at", return_value=self.county(WFIR_EALT=500, ERQK_EALT=100)), \
+        with patch("hazard_relevance.county_at", return_value=self.county(HRCN_EALT=500, ERQK_EALT=100)), \
              patch("hazard_relevance.disaster_at", side_effect=fetch):
             data = most_relevant(29.4, -98.5)
         self.assertEqual(data["peril"], "earthquake")
@@ -82,7 +89,7 @@ class RelevanceTests(unittest.TestCase):
         self.assertEqual(data["peril"], "auto")
         self.assertEqual(data["status"], "unavailable")
         self.assertEqual(data["points"], [])
-        self.assertEqual(len(data["selection"]["checks"]), 5)
+        self.assertEqual(len(data["selection"]["checks"]), 4)
 
     def test_invalid_points_are_not_usable(self):
         for frequency, severity in [(0, 2), (2, None), (2, -1), (float("nan"), 2), (True, 2)]:

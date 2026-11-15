@@ -9,16 +9,17 @@ dashed line connects it to the selection. **Show selection and fire** fits both.
 Rectangular selections use their center, explicitly labeled in the result.
 Selecting this hazard uses the current selection immediately. Switching to
 another hazard clears the fire marker and cancels its requests and periodic
-checks. The lookup panel appears only for this hazard. Annual probability,
-trigger and payout controls are hidden; a separate annual-frequency panel
-describes historical reported-fire proximity.
+checks. The lookup panel appears only for this hazard. A separate annual-frequency panel
+describes historical reported-fire proximity, and the trigger and payout
+controls use its burned-area curve (see **Nearby-fire triggers**).
 
 ## Annual nearby-fire frequency
 
 The wildfire view also calculates **the share of published archive years with
 at least one reported wildfire within 5, 10 and 20 km of the selection**. This is
-option 1 from the fire-risk exploration: it uses every eligible fire size, and
-does not implement a fire-size threshold or a property-loss model.
+option 1 from the fire-risk exploration. The headline frequencies use every
+eligible fire size; **size-aware exceedance** (below) adds reported acres.
+Neither is a property-loss model.
 
 For radius r, frequency = 100 × number of qualifying years / baseline years.
 Each calendar year counts once per radius, regardless of the number of fires.
@@ -71,13 +72,84 @@ own stale state, supports refresh, and cancels requests and timers when switchin
 to another hazard or waiting for an address match. Rectangular selections use
 the center rather than an area-average or anywhere-in-area probability.
 
+## Nearby-fire triggers
+
+The trigger and payout controls work as for the other hazards. A trigger is
+**a reported wildfire of at least N acres whose reported point is within the
+radius chosen in the fire panel (5, 10 or 20 km) in a calendar year**. Changing
+the radius reloads the levels and keeps the chosen size when it is still
+offered. Levels are the burned-area curve sizes (0.1, 0.3, 1, 3, 10 … acres).
+
+The trigger probability is the **observed share of archive years** that had
+such a fire (`empirical_years_pct`), the same basis as Wind and Heat. The Poisson rate is
+not used for pricing: reports cluster in some years, so it overstates the chance
+of at least one fire per year. Sizes never reported within the radius are not
+offered, rather than being priced at 0%; zero observed years does not mean
+zero future risk. Contribution = observed % ÷ 100 × payout, one payout per year,
+excluding fees. Example, 601 Luther St W, 10 km, 10+ acres: 21.2% × $10,000 =
+$2,120 per year. This is a historical illustration, not a forward-looking price.
+
+## Size-aware exceedance
+
+FPA FOD records the final burned area (`fire_size`, acres) of every fire, so
+`size_exceedance` combines that size with distance in four ways. All use
+the same archive records, baseline years and coverage assumption as above.
+
+0. **Burned-area exceedance curve** (`area_exceedance`). For each radius and
+   each burned-area threshold A (0.1, 0.3, 1, 3, 10 … 100,000 acres):
+   - expected fires per year at least A acres: rate λ = count / baseline years;
+   - annual probability of at least one: P = 1 − e^(−λ), assuming fires occur
+     independently at the archive's average rate (Poisson);
+   - observed share of years that had one (no independence assumption);
+   - return period 1 / P;
+   plus `expected_annual_reported_acres` (total reported acres / years). The
+   curve stops at the first threshold above the largest reported fire, so
+   nothing is extrapolated. When fires cluster in a few years, P exceeds the
+   observed share. At 601 Luther St W, small fires average about 7 per year
+   within 5 km, so the Poisson P is about 99.9% while only 52% of years had one. Treat the
+   observed column as the more conservative description of the archive.
+1. **Size thresholds.** For each of 10, 100, 1,000 and 5,000 acres (FPA size
+   classes C, D, F and G) and each radius, this is the share of baseline years with at least one
+   reported fire of at least that size, with a Wilson interval. A town full of
+   1-acre grass fires scores high on the headline frequency but low here.
+2. **Footprint reach.** Each fire is treated as a circle with its reported area
+   (radius √(acres × 0.004047 km² / π); 1 acre ≈ 36 m, 1,000 acres ≈ 1.1 km),
+   centered on its reported point. A year qualifies when any such circle covers
+   the selection. `closest_footprint_gap_km` is the distance from the selection
+   to the nearest circle edge.
+3. **Burned-area share.** For the 5 and 10 km circles, the overlap of every
+   fire's equivalent circle with the search circle is summed (exact
+   circle–circle intersection), divided by circle area and baseline years. This
+   gives the mean annual share of the circle that reported fires covered, and
+   `equivalent_return_interval_years` = 1 / share. It is the empirical analogue
+   of a landscape burn probability averaged over the whole circle. It is not
+   this property's probability, and land that burned more than once counts each time.
+
+Limitations: real perimeters are irregular, and the reported point may be the
+ignition location, not the center. Points can be off by up to about 1.6 km
+(PLSS section). Small fires therefore have a footprint smaller than their
+location error, so footprint reach is only meaningful for large fires. Only
+fires reported within 20 km are retrieved. `omitted_fire_min_acres` states the
+smallest fire reported farther away that could still have affected each
+result: about 310,000 acres for footprint reach, 175,000 for the 5 km share and
+78,000 for the 10 km share. The 20 km circle has no burned-area share because
+any fire just beyond the query could overlap it. Fires with no reported size
+are counted in `records_missing_size` and excluded from size-based results.
+
+Example, 601 Luther St W, College Station, TX (live, November 2026): 1,139
+records within 20 km. Years with a 10+ acre fire were 6.1% within 5 km, 21.2%
+within 10 km and 63.6% within 20 km. A 100+ acre fire occurred within 20 km in
+12.1% of years; no 1,000+ acre fire was reported. No footprint reached the
+point; the closest edge was 0.56 km away. Reported fires covered about 0.051%
+of the 5 km circle per year, equivalent to once in roughly 2,000 years.
+
 ```text
 GET /api/v1/fire-proximity?lat=29.4241&lon=-98.4936
 GET /api/v1/fire-proximity?address=100%20Dolorosa%20St%2C%20San%20Antonio%2C%20TX
 ```
 
 The v1 API returns `frequency_basis=historical_annual_reported_fire_frequency`,
-`baseline`, `frequencies`, `annual_records`, source/coverage provenance and
+`baseline`, `frequencies`, `annual_records`, `size_exceedance`, source/coverage provenance and
 `checked_at`. It accepts the same strict coordinate/address inputs as nearest
 fire, and uses a bounded five-minute cache for the exact selected coordinates.
 
