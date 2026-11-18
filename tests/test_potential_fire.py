@@ -145,26 +145,18 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(result["status"], "unavailable")
         self.assertIn("Point mode", result["reason"])
 
-    def test_api_retains_potential_interpretation_and_comparison_basis(self):
-        curve = {"status": "available", "peril": "potential_fire_intensity", "points": [{"severity": 100, "frequency_pct": 25}],
-                 "actual_wildfire_probability_available": False, "hazard_kind": "potential_intensity_exceedance"}
-        with patch("api_v1.disaster_at", return_value=curve):
+    def test_public_api_no_longer_offers_potential_intensity(self):
+        with patch("api_v1.disaster_at") as provider:
             code, response = dispatch("/api/v1/hazards/potential_fire_intensity", "lat=30&lon=-97")
-        self.assertEqual(code, 200)
-        self.assertFalse(response["data"]["actual_wildfire_probability_available"])
-        result = comparison(curve, Decimal("10000"))
-        self.assertEqual(result["frequency_basis"], "historical_potential_condition_frequency")
-        self.assertEqual(result["comparisons"][0]["expected_annual_contribution_usd"]["minimum"], 2500)
-        self.assertIn("whether or not a fire occurs", result["assumptions"][-1])
+        self.assertEqual(code, 400)
+        self.assertEqual(response["error"]["code"], "invalid_request")
+        provider.assert_not_called()
 
     def test_real_baseline_contract_when_prepared(self):
         path = fire.CACHE / "bastrop-baseline.json"
         if not path.exists():
             self.skipTest("Run the documented CLI to prepare the optional live-data fixture")
         curve = json.loads(path.read_text(encoding="utf-8"))
-        spec = openapi_document()
-        schema = {"$ref": "#/components/schemas/Hazard", "components": spec["components"]}
-        Draft202012Validator(schema).validate(curve)
         self.assertEqual(curve["baseline"]["complete_years"], 30)
         self.assertTrue(all(a["frequency_pct"] >= b["frequency_pct"] for a, b in zip(curve["points"], curve["points"][1:])))
         self.assertEqual(curve["points"][-1]["frequency_pct"], 100 / 30)

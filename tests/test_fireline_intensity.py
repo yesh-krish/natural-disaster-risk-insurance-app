@@ -94,22 +94,13 @@ class FirelineIntensityTests(unittest.TestCase):
                     fireline_intensity(lat, lon)
             fetch.assert_not_called()
 
-    def test_point_and_comparison_http_contracts(self):
+    def test_research_route_kept_but_not_in_public_api(self):
+        # Fireline intensity stays a research module; the public v1 API no longer offers it.
         with patch("fireline_intensity.fetch_json", side_effect=self.fetch("71.296150208")):
+            self.assertEqual(http_request("/api/disaster?peril=fireline_intensity&lat=29.62&lon=-98.6")[0], 200)
             status, payload = dispatch("/api/v1/hazards/fireline_intensity", "lat=29.62&lon=-98.6")
-            self.assertEqual(status, 200)
-            self.assertEqual(payload["status"], "available")
-            self.assert_contract(payload, "/api/v1/hazards/{peril}")
-            status, compared = dispatch("/api/v1/trigger-comparisons/fireline_intensity", "lat=29.62&lon=-98.6&payout_usd=50000")
-            self.assertEqual(status, 200)
-            self.assertEqual(compared["status"], "unavailable")
-            self.assertEqual(compared["data"]["frequency_basis"], "unavailable")
-            self.assertEqual(compared["data"]["comparisons"], [])
-            self.assertNotIn("expected_annual_contribution_usd", compared["data"])
-            self.assert_contract(compared, "/api/v1/trigger-comparisons/{peril}")
-            for route in ["/api/disaster?peril=fireline_intensity&lat=29.62&lon=-98.6",
-                          "/api/v1/hazards/fireline_intensity?lat=29.62&lon=-98.6"]:
-                self.assertEqual(http_request(route)[0], 200)
+        self.assertEqual(status, 400)
+        self.assertEqual(payload["error"]["code"], "invalid_request")
 
     def test_area_means_intensity_with_zeros_missing_and_full_sample_provenance(self):
         def provider(peril, lat, lon, site):
@@ -126,9 +117,6 @@ class FirelineIntensityTests(unittest.TestCase):
         self.assertFalse(result["annual_probability_available"])
         self.assertIsNone(result["area"]["samples"][0]["value"])
         self.assertEqual(result["area"]["samples"][5]["value"], 0)
-        with patch("api_v1.area_disaster", return_value=result):
-            _, payload = dispatch("/api/v1/areas/fireline_intensity", "south=0&west=0&north=4&east=4")
-        self.assert_contract(payload, "/api/v1/areas/{peril}")
 
     def test_area_no_data_and_station_uses_fire_weather_network(self):
         result = area_disaster(0, 0, 1, 1, "fireline_intensity", provider=lambda *args: {"status": "unavailable", "points": []})

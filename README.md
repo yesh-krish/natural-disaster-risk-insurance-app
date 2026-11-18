@@ -67,8 +67,10 @@ See [heat and wind rationale, sources and limitations](docs/heat-and-wind.md).
 
 The fireline-intensity, **potential intensity (kW/m)** and **flame length (FSim)**
 wildfire options have been removed from the map (the last two on November 10,
-2026), and "Choose most relevant" no longer selects flame length. Their research
-API routes remain available ([TxWRAP record](docs/fireline-intensity.md),
+2026), and "Choose most relevant" no longer selects flame length. Since API 1.13.0
+the public API no longer offers them either: its `wildfire` hazard uses the nearby
+reported-fire method (acres within 5, 10 or 20 km, share of years). Their research
+notes remain ([TxWRAP record](docs/fireline-intensity.md),
 [potential intensity method](docs/potential-fire-intensity.md)).
 
 The app includes a **versioned research API** for hazard lookup, point trigger
@@ -163,7 +165,7 @@ The **Set your trigger and payout** panel lets you select a hazard, choose a loc
 on the map or by address, then select a supported trigger level. Its result card
 shows the probability of meeting or exceeding that level in **one year**, with
 the location, units, source, and method. Wind results are explicitly labeled
-historical annual frequencies; wildfire results are research estimates. Trigger
+historical annual frequencies, and so are wildfire triggers (share of years with a reported fire of at least the chosen size nearby). Trigger
 levels in point mode come directly from the loaded government points, without interpolation
 or extrapolation. Missing levels are omitted, and missing coverage never becomes
 0%. Changing the hazard, location, or earthquake site class clears the result.

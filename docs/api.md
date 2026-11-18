@@ -1,6 +1,16 @@
 # NDApp Research API v1
 
-The current contract is **1.12.0**. Version 1.12.0 adds `window=24h|48h|7d` to
+The current contract is **1.13.0**. Version 1.13.0 makes `wildfire` in
+`/api/v1/hazards`, `/api/v1/trigger-comparisons` and `/api/v1/areas` use the
+nearby reported-fire method, the same one the map uses: each point is a fire
+size in acres and the share of record years (FPA FOD, currently 1992–2024) with
+at least one reported wildfire of at least that size within `radius_km` (5, 10 or
+20; default 10). Trigger comparisons use that observed share of years
+(`frequency_basis=historical_annual_frequency`). Sizes never reported within the
+radius are left out rather than priced at 0%. `areas/wildfire` uses the area's
+center, as the map does. The older wildfire models (`fireline_intensity`,
+`potential_fire_intensity` and the FSim flame-length curve) are no longer offered
+by the API and return 400; their research notes remain in the docs. Version 1.12.0 adds `window=24h|48h|7d` to
 `/api/v1/satellite-fires`, and `hazards/auto` no longer selects the wildfire
 flame-length model. Version 1.11.0 added `/api/v1/satellite-fires`:
 NASA FIRMS VIIRS active-fire detections near a point (see
@@ -68,12 +78,12 @@ Use `server.py --port 8001` to run a separate instance on another port.
 | `/api/v1/elevation-context` | `address` OR both `lat`, `lon` | USGS 3DEP bare-earth elevation in meters (datum not stated by the service); no-data returns unavailable; upstream can take up to 30 s |
 | `/api/v1/recent-earthquakes` | `address` OR both `lat`, `lon`; optional `radius_km` (1–300, default 100), `days` (1–3650, default 365), `min_magnitude` (0–9.5, default 2.5) | Full USGS ComCat count plus up to the 100 largest events with epicentral distances; historical catalog, not a probability |
 | `/api/v1/risk-index` | `address` OR both `lat`, `lon` | FEMA National Risk Index ratings, scores and expected annual loss for the intersecting census tract; tract-wide relative index, not property risk |
-| `/api/v1/hazards/{peril}` | `address` OR both `lat`, `lon` | Source severity–frequency points, units, sources and model details |
-| `/api/v1/trigger-comparisons/{peril}` | `payout_usd`, plus `address` OR both `lat`, `lon` | Alternative supported point thresholds and annual contributions |
-| `/api/v1/areas/{peril}` | `south`, `west`, `north`, `east` | 25-point grid means and per-threshold/per-sample coverage |
+| `/api/v1/hazards/{peril}` | `address` OR both `lat`, `lon`; `radius_km` (5, 10, 20) for wildfire | Source severity–frequency points, units, sources and model details. Wildfire: fire size (acres) vs share of years with such a fire nearby |
+| `/api/v1/trigger-comparisons/{peril}` | `payout_usd`, plus `address` OR both `lat`, `lon`; `radius_km` for wildfire | Alternative supported point thresholds and annual contributions |
+| `/api/v1/areas/{peril}` | `south`, `west`, `north`, `east`; `radius_km` for wildfire | 25-point grid means and per-threshold/per-sample coverage. Wildfire: the nearby-fire curve at the area's center |
 | `/api/v1/monitoring-stations` | `address` OR both `lat`, `lon`; optional `n`, and either `peril` or `network=awc_metar` | `peril` + `n` (1.10.0): nearest n stations in that hazard's own network (USGS stream or precipitation gauges, EarthScope seismic, NIFC RAWS, METAR wind for cyclone). `network=awc_metar` (or neither): nearest n METAR weather stations with observations. `peril` alone: legacy single station |
 
-Hazards are `flood`, `earthquake`, `wildfire`, `fireline_intensity`, `potential_fire_intensity`, `cyclone`, `rainfall` and `heat`.
+Hazards are `flood`, `earthquake`, `wildfire` (nearby reported fires by size and radius), `cyclone`, `rainfall`, `heat` and `auto`.
 
 `heat` is historical **annual maximum daily air temperature**, using NOAA
 GHCN-Daily TMAX in °C and the 1991–2020 baseline. `frequency_basis` is

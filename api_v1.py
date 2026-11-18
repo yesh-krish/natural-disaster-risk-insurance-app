@@ -6,7 +6,7 @@ import math
 from urllib.parse import parse_qs
 from address_lookup import geocode_address, normalize_address
 
-from area_hazard import PERILS, SITE_CLASSES, area_disaster, validate_area
+from area_hazard import SITE_CLASSES, area_disaster, validate_area
 from disaster_data import disaster_at
 from hazard_engine import coordinates
 from monitoring_stations import nearest_hazard_stations, nearest_station, nearest_stations, station_count
@@ -15,7 +15,14 @@ from fire_proximity import fire_proximity
 from risk_context import (active_weather_alerts, elevation_context, flood_zone_context,
                           national_risk_index, recent_earthquakes)
 
-VERSION = "1.12.0"
+VERSION = "1.13.0"
+# Hazards the public API offers. Wildfire uses the nearby reported-fire method (fire size in acres
+# within a radius, share of years), the same one the map's trigger controls use. The older wildfire
+# models (FSim flame length, fireline intensity, potential intensity) are not offered.
+PERILS = {"auto", "earthquake", "flood", "wildfire", "cyclone", "rainfall", "heat"}
+STATION_PERILS = {"earthquake", "flood", "wildfire", "cyclone", "rainfall"}
+FIRE_RADII_KM = (5, 10, 20)
+DEFAULT_FIRE_RADIUS_KM = 10
 ASSESSMENT_HAZARDS = {"flood", "earthquake", "wildfire"}
 # Failures a provider can raise on malformed, truncated or unreachable upstream data. Each means
 # "no answer" (502), never a substituted estimate. http.client.IncompleteRead is not an OSError.
@@ -142,7 +149,7 @@ def comparison(curve, payout):
         rows.append({"severity": severity, "frequency_pct": {"minimum": low, "maximum": high},
                      "expected_annual_contribution_usd": {"minimum": contribution(low), "maximum": contribution(high)}})
     result = {**curve, "payout_usd": float(payout), "comparisons": rows,
-              "frequency_basis": {"potential_fire_intensity": "historical_potential_condition_frequency", "cyclone": "historical_annual_frequency", "heat": "historical_annual_frequency", "wildfire": "research_estimate"}.get(curve["peril"], "modeled_annual_probability"),
+              "frequency_basis": {"cyclone": "historical_annual_frequency", "heat": "historical_annual_frequency", "wildfire": "historical_annual_frequency"}.get(curve["peril"], "modeled_annual_probability"),
               "calculation": "(annual exceedance percentage / 100) * fixed payout",
               "assumptions": ["One fixed payout in a year when the trigger is met or exceeded; fees and pricing adjustments excluded.",
                               "Rows are alternative choices, not amounts to add together; contributions rounded to USD cents.",
@@ -152,8 +159,57 @@ def comparison(curve, payout):
         result.update(status="unavailable", reason=curve.get("reason") or "No supported trigger levels at this location.")
     if curve["peril"] == "heat":
         result["assumptions"].append("Heat contributions use 1991–2020 station-proxy frequencies among complete years. They are historical-frequency illustrations, not forward-looking prices or construction exposure limits.")
-    if curve["peril"] == "potential_fire_intensity":
-        result["assumptions"].append("This payout illustration triggers on modeled potential conditions, whether or not a fire occurs. It is not wildfire loss pricing or an actual fire-arrival probability.")
+    if curve["peril"] == "wildfire":
+        result["assumptions"].append(
+            f"Wildfire trigger: a reported wildfire of at least the chosen size (acres) within {curve.get('radius_km')} km in a calendar year. "
+            "The percentage is the observed share of archive years that had one, not a Poisson rate. "
+            "Sizes never reported within the radius are not offered; zero observed years is not zero future risk. "
+            "Historical illustration, not a forward-looking price or a property loss probability.")
+    return result
+
+
+def fire_radius(query):
+    if "radius_km" not in query:
+        return DEFAULT_FIRE_RADIUS_KM
+    try:
+        radius = float(query["radius_km"])
+    except ValueError:
+        radius = None
+    if radius not in FIRE_RADII_KM:
+        raise InvalidRequest("radius_km must be 5, 10 or 20 for wildfire.")
+    return int(radius)
+
+
+def wildfire_curve(lat, lon, radius_km):
+    """Nearby reported-fire trigger curve: fire size (acres) vs share of years with such a fire."""
+    proximity = fire_proximity(lat, lon)
+    result = {"peril": "wildfire", "status": "unavailable", "radius_km": radius_km,
+              "metric": f"Reported wildfire size within {radius_km} km", "unit": "acres",
+              "frequency_label": "Share of years with at least one such fire (%)",
+              "frequency_basis": "historical_annual_frequency",
+              "source_name": proximity.get("source_name"), "source_url": proximity.get("source_url"),
+              "points": [], "details": [],
+              "notes": ["Each point: the share of archive years with at least one reported wildfire of at least that many acres within the radius.",
+                        "Sizes never reported within the radius are left out, not given 0%; zero observed years is not zero future risk.",
+                        "Historical reported fires, not a forecast, burn probability for this property or a loss estimate. Full detail: /api/v1/fire-proximity."]}
+    curves = ((proximity.get("size_exceedance") or {}).get("area_exceedance") or {}).get("curves") or []
+    curve = next((item for item in curves if item.get("radius_km") == radius_km), None)
+    baseline = proximity.get("baseline") or {}
+    if proximity.get("status") != "available" or curve is None:
+        result["reason"] = proximity.get("reason") or "Nearby-fire records are unavailable for this location."
+        return result
+    result["record_period"] = {"start_year": baseline.get("start_year"), "end_year": baseline.get("end_year"),
+                               "years": curve.get("total_years")}
+    result["details"] = [["Radius", f"{radius_km} km"], ["Reported fires within radius", curve.get("fire_count")],
+                         ["Largest reported fire (acres)", curve.get("largest_reported_acres")],
+                         ["Record period", f"{baseline.get('start_year')}-{baseline.get('end_year')}"]]
+    result["points"] = [{"severity": point["min_acres"], "frequency_pct": point["empirical_years_pct"], "status": "Observed"}
+                        for point in curve.get("points", []) if point.get("empirical_years_pct", 0) > 0]
+    if result["points"]:
+        result["status"] = "available"
+    else:
+        result["reason"] = (f"No reported wildfire within {radius_km} km in the record period. "
+                            "Zero observed years does not mean zero future risk.")
     return result
 
 
@@ -270,8 +326,8 @@ def dispatch(path, raw_query):
                 if "network" in query:
                     raise InvalidRequest("Use peril with n for hazard stations, or network=awc_metar for weather stations, not both.")
                 peril = query["peril"]
-                if peril not in PERILS - {"auto", "heat", "potential_fire_intensity"}:
-                    raise InvalidRequest("peril must be flood, earthquake, wildfire, fireline_intensity, cyclone or rainfall.")
+                if peril not in STATION_PERILS:
+                    raise InvalidRequest("peril must be flood, earthquake, wildfire, cyclone or rainfall.")
                 try:
                     n = station_count(query["n"])
                 except ValueError as exc:
@@ -297,8 +353,8 @@ def dispatch(path, raw_query):
                 return 200, envelope(nearest_stations(lat, lon, n), request, location)
             # Preserve existing peril-only clients and the single-station route.
             peril = query["peril"]
-            if peril not in PERILS - {"auto", "heat", "potential_fire_intensity"}:
-                raise InvalidRequest("peril must be flood, earthquake, wildfire, fireline_intensity, cyclone or rainfall.")
+            if peril not in STATION_PERILS:
+                raise InvalidRequest("peril must be flood, earthquake, wildfire, cyclone or rainfall.")
             lat, lon, location = resolve_location(query)
             request = {"peril": peril, "lat": lat, "lon": lon}
             if location:
@@ -308,12 +364,28 @@ def dispatch(path, raw_query):
             return error_response(404, "not_found", "Unknown v1 endpoint. See /api/docs.")
         peril = relative[1]
         if peril not in PERILS:
-            raise InvalidRequest("Unknown hazard. Use flood, earthquake, wildfire, fireline_intensity, potential_fire_intensity, cyclone, rainfall, heat or auto.")
+            raise InvalidRequest("Unknown hazard. Use flood, earthquake, wildfire, cyclone, rainfall, heat or auto.")
         if resource == "areas":
             keys = ("south", "west", "north", "east")
-            query = parameters(raw_query, (*keys, "site_class"), keys)
+            query = parameters(raw_query, (*keys, "site_class", "radius_km"), keys)
             bounds = [number(query, key) for key in keys]
             site_class = query.get("site_class", "BC")
+            if peril == "wildfire":
+                south, west, north, east = bounds
+                if not (-90 <= south < north <= 90 and -180 <= west < east <= 180) or site_class not in SITE_CLASSES:
+                    raise InvalidRequest("Use ordered south < north, west < east, valid coordinates and site_class.")
+                radius = fire_radius(query)
+                lat, lon = (south + north) / 2, (west + east) / 2
+                result = wildfire_curve(lat, lon, radius)
+                result["notes"].insert(0, f"Area request: wildfire uses the area's center ({lat:.5f}, {lon:.5f}), as the map does.")
+                result["area"] = {"bounds": dict(zip(keys, bounds)), "centroid": {"latitude": lat, "longitude": lon},
+                                  "sample_count": 1, "aggregation": "center_point",
+                                  "method": "Nearby reported-fire frequency at the area's center, as the map does.",
+                                  "samples": [{"latitude": lat, "longitude": lon}]}
+                request = dict(zip(keys, bounds), peril=peril, site_class=site_class, radius_km=radius)
+                return 200, envelope(result, request)
+            if "radius_km" in query:
+                raise InvalidRequest("radius_km applies to wildfire only.")
             try:
                 validate_area(*bounds, peril, site_class)
             except ValueError as exc:
@@ -321,7 +393,11 @@ def dispatch(path, raw_query):
             request = dict(zip(keys, bounds), peril=peril, site_class=site_class)
             return 200, envelope(area_disaster(*bounds, peril, site_class), request)
         required = ("payout_usd",) if resource == "trigger-comparisons" else ()
-        query = parameters(raw_query, ("lat", "lon", "address", "payout_usd", "site_class") if required else ("lat", "lon", "address", "site_class"), required)
+        allowed = ("lat", "lon", "address", "site_class", "radius_km") + (("payout_usd",) if required else ())
+        query = parameters(raw_query, allowed, required)
+        if "radius_km" in query and peril != "wildfire":
+            raise InvalidRequest("radius_km applies to wildfire only.")
+        radius = fire_radius(query) if peril == "wildfire" else None
         site_class = query.get("site_class", "BC")
         if site_class not in SITE_CLASSES:
             raise InvalidRequest("site_class must be A, B, BC, C, CD, D, DE or E.")
@@ -332,7 +408,11 @@ def dispatch(path, raw_query):
             request["address"] = location["normalized_address"]
         if payout is not None:
             request["payout_usd"] = float(payout)
-        if peril == "auto":
+        if radius is not None:
+            request["radius_km"] = radius
+        if peril == "wildfire":
+            curve = wildfire_curve(lat, lon, radius)
+        elif peril == "auto":
             from hazard_relevance import most_relevant
             curve = most_relevant(lat, lon, site_class)
         else:

@@ -95,7 +95,74 @@ class APIV1Tests(unittest.TestCase):
         result = comparison(source, Decimal("100"))
         self.assertEqual(len(result["comparisons"]), 1)
         self.assertEqual(result["comparisons"][0]["expected_annual_contribution_usd"]["minimum"], .01)
-        self.assertEqual(result["frequency_basis"], "research_estimate")
+        self.assertEqual(result["frequency_basis"], "historical_annual_frequency")
+
+    def fire_proximity_fixture(self):
+        def area_curve(radius, rows):
+            return {"radius_km": radius, "fire_count": 40, "total_years": 33, "largest_reported_acres": 250,
+                    "expected_annual_reported_acres": 12.5,
+                    "points": [{"min_acres": acres, "empirical_years_pct": pct, "annual_probability_pct": pct + 5}
+                               for acres, pct in rows]}
+        return {"status": "available", "source_name": "USFS FPA FOD", "source_url": "https://example.org/fpa",
+                "baseline": {"start_year": 1992, "end_year": 2024},
+                "size_exceedance": {"area_exceedance": {"curves": [
+                    area_curve(5, [(0.1, 30.3), (10, 6.1), (100, 0)]),
+                    area_curve(10, [(0.1, 51.5), (10, 21.2), (100, 3.0), (1000, 0)]),
+                    area_curve(20, [(0.1, 90.9), (10, 63.6), (100, 12.1)])]}}}
+
+    def test_wildfire_uses_nearby_fire_sizes_and_observed_years(self):
+        with patch("api_v1.fire_proximity", return_value=self.fire_proximity_fixture()) as provider, \
+             patch("api_v1.disaster_at") as old_model:
+            status, payload = dispatch("/api/v1/hazards/wildfire", "lat=30.6&lon=-96.3")
+            self.assertEqual(status, 200)
+            data = payload["data"]
+            self.assertEqual((data["peril"], data["unit"], data["radius_km"]), ("wildfire", "acres", 10))
+            # Sizes never observed within the radius are left out rather than priced at 0%.
+            self.assertEqual([(p["severity"], p["frequency_pct"]) for p in data["points"]], [(0.1, 51.5), (10, 21.2), (100, 3.0)])
+            self.assertEqual(data["record_period"], {"start_year": 1992, "end_year": 2024, "years": 33})
+            self.assert_contract(payload, "/api/v1/hazards/{peril}")
+            status, compared = dispatch("/api/v1/trigger-comparisons/wildfire", "lat=30.6&lon=-96.3&radius_km=20&payout_usd=10000")
+            self.assertEqual(status, 200)
+            self.assertEqual(compared["data"]["frequency_basis"], "historical_annual_frequency")
+            self.assertEqual(compared["data"]["comparisons"][1]["expected_annual_contribution_usd"]["minimum"], 6360)
+            self.assertIn("observed share of archive years", compared["data"]["assumptions"][-1])
+            self.assert_contract(compared, "/api/v1/trigger-comparisons/{peril}")
+            status, area = dispatch("/api/v1/areas/wildfire", "south=30&west=-97&north=31&east=-96&radius_km=5")
+            self.assertEqual(status, 200)
+            self.assertEqual(area["data"]["radius_km"], 5)
+            self.assertIn("center (30.50000, -96.50000)", area["data"]["notes"][0])
+            self.assert_contract(area, "/api/v1/areas/{peril}")
+        provider.assert_called_with(30.5, -96.5)
+        old_model.assert_not_called()
+
+    def test_wildfire_without_reported_fires_is_unavailable_not_zero(self):
+        empty = self.fire_proximity_fixture()
+        empty["size_exceedance"]["area_exceedance"]["curves"][1]["points"] = [{"min_acres": 0.1, "empirical_years_pct": 0}]
+        with patch("api_v1.fire_proximity", return_value=empty):
+            status, payload = dispatch("/api/v1/trigger-comparisons/wildfire", "lat=30.6&lon=-96.3&payout_usd=10000")
+        self.assertEqual(status, 200)
+        self.assertEqual(payload["data"]["status"], "unavailable")
+        self.assertEqual(payload["data"]["comparisons"], [])
+        self.assertIn("does not mean zero future risk", payload["data"]["reason"])
+
+    def test_old_fire_models_and_bad_radius_are_rejected(self):
+        with patch("api_v1.fire_proximity") as provider, patch("api_v1.disaster_at") as old_model:
+            for path, query in [("/api/v1/hazards/fireline_intensity", "lat=30&lon=-97"),
+                                ("/api/v1/hazards/potential_fire_intensity", "lat=30&lon=-97"),
+                                ("/api/v1/trigger-comparisons/fireline_intensity", "lat=30&lon=-97&payout_usd=1"),
+                                ("/api/v1/areas/potential_fire_intensity", "south=30&west=-97&north=31&east=-96"),
+                                ("/api/v1/monitoring-stations", "peril=fireline_intensity&lat=30&lon=-97"),
+                                ("/api/v1/hazards/wildfire", "lat=30&lon=-97&radius_km=15"),
+                                ("/api/v1/hazards/flood", "lat=30&lon=-97&radius_km=10")]:
+                with self.subTest(path=path, query=query):
+                    status, payload = dispatch(path, query)
+                    self.assertEqual(status, 400)
+                    self.assertEqual(payload["error"]["code"], "invalid_request")
+        provider.assert_not_called()
+        old_model.assert_not_called()
+        spec = json.dumps(openapi_document())
+        for removed in ("fireline_intensity", "potential_fire_intensity"):
+            self.assertNotIn(removed, spec)
 
     def test_invalid_inputs_fail_before_any_provider_call(self):
         bad_queries = ["", "lat=nan&lon=0", "lat=91&lon=0", "lat=0&lon=181", "lat=0&lon=inf",
