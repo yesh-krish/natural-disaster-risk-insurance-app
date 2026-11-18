@@ -3,7 +3,10 @@
 How the hosted copy of NDApp runs:
 
 ```
-browser ──HTTPS──> Caddy (ports 80/443, automatic Let's Encrypt) ──> server.py on 127.0.0.1:8000 (systemd)
+                                        ┌─ request has X-API-Key, or is /api/docs or /api/v1/health
+browser/client ──HTTPS──> Caddy ────────┤      └─> api_server.py on 127.0.0.1:8002 (checks the key)
+          (ports 80/443, Let's Encrypt) └─ everything else
+                                               └─> server.py on 127.0.0.1:8000 (map, password login)
 ```
 
 Files in `deploy/`:
@@ -11,8 +14,30 @@ Files in `deploy/`:
 | File | Purpose |
 | --- | --- |
 | `setup_vm.sh` | One script that installs everything on Ubuntu 24.04. Safe to rerun. |
-| `ndapp.service` | systemd unit: starts the app on boot and restarts it if it crashes. |
-| `Caddyfile.template` | Web server config: HTTPS and forwarding to the app. |
+| `ndapp.service` | systemd unit for the map: starts on boot, restarts if it crashes. |
+| `ndapp-api.service` | systemd unit for the public API. Refuses to start without at least one key. |
+| `api_key.sh` | Add, remove and list API keys for other people. |
+| `Caddyfile.template` | Web server config: HTTPS, and which requests go to the map or the API. |
+
+## Sharing the API with other people
+
+The map stays behind the password. Other people use the API with their own key instead:
+
+```bash
+sudo bash deploy/api_key.sh add alice      # prints Alice's key; send it to her privately
+sudo bash deploy/api_key.sh list           # who has a key
+sudo bash deploy/api_key.sh remove alice   # revoke it (takes effect immediately)
+```
+
+What to send them: the base URL `https://<hostname>`, their key, and
+[share-api.md](share-api.md) ("Them" section). Docs at `https://<hostname>/api/docs`
+(click **Authorize** and paste the key) and `/api/v1/health` are public. Every data request needs
+an `X-API-Key` header. The first run of `setup_vm.sh` creates a key named `owner` for you.
+Keys are stored in `/etc/ndapp-api-keys` (root only).
+
+Browser JavaScript on *other websites* can't call the API until their site is allowed: add
+`NDAPP_ALLOWED_ORIGINS=https://their.site` as a new line in `/etc/ndapp-api.env` and run
+`sudo systemctl restart ndapp-api`. Scripts, notebooks and servers don't need this.
 
 Settings live in `/etc/ndapp.env` on the machine (`HOST`, `PORT`, `NDAPP_USER`, `NDAPP_PASSWORD`).
 The script generates a password the first time. Remove the two `NDAPP_` lines and run
@@ -86,8 +111,8 @@ and on the VM: `sudo cp -r /tmp/ndapp-data/. /opt/ndapp/data/ && sudo chown -R n
 
 | Task | Command |
 | --- | --- |
-| Live logs | `journalctl -u ndapp -f` |
-| Restart the app | `sudo systemctl restart ndapp` |
+| Live logs | `journalctl -u ndapp -f` (map), `journalctl -u ndapp-api -f` (API) |
+| Restart the app | `sudo systemctl restart ndapp ndapp-api` |
 | Deploy new code | `cd /opt/ndapp && sudo git pull && sudo bash deploy/setup_vm.sh <hostname>` |
 | Show the password | `sudo cat /etc/ndapp.env` |
 | Caddy / HTTPS problems | `journalctl -u caddy -n 50` |

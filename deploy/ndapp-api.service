@@ -1,0 +1,29 @@
+# systemd unit for the key-protected public API (api_server.py).
+# setup_vm.sh fills in __APP_DIR__, __APP_USER__ and __API_PORT__.
+# Keys live in /etc/ndapp-api.env, written by deploy/api_key.sh.
+[Unit]
+Description=NDApp public API (X-API-Key)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=__APP_USER__
+Group=__APP_USER__
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=/etc/ndapp-api.env
+Environment=PYTHONUNBUFFERED=1
+# Never start without keys: api_server.py allows open access on 127.0.0.1, and Caddy
+# forwards public traffic to it, so an empty key list would open the API to everyone.
+ExecStartPre=/bin/sh -c 'test -n "$${NDAPP_API_KEYS}" || { echo "No API keys: run deploy/api_key.sh add <name>"; exit 1; }'
+ExecStart=__APP_DIR__/.venv/bin/python api_server.py --host 127.0.0.1 --port __API_PORT__
+Restart=on-failure
+RestartSec=3
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=__APP_DIR__/data
+
+[Install]
+WantedBy=multi-user.target

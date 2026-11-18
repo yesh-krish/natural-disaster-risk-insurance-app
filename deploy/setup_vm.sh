@@ -5,6 +5,9 @@
 #   sudo bash deploy/setup_vm.sh                      # plain HTTP on port 80 (WSL test)
 #   sudo bash deploy/setup_vm.sh ndapp.example.org    # HTTPS for that hostname (Jetstream2)
 #
+# It runs two services behind Caddy: the map (password-protected) and the public API
+# (X-API-Key). Manage API keys afterwards with: sudo bash deploy/api_key.sh add <name>
+#
 # Options (environment variables):
 #   SKIP_DATA=1     don't download the flood/fire rasters (do it later, or copy data/ up yourself)
 #   NO_PASSWORD=1   serve the site publicly without the HTTP Basic password
@@ -17,6 +20,7 @@ DOMAIN="${1:-}"
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_USER="ndapp"
 PORT=8000
+API_PORT=8002
 ENV_FILE="/etc/ndapp.env"
 
 if [[ $EUID -ne 0 ]]; then
@@ -51,7 +55,7 @@ while [[ "$parent" != "/" ]]; do parent="$(dirname "$parent")"; chmod o+x "$pare
 echo "==> Building Python environment"
 sudo -u "$APP_USER" python3 -m venv "$APP_DIR/.venv"
 sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet --upgrade pip
-sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet -r "$APP_DIR/requirements.txt"
+sudo -u "$APP_USER" "$APP_DIR/.venv/bin/pip" install --quiet -r "$APP_DIR/requirements-api.txt"
 
 if [[ "${SKIP_DATA:-0}" != "1" ]]; then
   echo "==> Downloading data (several GB; reruns skip finished files)"
@@ -72,17 +76,28 @@ if [[ ! -f "$ENV_FILE" ]]; then
   chmod 600 "$ENV_FILE"
 fi
 
-echo "==> Installing systemd service"
-sed -e "s#__APP_DIR__#$APP_DIR#g" -e "s#__APP_USER__#$APP_USER#g" \
-  "$APP_DIR/deploy/ndapp.service" > /etc/systemd/system/ndapp.service
+echo "==> Setting up API keys"
+first_key=""
+if [[ ! -s /etc/ndapp-api-keys ]]; then
+  first_key="$(bash "$APP_DIR/deploy/api_key.sh" add owner | tail -n 1)"
+fi
+bash "$APP_DIR/deploy/api_key.sh" sync
+
+echo "==> Installing systemd services"
+for unit in ndapp ndapp-api; do
+  sed -e "s#__APP_DIR__#$APP_DIR#g" -e "s#__APP_USER__#$APP_USER#g" -e "s#__API_PORT__#$API_PORT#g" \
+    "$APP_DIR/deploy/$unit.service" > "/etc/systemd/system/$unit.service"
+done
 systemctl daemon-reload
-systemctl enable ndapp >/dev/null
-systemctl restart ndapp
+systemctl enable ndapp ndapp-api >/dev/null
+systemctl restart ndapp ndapp-api
 
 echo "==> Configuring Caddy"
 SITE="${DOMAIN:-:80}"
-sed -e "s#__SITE__#$SITE#g" -e "s#__PORT__#$PORT#g" \
+sed -e "s#__SITE__#$SITE#g" -e "s#__PORT__#$PORT#g" -e "s#__API_PORT__#$API_PORT#g" \
   "$APP_DIR/deploy/Caddyfile.template" > /etc/caddy/Caddyfile
+caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null \
+  || { echo "Caddy config is invalid; see the message above." >&2; exit 1; }
 systemctl enable caddy >/dev/null
 systemctl reload caddy 2>/dev/null || systemctl restart caddy
 
@@ -95,6 +110,14 @@ if [[ "${ok:-0}" != "1" ]]; then
   echo "App did not respond. See: journalctl -u ndapp -n 50" >&2
   exit 1
 fi
+for _ in $(seq 1 20); do
+  curl -fs -o /dev/null "http://127.0.0.1:$API_PORT/api/v1/health" && api_ok=1 && break
+  sleep 1
+done
+if [[ "${api_ok:-0}" != "1" ]]; then
+  echo "Public API did not respond. See: journalctl -u ndapp-api -n 50" >&2
+  exit 1
+fi
 
 echo
 echo "Done."
@@ -102,4 +125,10 @@ if [[ -n "$DOMAIN" ]]; then echo "Site: https://$DOMAIN/"; else echo "Site: http
 if grep -q NDAPP_PASSWORD "$ENV_FILE"; then
   echo "Login: user 'ndapp', password in $ENV_FILE (sudo cat $ENV_FILE)"
 fi
-echo "Logs: journalctl -u ndapp -f"
+if [[ -n "$DOMAIN" ]]; then base="https://$DOMAIN"; else base="http://localhost"; fi
+echo "Public API docs: $base/api/docs (data requests need an X-API-Key header)"
+if [[ -n "$first_key" ]]; then
+  echo "Your first API key (name 'owner'): $first_key"
+fi
+echo "Give someone a key: sudo bash deploy/api_key.sh add <name>"
+echo "Logs: journalctl -u ndapp -f   and   journalctl -u ndapp-api -f"

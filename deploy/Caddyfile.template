@@ -1,7 +1,27 @@
-# Caddy config for NDApp. setup_vm.sh fills in __SITE__ and __PORT__.
+# Caddy config for NDApp. setup_vm.sh fills in __SITE__, __PORT__ and __API_PORT__.
 # With a hostname, Caddy gets and renews a free Let's Encrypt certificate automatically.
 # With ":80" (WSL test), it serves plain HTTP.
+#
+# Two apps share the site:
+#   - The map (server.py, __PORT__), behind the NDAPP_PASSWORD login.
+#   - The public API (api_server.py, __API_PORT__), which checks X-API-Key itself.
+# A request goes to the public API when it carries an X-API-Key header, is a CORS
+# preflight, or is one of the public pages (health check and API docs).
 __SITE__ {
 	encode gzip
+
+	@keyed {
+		path /api/v1 /api/v1/*
+		header X-API-Key *
+	}
+	@preflight {
+		path /api/v1 /api/v1/*
+		method OPTIONS
+	}
+	@public path /api/v1/health /api/v1/openapi.json /api/docs /api/docs/*
+
+	reverse_proxy @keyed 127.0.0.1:__API_PORT__
+	reverse_proxy @preflight 127.0.0.1:__API_PORT__
+	reverse_proxy @public 127.0.0.1:__API_PORT__
 	reverse_proxy 127.0.0.1:__PORT__
 }

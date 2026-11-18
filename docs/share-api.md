@@ -35,7 +35,11 @@ request needs the key in an `X-API-Key` header.
 | **Tailscale** (recommended) | Free personal plan | Different networks; stays private | `http://<your Tailscale IP>:8000` |
 | **Cloudflare quick tunnel** | Free, no account | Quick test or demo | Temporary `https://….trycloudflare.com` |
 | **Same Wi-Fi** | Free | Both on the same home network | `http://<your Wi-Fi IP>:8000` |
-| **Hosting** (Render, Jetstream2) | Free tier / paid / sponsored | Permanent, laptop not needed | Hosting URL |
+| **Jetstream2** (set up) | Free under the CIV260076 allocation | Permanent, laptop not needed | `https://ndapp.civ260076.projects.jetstream-cloud.org` |
+
+**Jetstream2 is already running.** Skip the steps above: on the VM, run
+`sudo bash deploy/api_key.sh add <their-name>` and send them the printed key with the address
+above. See [deploy-jetstream2.md](deploy-jetstream2.md#sharing-the-api-with-other-people).
 
 - **Tailscale:** both install Tailscale and sign in. Then share your laptop with them
   ("Share" on your device in the Tailscale admin page). Use the `100.x.x.x` address
