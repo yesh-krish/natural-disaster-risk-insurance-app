@@ -99,6 +99,25 @@ class FireProximityTests(unittest.TestCase):
         self.assertEqual((empty["fire_count"], len(empty["points"])), (0, 1))
         self.assertIsNone(empty["largest_reported_acres"])
 
+    def test_any_trigger_distance_is_computed_from_sized_fire_rows(self):
+        records = [record(1, 2000, 2, 0.5), record(2, 2000, 4, 150), record(3, 2001, 7.25, 200),
+                   record(4, 2001, 8, 1200), record(5, 2002, 18, 6000), record(6, 2003, 1, None), record(7, 1990, 1, 50)]
+        result = proximity.size_exceedance(records, 1992, 2024)
+        sized = result["sized_fires"]
+        self.assertEqual(sized["fields"], ["year", "distance_km", "reported_acres"])
+        self.assertEqual(sized["rows"], [[2000, 2, 0.5], [2000, 4, 150], [2001, 7.25, 200], [2001, 8, 1200], [2002, 18, 6000]],
+                         "unsized and out-of-baseline fires are left out")
+        for curve in result["area_exceedance"]["curves"]:
+            self.assertEqual(proximity.distance_curve(sized["rows"], 33, curve["radius_km"]), curve, "5/10/20 km match the published curves")
+        curve = proximity.distance_curve(sized["rows"], 33, 7.25)
+        self.assertEqual((curve["radius_km"], curve["fire_count"], curve["largest_reported_acres"]), (7.25, 3, 200), "boundary is inclusive")
+        by_size = {point["min_acres"]: point for point in curve["points"]}
+        self.assertAlmostEqual(by_size[100]["empirical_years_pct"], 200 / 33, msg="2000 and 2001 each count once")
+        self.assertEqual(max(by_size), 300)
+        for bad in (0, -1, 20.01):
+            with self.assertRaises(ValueError):
+                proximity.distance_curve(sized["rows"], 33, bad)
+
     def test_footprint_reach_and_burned_area(self):
         # A 100,000-acre fire (11.35 km equivalent radius) reported 8 km away reaches the point.
         records = [record(1, 2005, 8, 100000), record(2, 2006, 0.5, 1)]

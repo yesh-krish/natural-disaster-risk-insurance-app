@@ -91,15 +91,6 @@
       .trigger-result[data-state="unavailable"], .trigger-result[data-state="error"] { background:#fff7ed; border-color:#fed7aa; }
       .trigger-result[data-state="unavailable"] #trigger-probability, .trigger-result[data-state="error"] #trigger-probability { color:#9a3412; }
       select:disabled { background:#f1f5f9; color:#64748b; cursor:not-allowed; }
-      .trigger-comparison { margin:0 0 20px; }
-      .trigger-comparison .table-scroll { max-height:320px; }
-      #comparison-table { margin-top:0; font-variant-numeric:tabular-nums; }
-      #comparison-table caption { text-align:left; padding:12px 9px; color:#475569; font-size:.9rem; }
-      #comparison-table thead th { position:sticky; top:0; background:#f1f5f9; z-index:1; }
-      #comparison-table tbody th { font-weight:600; }
-      #comparison-table tr[data-selected="true"] { background:#eef5ff; }
-      #comparison-table td:last-child { white-space:nowrap; }
-      #comparison-table button[aria-pressed="true"] { border-color:#1d4ed8; color:#1d4ed8; font-weight:600; }
       select:focus-visible, input:focus-visible, button:focus-visible { outline:3px solid #93c5fd; outline-offset:3px; }
       @media (max-width:700px) { .trigger-workspace { grid-template-columns:1fr; } .trigger-result { border-left:0; border-top:1px solid #d6e4fa; } .trigger-setup, .trigger-result { padding:20px; } }
       @media (max-width:850px) { .hazard-layout { grid-template-columns:1fr; } }
@@ -109,24 +100,57 @@
       .trigger-workspace.history-mode { grid-template-columns: 1fr; }
       #fire-proximity-value { font-size: 2rem; font-weight: 700; color: #1d4ed8; }
       #fire-proximity-rows tr[data-selected="true"] { background: #eef5ff; font-weight: 600; }
+      /* Page sections: 1 location, 2 answer, 3 method, 4 monitors, 5 context. */
+      .step-heading { margin: 0 0 10px; font-size: 1.15rem; }
+      details.section > summary { cursor: pointer; font-size: 1.15rem; font-weight: 600; }
+      details.section[open] > summary { margin-bottom: 10px; }
+      details.section > summary .summary-note { font-weight: 400; font-size: .9rem; color: #64748b; }
+      #location-line { margin: 10px 0 0; }
+      #location-line #coordinates, #location-line #status { display: inline; margin: 0 10px 0 0; }
+      .monitor-controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; margin: 0 0 6px; }
+      .monitor-controls label { display: grid; gap: 5px; font-weight: 600; }
+      .monitor-controls input { padding: 7px; border: 1px solid #94a3b8; border-radius: 5px; font: inherit; }
+      tr.compare-row td { background: #eef5ff; font-weight: 600; }
+      .monitor-curve summary { cursor: pointer; color: #1d4ed8; font-size: .85rem; margin-top: 4px; }
+      .monitor-curve table { margin-top: 4px; font-size: .85rem; border-collapse: collapse; }
+      .monitor-curve td, .monitor-curve th { padding: 2px 10px 2px 0; text-align: left; }
+      .monitor-pin { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #0f766e; color: white; font: 700 12px system-ui, sans-serif; border: 2px solid white; box-shadow: 0 0 0 1px #0f766e; }
     </style>
   </head>
   <body>
     <main>
+
       <h1>NDApp · Parametric insurance pool</h1>
       <p class="note" style="margin:6px 0 12px"><a class="source-link" href="/api/docs">Explore the research API ↗</a></p>
       <p class="intro">Explore hazard data at a location. Where annual probabilities are available, choose a trigger and payout to calculate an expected annual pool contribution.</p>
+      <section class="panel" id="location-panel" aria-labelledby="location-heading" style="margin-top:0">
+        <h2 id="location-heading" class="step-heading">1. Choose a location</h2>
+        <form id="address-search" class="address-search">
+        <input id="address-input" type="search" maxlength="100" required autocomplete="street-address" aria-label="US street address" placeholder="Street address, city, state (e.g. 100 Dolorosa St, San Antonio, TX)">
+        <button id="search-button" type="submit">Find address</button>
+      </form>
+        <p id="search-status" role="status" aria-live="polite">Address search uses the US Census Bureau geocoder. Its point is approximate; verify it on the map.</p>
+        <div class="selection-controls">
+        <label for="selection-mode">Select a <select id="selection-mode" aria-describedby="selection-help"><option value="point">Point</option><option value="area">Rectangular area</option></select></label>
+        <button class="scenario-button" id="redraw-area" type="button" hidden>Draw new area</button>
+        <button class="scenario-button" id="cancel-area" type="button" hidden>Cancel drawing</button>
+        <p id="selection-help" role="status" aria-live="polite">Click the map to select a point.</p>
+      </div>
+        <div id="map" role="application" aria-label="Map centered on San Antonio, Texas"></div>
+        <p id="location-line" aria-live="polite"><p id="coordinates">Click the map to select a point.</p> <p id="status"></p></p>
+      </section>
       <section class="trigger-workspace" id="trigger-workspace" aria-labelledby="trigger-heading">
       <div class="trigger-setup">
-      <h2 id="trigger-heading">Set your trigger and payout</h2>
-      <p id="hazard-selection-description">Use a government model’s supported levels for your selected location.</p>
+      <h2 id="trigger-heading">2. Set an intensity and see the chance</h2>
+      <p id="hazard-selection-description">Enter any intensity; probabilities are estimated from a government model’s levels for your selected location.</p>
       <div class="hazard-controls">
-        <label for="disaster-select">1. Select a hazard
+        <label for="disaster-select">Hazard
           <select id="disaster-select">
             <option value="auto">Choose most relevant</option>
             <option value="flood" selected>Flood</option>
             <option value="earthquake">Earthquake</option>
             <option value="nearest_fire">Wildfire / Nearby fire frequency</option>
+            <option value="satellite_fire">Wildfire / Satellite fire detections (NASA)</option>
             <option value="cyclone">Wind (tropical cyclones)</option>
             <option value="rainfall">Rainfall</option>
             <option value="heat">Heat (historical annual exceedance)</option>
@@ -135,21 +159,31 @@
         <label for="site-class" id="site-class-control" hidden>Earthquake site class
           <select id="site-class"><option>A</option><option>B</option><option selected>BC</option><option>C</option><option>CD</option><option>D</option><option>DE</option><option>E</option></select>
         </label>
-        <label for="trigger-select" id="trigger-level-control">2. Select a trigger level
-          <select id="trigger-select" disabled aria-describedby="trigger-help"><option value="">Choose a location first</option></select>
+        <label for="satellite-radius" id="satellite-radius-control" hidden>Search radius around the point (km, 0.5–100)
+          <input id="satellite-radius" type="number" min="0.5" max="100" step="any" value="25" list="satellite-radius-options" aria-describedby="satellite-radius-help">
         </label>
-        <label for="trigger-payout" id="trigger-payout-control">3. Payout if the trigger occurs (USD)
+        <datalist id="satellite-radius-options"><option value="5"></option><option value="10"></option><option value="25"></option><option value="50"></option><option value="100"></option></datalist>
+        <p id="satellite-radius-help" class="trigger-help" hidden>Type any radius, then press Enter or click away to update. Detections are 375 m satellite pixels, so the smallest radius is 0.5 km.</p>
+        <label for="trigger-threshold" id="trigger-level-control"><span><span id="trigger-threshold-name">Intensity</span> (<span id="trigger-threshold-unit">choose a location first</span>)</span>
+          <input id="trigger-threshold" type="number" min="0" step="any" disabled placeholder="Enter any threshold" aria-describedby="trigger-threshold-help trigger-help">
+        </label>
+        <p id="trigger-threshold-help" class="trigger-help" hidden></p>
+        <label for="trigger-distance" id="trigger-distance-control" hidden><span>Distance from the location (km, above 0 and up to 20)</span>
+          <input id="trigger-distance" type="number" min="0" max="20" step="any" value="10" disabled aria-describedby="trigger-distance-help">
+        </label>
+        <p id="trigger-distance-help" class="trigger-help" hidden>The trigger needs a reported fire of at least the threshold size within this distance in a year. Frequencies are counted from the reported fires within that distance, not interpolated.</p>
+        <label for="trigger-payout" id="trigger-payout-control"><span id="trigger-payout-name">Payout if this intensity is reached (USD)</span>
           <input id="trigger-payout" type="number" min="0" step="0.01" list="payout-options" placeholder="Select or enter an amount" aria-describedby="payout-help">
         </label>
         <datalist id="payout-options"><option value="10000"></option><option value="25000"></option><option value="50000"></option><option value="100000"></option></datalist>
-        <p id="payout-help">The exceedance amount is the fixed payout when your selected trigger is met or exceeded.</p>
+        <p id="payout-help">The fixed payout in a year when the selected intensity is reached or exceeded.</p>
         <p id="metric-summary">Flood · Peak inundation depth (m) · TWDB + FEMA</p>
       </div>
-      <p class="trigger-help" id="trigger-help">Search an address or click the map below to load available trigger levels.</p>
+      <p class="trigger-help" id="trigger-help">Search an address or click the map above to load available trigger levels.</p>
       </div>
       <div class="trigger-result" id="trigger-result" data-state="idle" role="status" aria-live="polite" aria-atomic="true">
         <h2 id="trigger-result-label">Annual exceedance probability</h2>
-        <output id="trigger-probability" for="disaster-select trigger-select site-class">—</output>
+        <output id="trigger-probability" for="disaster-select trigger-threshold site-class">—</output>
         <p id="trigger-explanation">Select a location to get started.</p>
         <p id="trigger-location" hidden></p>
         <p id="area-average" class="note" hidden></p>
@@ -157,9 +191,9 @@
         <p id="trigger-method" hidden></p>
         <div class="pool-contribution">
           <h2 id="pool-contribution-label">Expected annual pool contribution (USD)</h2>
-          <output id="pool-contribution" for="disaster-select trigger-select site-class trigger-payout" aria-labelledby="pool-contribution-label">—</output>
+          <output id="pool-contribution" for="disaster-select trigger-threshold site-class trigger-payout" aria-labelledby="pool-contribution-label">—</output>
           <p id="pool-calculation">Select a location, trigger level, and payout amount.</p>
-          <p class="note">Probability × exceedance amount. Assumes one fixed payout in a year when the trigger occurs; excludes fees and other pricing adjustments.</p>
+          <p class="note">Probability × exceedance amount. Assumes one fixed payout in a year when the intensity is reached; excludes fees and other pricing adjustments.</p>
         </div>
       </div>
       <div class="trigger-result" id="intensity-preview" hidden aria-live="polite" aria-atomic="true">
@@ -169,20 +203,6 @@
         <p class="note">kW/m = kilowatts per metre of fire front. Texas A&M Forest Service / TxWRAP.</p>
       </div>
       </section>
-      <section class="panel trigger-comparison" id="comparison-panel" aria-labelledby="comparison-heading">
-        <h2 id="comparison-heading">Compare trigger levels</h2>
-        <p id="comparison-status" role="status" aria-live="polite">Select a location to compare supported trigger levels.</p>
-        <div id="comparison-content" hidden>
-          <div class="table-scroll" tabindex="0" role="region" aria-label="Supported trigger comparisons">
-            <table class="scenario-table" id="comparison-table" aria-describedby="comparison-note">
-              <caption id="comparison-context"></caption>
-              <thead><tr><th scope="col" id="comparison-severity">Trigger threshold</th><th scope="col" id="comparison-frequency">Annual exceedance probability</th><th scope="col">Fixed payout (USD)</th><th scope="col">Expected annual contribution (USD)</th><th scope="col" id="comparison-coverage" hidden>Grid samples used</th><th scope="col">Active trigger</th></tr></thead>
-              <tbody id="comparison-rows"></tbody>
-            </table>
-          </div>
-          <p class="note" id="comparison-note"></p>
-        </div>
-      </section>
       <section class="panel" id="relevance-panel" aria-labelledby="relevance-heading" hidden style="margin:0 0 16px">
         <h2 id="relevance-heading">Choose most relevant</h2>
         <p id="relevance-status" role="status" aria-live="polite">Select a location to choose a disaster automatically.</p>
@@ -190,34 +210,14 @@
         <p class="note" id="relevance-source"></p>
         <details id="relevance-details" hidden><summary>Why this disaster?</summary><ul id="relevance-checks"></ul><p class="note">County hazard rankings provide regional context. Missing local flood data does not establish low flood risk. Rainfall is related context when an inland-flood curve is unavailable.</p></details>
       </section>
-      <form id="address-search" class="address-search">
-        <input id="address-input" type="search" maxlength="100" required autocomplete="street-address" aria-label="US street address" placeholder="Street address, city, state (e.g. 100 Dolorosa St, San Antonio, TX)">
-        <label for="station-count">Stations (n)
-          <input id="station-count" type="number" min="1" max="50" step="1" value="5" required aria-describedby="station-coverage" style="width: 5em; display: block;">
-        </label>
-        <button id="search-button" type="submit">Find address</button>
-      </form>
-      <p id="search-status" role="status" aria-live="polite">Address search uses the US Census Bureau geocoder. Its point is approximate; verify it on the map.</p>
-      <div class="selection-controls">
-        <label for="selection-mode">Select a <select id="selection-mode" aria-describedby="selection-help"><option value="point">Point</option><option value="area">Rectangular area</option></select></label>
-        <button class="scenario-button" id="redraw-area" type="button" hidden>Draw new area</button>
-        <button class="scenario-button" id="cancel-area" type="button" hidden>Cancel drawing</button>
-        <p id="selection-help" role="status" aria-live="polite">Click the map to select a point.</p>
-      </div>
-      <div id="map" role="application" aria-label="Map centered on San Antonio, Texas"></div>
-      <section id="heat-observation-panel" aria-labelledby="heat-heading" hidden>
-        <details>
-        <summary>Latest heat conditions — optional station context</summary>
-        <h2 id="heat-heading">Heat — station observation snapshot</h2>
-        <p class="note">Air temperature and derived Heat Index in shade/light wind from nearby METAR reports. These describe stations, not the selected worksite or the whole rectangle. Reports are checked at lookup; this snapshot does not refresh automatically.</p>
-        <p id="heat-status" role="status" aria-live="polite">Select a location to screen current station reports for heat.</p>
-        <ol id="heat-list" aria-label="Heat screening at nearby stations, nearest first"></ol>
-        <button id="heat-refresh" type="button">Refresh heat and station reports</button>
-        <p class="note">Heat Index is a screening estimate, not WBGT. For outdoor construction, use on-site WBGT with workload, clothing/PPE and acclimatization guidance. No construction shutdown threshold is supplied. Heat illness can occur below the listed bands. Sun and local heat sources can increase exposure.</p>
-        <p class="note">NWS Heat Index bands (°F): Caution 80–&lt;90; Extreme caution 90–&lt;103; Danger 103–&lt;125; Extreme danger ≥125. No forecast, heat-wave duration, historical annual probability or payout is calculated here.</p>
-        <p class="note">Sources: <a href="https://www.weather.gov/ama/heatindex" target="_blank" rel="noopener noreferrer">NWS Heat Index and bands</a> · <a href="https://www.osha.gov/heat-exposure/hazards" target="_blank" rel="noopener noreferrer">OSHA worksite heat assessment</a> · <a href="docs/heat-and-wind.md">Methods and limitations</a></p>
-        </details>
-      </section>
+      <p id="area-summary" class="note" role="status" aria-live="polite" hidden></p>
+      <button class="scenario-button" id="export-area" type="button" disabled hidden>Export area averages and samples CSV</button>
+      <details id="area-sample-details" class="panel" hidden>
+        <summary>Point-by-point data for the selected trigger</summary>
+        <p id="area-sample-context"></p>
+        <div class="table-scroll"><table class="scenario-table"><thead><tr><th scope="col">Latitude</th><th scope="col">Longitude</th><th scope="col" id="area-sample-value">Exceedance (%)</th><th scope="col">Method</th></tr></thead><tbody id="area-sample-rows"></tbody></table></div>
+        <p id="area-sample-mean"></p>
+      </details>
       <section id="nearest-fire-panel" aria-labelledby="fire-proximity-heading" hidden>
         <h2 id="fire-proximity-heading">Annual nearby-fire frequency</h2>
         <p class="note">Historical share of years with at least one reported wildfire within a chosen radius. Each year counts once, regardless of how many fires occurred.</p>
@@ -270,57 +270,10 @@
         <button id="nearest-fire-refresh" type="button" disabled>Refresh fire history</button>
         <p class="note">Reported locations can be approximate. Distance is to the recorded point; it does not establish that your selected property burned. <a href="docs/fire-history.md">Sources and historical coverage</a></p>
       </section>
-      <section class="panel" id="satellite-fire-panel" aria-labelledby="satellite-fire-heading" hidden>
-        <h2 id="satellite-fire-heading">Satellite fire observations — NASA FIRMS (VIIRS)</h2>
-        <p class="note" id="satellite-fire-legend" style="margin-top:0">Hot spots detected by the NOAA-20 and NOAA-21 satellites in about the last 24 hours, in ~375 m pixels. Marker colour shows age: red under 6 hours, orange under 12 hours, amber older.</p>
-        <label for="satellite-fire-window">Time window
-          <select id="satellite-fire-window" disabled><option value="24h" selected>Last 24 hours</option><option value="48h">Last 48 hours</option><option value="7d">Last 7 days</option></select>
-        </label>
-        <label for="satellite-fire-radius">Search radius
-          <select id="satellite-fire-radius" disabled><option value="10">10 km</option><option value="25" selected>25 km</option><option value="50">50 km</option><option value="100">100 km</option></select>
-        </label>
-        <button id="satellite-fire-refresh" type="button" disabled>Refresh detections</button>
-        <button id="satellite-fire-show" type="button" hidden>Show selection and detections</button>
-        <p id="satellite-fire-status" role="status" aria-live="polite">Select a location to check recent satellite fire detections.</p>
-        <div id="satellite-fire-content" hidden>
-          <ol id="satellite-fire-list" aria-label="Satellite detections, nearest first"></ol>
-          <p id="satellite-fire-sources" class="note"></p>
-        </div>
-        <p class="note">A detection means something hot was seen from space, not a confirmed wildfire: prescribed or farm burns, gas flares and industry can appear too. No detection does not mean no fire, because clouds, smoke and small or short fires can be missed. Fire radiative power (MW) is not fireline intensity (kW/m). Confirm with agency incident reports.</p>
-      </section>
-      <section aria-labelledby="hazard-station-heading">
-        <h2 id="hazard-station-heading">Nearest monitoring stations for the selected hazard</h2>
-        <p id="station-coverage" class="note">Stations come from the network that monitors the selected hazard (for example, USGS stream gauges for flood or seismic stations for earthquake), within 200 km. Set how many with Stations (n) above.</p>
-        <p id="hazard-station-status" role="status" aria-live="polite">Select a location to find hazard-specific stations.</p>
-        <div id="hazard-station-details" class="note"></div>
-        <button id="hazard-station-show" type="button" hidden>Show selection and stations</button>
-        <button id="hazard-station-retry" type="button" hidden>Retry station search</button>
-      </section>
-      <p id="area-summary" class="note" role="status" aria-live="polite" hidden></p>
-      <button class="scenario-button" id="export-area" type="button" disabled hidden>Export area averages and samples CSV</button>
-      <details id="area-sample-details" class="panel" hidden>
-        <summary>Point-by-point data for the selected trigger</summary>
-        <p id="area-sample-context"></p>
-        <div class="table-scroll"><table class="scenario-table"><thead><tr><th scope="col">Latitude</th><th scope="col">Longitude</th><th scope="col" id="area-sample-value">Exceedance (%)</th><th scope="col">Method</th></tr></thead><tbody id="area-sample-rows"></tbody></table></div>
-        <p id="area-sample-mean"></p>
-      </details>
-      <section class="panel" aria-live="polite">
-        <h2>Selected location</h2>
-        <p id="coordinates">Click the map to select a point.</p>
-        <p id="status"></p>
+      <details class="panel section" id="method-section">
+        <summary>3. Where the number comes from <span class="summary-note">· curve, source and method</span></summary>
         <dl id="results" hidden></dl>
-        <details id="heat-history-details" hidden>
-          <summary>Historical heat: annual maxima and record coverage</summary>
-          <p id="heat-history-context" class="note"></p>
-          <div class="table-scroll"><table class="scenario-table">
-            <thead><tr><th scope="col">Year</th><th scope="col">Valid / expected days</th><th scope="col">Annual maximum (°C / °F)</th><th scope="col">Source date of maximum</th><th scope="col">Included</th></tr></thead>
-            <tbody id="heat-history-rows"></tbody>
-          </table></div>
-          <button class="scenario-button" id="export-heat" type="button" disabled>Export historical heat data CSV</button>
-        </details>
-        <p class="note" id="location-note">A missing polygon can also mean FEMA has no digital map here. A missing polygon or blank attribute does not establish that a location has no flood risk.</p>
-      </section>
-      <section class="panel" id="hazard-panel" aria-labelledby="hazard-heading" hidden>
+        <section id="hazard-panel" aria-labelledby="hazard-heading" hidden>
         <h2 id="hazard-heading">Earthquake hazard curve</h2>
         <p id="hazard-status" role="status" aria-live="polite">Select a location to load government data.</p>
         <p class="axis-note" id="hazard-axis-note">X: frequency · Y: severity</p>
@@ -337,7 +290,25 @@
         <p class="note" id="hazard-source"></p>
         <div id="hazard-notes" class="note"></div>
       </section>
-      <section class="panel" id="flood-panel" aria-labelledby="curves-heading">
+        <details id="heat-history-details" hidden>
+          <summary>Historical heat: annual maxima and record coverage</summary>
+          <p id="heat-history-context" class="note"></p>
+          <div class="table-scroll"><table class="scenario-table">
+            <thead><tr><th scope="col">Year</th><th scope="col">Valid / expected days</th><th scope="col">Annual maximum (°C / °F)</th><th scope="col">Source date of maximum</th><th scope="col">Included</th></tr></thead>
+            <tbody id="heat-history-rows"></tbody>
+          </table></div>
+          <button class="scenario-button" id="export-heat" type="button" disabled>Export historical heat data CSV</button>
+        </details>
+        <details id="satellite-years-details" hidden>
+          <summary>Satellite fire detections: strongest detection each year</summary>
+          <p id="satellite-years-context" class="note"></p>
+          <div class="table-scroll"><table class="scenario-table">
+            <thead><tr><th scope="col">Year</th><th scope="col">Detections within radius</th><th scope="col">Strongest detection (MW)</th><th scope="col">Date (UTC)</th></tr></thead>
+            <tbody id="satellite-years-rows"></tbody>
+          </table></div>
+        </details>
+        <p class="note" id="location-note">A missing polygon can also mean FEMA has no digital map here. A missing polygon or blank attribute does not establish that a location has no flood risk.</p>
+        <section id="flood-panel" aria-labelledby="curves-heading">
         <h2 id="curves-heading">Frequency, flood depth, and damage</h2>
         <p>For Texas points with an installed tile, the app fills modeled TWDB flood depths. Choose a single-family home profile to estimate structure damage. Blank cells mean unavailable data, not zero flooding or zero damage.</p>
         <p id="scenario-context">Select a map point to begin.</p>
@@ -370,16 +341,94 @@
         </div>
         <p class="note">These are modeled event scenarios. Lines only guide the eye. The Hazus 4.0 riverine curves use depth relative to the first floor and estimate structure damage percentage for a selected residential type. TWDB's combined-peril depths and Hazus riverine curves come from different models; this is an exploratory pairing, not a site-specific loss assessment or insurance payout.</p>
       </section>
+      </details>
+      <section class="panel" id="monitors-panel" aria-labelledby="monitors-heading">
+        <h2 id="monitors-heading" class="step-heading">4. What nearby monitors show</h2>
+        <p class="note" style="margin-top:0">Each monitor's own history, side by side with the result at your point. Numbered pins on the map match the rows. Rows are never averaged.</p>
+        <div class="monitor-controls"><label for="station-count">Stations (n)
+          <input id="station-count" type="number" min="1" max="50" step="1" value="5" required aria-describedby="station-coverage" style="width: 5em; display: block;">
+        </label></div>
+        <div id="records-details" hidden>
+          <h3 id="records-summary" style="margin:0 0 6px">Monitor records</h3>
+          <p id="records-status" class="note" role="status" aria-live="polite"></p>
+          <label for="records-threshold" id="records-threshold-wrap"><span id="records-threshold-label">Threshold</span>
+            <input id="records-threshold" type="number" min="0" step="any" style="width: 8em;" aria-describedby="records-threshold-help">
+          </label>
+          <label for="records-level" id="records-level-wrap" hidden>Flood level
+            <select id="records-level"><option value="action">Action stage (river rising, near flooding)</option><option value="minor" selected>Minor flood stage</option><option value="moderate">Moderate flood stage</option><option value="major">Major flood stage</option></select>
+          </label>
+          <button class="scenario-button" id="records-show" type="button" hidden>Show these monitors on the map</button>
+          <p id="records-threshold-help" class="note">Starts at the nearest available station's median year (about half its years reach it). Enter any value.</p>
+          <div class="table-scroll"><table class="scenario-table">
+            <thead><tr><th scope="col">Station</th><th scope="col">Distance (km)</th><th scope="col">Years counted</th><th scope="col" id="records-median-heading">Median year</th><th scope="col" id="records-highest-heading">Highest year</th><th scope="col" id="records-frequency-heading">Years at or above threshold</th></tr></thead>
+            <tbody id="records-rows"></tbody>
+          </table></div>
+          <div id="records-notes" class="note"></div>
+        </div>
+        <details id="live-network-details" style="margin-top:16px">
+          <summary>Live monitoring network for this hazard</summary>
+        <section aria-labelledby="hazard-station-heading">
+        <h3 id="hazard-station-heading">Nearest monitoring stations for the selected hazard</h3>
+        <p id="station-coverage" class="note">Stations come from the network that monitors the selected hazard (for example, USGS stream gauges for flood or seismic stations for earthquake), within 200 km. Set how many with Stations (n) above. These stations link to live readings. Where a monitor table appears above, it holds the historical records; for Earthquake and Wildfire these stations are context only and are not used in the calculation.</p>
+        <p id="hazard-station-status" role="status" aria-live="polite">Select a location to find hazard-specific stations.</p>
+        <div id="hazard-station-details" class="note"></div>
+        <button id="hazard-station-show" type="button" hidden>Show selection and stations</button>
+        <button id="hazard-station-retry" type="button" hidden>Retry station search</button>
+      </section>
+        </details>
+      </section>
+      <details class="panel section" id="context-section" hidden>
+        <summary>5. Current conditions <span class="summary-note">· latest readings near the point</span></summary>
+        <section id="heat-observation-panel" aria-labelledby="heat-heading" hidden>
+        <details>
+        <summary>Latest heat conditions — optional station context</summary>
+        <h2 id="heat-heading">Heat — station observation snapshot</h2>
+        <p class="note">Air temperature and derived Heat Index in shade/light wind from nearby METAR reports. These describe stations, not the selected worksite or the whole rectangle. Reports are checked at lookup; this snapshot does not refresh automatically.</p>
+        <p id="heat-status" role="status" aria-live="polite">Select a location to screen current station reports for heat.</p>
+        <ol id="heat-list" aria-label="Heat screening at nearby stations, nearest first"></ol>
+        <button id="heat-refresh" type="button">Refresh heat and station reports</button>
+        <p class="note">Heat Index is a screening estimate, not WBGT. For outdoor construction, use on-site WBGT with workload, clothing/PPE and acclimatization guidance. No construction shutdown threshold is supplied. Heat illness can occur below the listed bands. Sun and local heat sources can increase exposure.</p>
+        <p class="note">NWS Heat Index bands (°F): Caution 80–&lt;90; Extreme caution 90–&lt;103; Danger 103–&lt;125; Extreme danger ≥125. No forecast, heat-wave duration, historical annual probability or payout is calculated here.</p>
+        <p class="note">Sources: <a href="https://www.weather.gov/ama/heatindex" target="_blank" rel="noopener noreferrer">NWS Heat Index and bands</a> · <a href="https://www.osha.gov/heat-exposure/hazards" target="_blank" rel="noopener noreferrer">OSHA worksite heat assessment</a> · <a href="docs/heat-and-wind.md">Methods and limitations</a></p>
+        </details>
+      </section>
+        <section class="panel" id="satellite-fire-panel" aria-labelledby="satellite-fire-heading" hidden>
+        <h2 id="satellite-fire-heading">Satellite fire observations — NASA FIRMS (VIIRS)</h2>
+        <p class="note" id="satellite-fire-legend" style="margin-top:0">Hot spots detected by the NOAA-20 and NOAA-21 satellites in about the last 1–2 days, in ~375 m pixels. Marker colour shows age: red under 6 hours, orange under 12 hours, amber older.</p>
+        <label for="satellite-fire-window">Time window
+          <select id="satellite-fire-window" disabled><option value="24h" selected>Last 1–2 days (24h file)</option><option value="48h">Last 2–3 days (48h file)</option><option value="7d">Last 7–8 days (7d file)</option></select>
+        </label>
+        <label for="satellite-fire-radius">Search radius
+          <select id="satellite-fire-radius" disabled><option value="10">10 km</option><option value="25" selected>25 km</option><option value="50">50 km</option><option value="100">100 km</option></select>
+        </label>
+        <button id="satellite-fire-refresh" type="button" disabled>Refresh detections</button>
+        <button id="satellite-fire-show" type="button" hidden>Show selection and detections</button>
+        <p id="satellite-fire-status" role="status" aria-live="polite">Select a location to check recent satellite fire detections.</p>
+        <div id="satellite-fire-content" hidden>
+          <ol id="satellite-fire-list" aria-label="Satellite detections, nearest first"></ol>
+          <div id="satellite-fire-frp" hidden>
+            <p id="satellite-fire-frp-summary"></p>
+            <div class="chart-grid">
+              <div class="chart-box"><h3>Fire radiative power (MW) by detection time</h3><div id="satellite-fire-frp-time"></div></div>
+              <div class="chart-box"><h3>FRP exceedance across detections (MW)</h3><div id="satellite-fire-frp-curve"></div></div>
+            </div>
+            <p id="satellite-fire-frp-basis" class="note"></p>
+          </div>
+          <p id="satellite-fire-sources" class="note"></p>
+        </div>
+        <p class="note">A detection means something hot was seen from space, not a confirmed wildfire: prescribed or farm burns, gas flares and industry can appear too. No detection does not mean no fire, because clouds, smoke and small or short fires can be missed. Fire radiative power (MW) is not fireline intensity (kW/m). Confirm with agency incident reports.</p>
+      </section>
+      </details>
     </main>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js"></script>
     <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js"></script>
     <script src="damage_model.js?v=1"></script>
     <script src="hazard_chart.js?v=1"></script>
-    <script src="hazard_trigger.js?v=5"></script>
+    <script src="hazard_trigger.js?v=10"></script>
     <script src="fire_history.js?v=1"></script>
-    <script src="fire_proximity.js?v=2"></script>
-    <script src="satellite_fire.js?v=1"></script>
-    <script src="script.js?v=32"></script>
+    <script src="fire_proximity.js?v=4"></script>
+    <script src="satellite_fire.js?v=3"></script>
+    <script src="script.js?v=59"></script>
   </body>
 </html>

@@ -61,6 +61,8 @@ if [[ "${SKIP_DATA:-0}" != "1" ]]; then
   echo "==> Downloading data (several GB; reruns skip finished files)"
   sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR' && .venv/bin/python prepare_data.py --tile n29w99"
   sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR' && .venv/bin/python prepare_fire_data.py --region CONUS"
+  # NASA FIRMS yearly fire archives for the satellite-fire hazard (~450 MB streamed, ~84 MB kept).
+  sudo -u "$APP_USER" -H bash -c "cd '$APP_DIR' && .venv/bin/python prepare_satellite_fire_data.py"
 fi
 
 echo "==> Writing $ENV_FILE"

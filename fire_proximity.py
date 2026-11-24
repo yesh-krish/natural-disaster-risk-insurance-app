@@ -10,6 +10,8 @@ from hazard_engine import coordinates
 from hazard_relevance import NRI_LAYER
 
 RADII_KM = (5, 10, 20)
+# Fires are retrieved within this distance; any trigger distance up to it is computed exactly.
+MAX_DISTANCE_KM = max(RADII_KM)
 # FPA FOD size classes: C ≥10, D ≥100, F ≥1,000, G ≥5,000 acres.
 SIZE_THRESHOLDS_ACRES = (10, 100, 1000, 5000)
 # Burned-area share is only computed where fires reported beyond the 20 km query
@@ -108,28 +110,39 @@ def area_exceedance_curve(sized, years):
     historical rate holds. empirical_years_pct counts years that actually had one.
     The curve stops at the first threshold above the largest reported fire; nothing is extrapolated.
     """
-    curves = []
-    for radius in RADII_KM:
-        fires = [fire for fire in sized if fire["distance_km"] <= radius + 1e-8 and fire["reported_acres"] > 0]
-        largest = max((fire["reported_acres"] for fire in fires), default=0)
-        points = []
-        for acres in CURVE_ACRES:
-            hits = [fire for fire in fires if fire["reported_acres"] >= acres]
-            rate = len(hits) / years
-            probability = 1 - math.exp(-rate)
-            hit_years = {int(fire["discovery_date"][:4]) for fire in hits}
-            points.append({"min_acres": acres, "fires_at_or_above": len(hits),
-                           "expected_annual_exceedances": rate, "annual_probability_pct": probability * 100,
-                           "empirical_years_pct": len(hit_years) / years * 100,
-                           "return_period_years": 1 / probability if probability > 0 else None})
-            if not hits:
-                break
-        curves.append({"radius_km": radius, "fire_count": len(fires), "total_years": years,
-                       "largest_reported_acres": largest or None,
-                       "expected_annual_reported_acres": sum(fire["reported_acres"] for fire in fires) / years,
-                       "points": points})
+    rows = sized_fire_rows(sized)
     return {"method": "poisson_rate_of_reported_fire_size", "thresholds_acres": list(CURVE_ACRES),
-            "curves": curves}
+            "curves": [distance_curve(rows, years, radius) for radius in RADII_KM]}
+
+
+def sized_fire_rows(sized):
+    """Compact [year, distance_km, reported_acres] rows for every sized fire, nearest first."""
+    return sorted([int(fire["discovery_date"][:4]), round(fire["distance_km"], 4), fire["reported_acres"]]
+                  for fire in sized if fire["reported_acres"] > 0)
+
+
+def distance_curve(rows, years, radius):
+    """Burned-area exceedance for any search distance up to MAX_DISTANCE_KM, from sized_fire_rows.
+
+    Exact for the records: no interpolation between radii. Mirrored by distanceCurve in fire_proximity.js.
+    """
+    if not 0 < radius <= MAX_DISTANCE_KM:
+        raise ValueError(f"Distance must be greater than 0 and at most {MAX_DISTANCE_KM} km.")
+    fires = [row for row in rows if row[1] <= radius + 1e-8]
+    points = []
+    for acres in CURVE_ACRES:
+        hits = [row for row in fires if row[2] >= acres]
+        rate = len(hits) / years
+        probability = 1 - math.exp(-rate)
+        points.append({"min_acres": acres, "fires_at_or_above": len(hits),
+                       "expected_annual_exceedances": rate, "annual_probability_pct": probability * 100,
+                       "empirical_years_pct": len({row[0] for row in hits}) / years * 100,
+                       "return_period_years": 1 / probability if probability > 0 else None})
+        if not hits:
+            break
+    return {"radius_km": radius, "fire_count": len(fires), "total_years": years,
+            "largest_reported_acres": max((row[2] for row in fires), default=0) or None,
+            "expected_annual_reported_acres": sum(row[2] for row in fires) / years, "points": points}
 
 
 def _omitted_acres(gap_km):
@@ -181,6 +194,8 @@ def size_exceedance(records, start_year, end_year):
     return {"basis": "reported_size_and_distance", "size_thresholds_acres": list(SIZE_THRESHOLDS_ACRES),
             "records_in_query": len(fires), "records_missing_size": len(fires) - len(sized),
             "threshold_frequencies": thresholds, "area_exceedance": area_exceedance_curve(sized, years),
+            "sized_fires": {"fields": ["year", "distance_km", "reported_acres"], "max_distance_km": query_km,
+                            "rows": sized_fire_rows(sized)},
             "footprint_reach": reach, "burned_area": burned,
             "notes": SIZE_NOTES.copy()}
 

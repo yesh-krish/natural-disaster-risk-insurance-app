@@ -20,6 +20,10 @@ START_YEAR, END_YEAR = 1991, 2020
 MIN_COMPLETE_YEARS = 20  # Product coverage policy, not a NOAA safety threshold.
 RADIUS_KM = 100
 MAX_CANDIDATES = 5
+# Per-station comparison table: each station is a separate NOAA download, so the
+# table is capped even though the viewer's station count accepts up to 50.
+MAX_COMPARISON_STATIONS = 10
+NO_STATION_REASON = "No US GHCN-Daily TMAX station with inventory spanning 1991–2020 is within 100 km. Historical heat coverage is unavailable."
 
 
 def _resource(name, limit):
@@ -34,9 +38,16 @@ def _resource(name, limit):
                                  "fetched_at": datetime.now(timezone.utc).isoformat()}
 
 
+INDEX_ELEMENTS = {"TMAX", "PRCP", "WSF2"}
+
+
 @lru_cache(maxsize=1)
-def station_catalog(day):
-    """US TMAX stations whose inventory spans the fixed baseline; not a QC claim."""
+def ghcn_index(day):
+    """US station metadata plus inventory year spans for INDEX_ELEMENTS.
+
+    One daily download of the NOAA catalog, shared by the heat curve and the
+    per-station rainfall/wind tables. Inventory span does not imply continuity.
+    """
     with ThreadPoolExecutor(max_workers=2) as pool:
         inventory_job = pool.submit(_resource, "ghcnd-inventory.txt", 64_000_000)
         metadata_job = pool.submit(_resource, "ghcnd-stations.txt", 16_000_000)
@@ -56,18 +67,27 @@ def station_catalog(day):
             stations[identifier] = {"id": identifier, "name": line[41:71].strip(),
                                     "latitude": lat, "longitude": lon,
                                     "url": ROOT_URL + "all/" + identifier + ".dly"}
-    eligible = set()
+    spans = {}
     for line in io.StringIO(inventory):
-        if line[:11] not in stations or line[31:35] != "TMAX":
+        element = line[31:35]
+        if line[:11] not in stations or element not in INDEX_ELEMENTS:
             continue
         try:
-            if int(line[36:40]) <= START_YEAR and int(line[41:45]) >= END_YEAR:
-                eligible.add(line[:11])
+            spans[(line[:11], element)] = (int(line[36:40]), int(line[41:45]))
         except ValueError:
             continue
+    return stations, spans, [inventory_provenance, metadata_provenance]
+
+
+@lru_cache(maxsize=1)
+def station_catalog(day):
+    """US TMAX stations whose inventory spans the fixed baseline; not a QC claim."""
+    stations, spans, provenance = ghcn_index(day)
+    eligible = {identifier for (identifier, element), (first, last) in spans.items()
+                if element == "TMAX" and first <= START_YEAR and last >= END_YEAR}
     if not eligible:
         raise OSError("NOAA historical heat station inventory is empty or incompatible")
-    return [stations[key] for key in sorted(eligible)], [inventory_provenance, metadata_provenance]
+    return [stations[key] for key in sorted(eligible)], provenance
 
 
 def annual_maxima(raw, station_id):
@@ -118,23 +138,87 @@ def annual_maxima(raw, station_id):
 
 
 @lru_cache(maxsize=16)
-def station_years(identifier, day):
+def station_text(identifier, day):
+    """Raw GHCN-Daily station file (all elements); shared by heat, rainfall and wind."""
     if not re.fullmatch(r"US[A-Z0-9]{9}", identifier):
         raise ValueError("Invalid GHCN station identifier")
-    raw, provenance = _resource("all/" + identifier + ".dly", 16_000_000)
+    return _resource("all/" + identifier + ".dly", 16_000_000)
+
+
+@lru_cache(maxsize=16)
+def station_years(identifier, day):
+    raw, provenance = station_text(identifier, day)
     return annual_maxima(raw, identifier), provenance
 
 
-def heat_at(lat, lon):
+def _nearby(lat, lon, day):
+    """Baseline-spanning stations within RADIUS_KM, nearest first (ID breaks ties)."""
     coordinates(lat, lon)
     from monitoring_stations import distance_km
-    day = int(datetime.now(timezone.utc).timestamp() // 86400)
     stations, catalog_provenance = station_catalog(day)
     nearby = sorted(({**row, "distance_km": distance_km(lat, lon, row["latitude"], row["longitude"])} for row in stations),
                     key=lambda row: (row["distance_km"], row["id"]))
-    candidates = [row for row in nearby if row["distance_km"] <= RADIUS_KM][:MAX_CANDIDATES]
+    return [row for row in nearby if row["distance_km"] <= RADIUS_KM], catalog_provenance
+
+
+def station_comparison(lat, lon, requested):
+    """Each nearby station's own empirical annual-maximum distribution.
+
+    Stations are listed side by side and never averaged; the main heat curve
+    still comes from heat_at's single qualifying station.
+    """
+    if isinstance(requested, bool) or not isinstance(requested, int) or not 1 <= requested <= 50:
+        raise ValueError("Station count must be an integer from 1 to 50.")
+    day = int(datetime.now(timezone.utc).timestamp() // 86400)
+    within, catalog_provenance = _nearby(lat, lon, day)
+    shown = within[:min(requested, MAX_COMPARISON_STATIONS)]
+
+    def fetch(station):
+        try:
+            return station_years(station["id"], day)
+        except (OSError, ValueError) as exc:
+            return exc
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        fetched = list(pool.map(fetch, shown))
+    rows = []
+    for station, outcome in zip(shown, fetched):
+        row = {key: station[key] for key in ("id", "name", "latitude", "longitude", "distance_km", "url")}
+        if isinstance(outcome, Exception):
+            # A download/parse failure is reported as such, never as missing coverage.
+            row.update(status="source_unavailable", complete_years=None, annual_maxima_c=[], points=[],
+                       reason=f"NOAA daily record could not be read ({type(outcome).__name__}).")
+            rows.append(row)
+            continue
+        years, provenance = outcome
+        maxima = [year["maximum_c"] for year in years if year["complete"]]
+        row.update(complete_years=len(maxima), source=provenance,
+                   annual_maxima_c=maxima, highest_annual_maximum_c=max(maxima) if maxima else None)
+        if len(maxima) < MIN_COMPLETE_YEARS:
+            row.update(status="insufficient_years", points=[],
+                       reason=f"{len(maxima)} complete {'year' if len(maxima) == 1 else 'years'}; at least {MIN_COMPLETE_YEARS} are required.")
+        else:
+            row.update(status="available", points=[
+                {"severity": threshold, "frequency_pct": 100 * sum(value >= threshold for value in maxima) / len(maxima),
+                 "hit_years": sum(value >= threshold for value in maxima), "exposure_years": len(maxima)}
+                for threshold in sorted(set(maxima))])
+        rows.append(row)
+    return {"peril": "heat", "latitude": lat, "longitude": lon,
+            "requested_stations": requested, "station_limit": MAX_COMPARISON_STATIONS,
+            "stations_within_radius": len(within), "radius_km": RADIUS_KM,
+            "baseline": {"start_year": START_YEAR, "end_year": END_YEAR, "minimum_complete_years": MIN_COMPLETE_YEARS},
+            "frequency": "100 × complete years with annual maximum ≥ threshold / included complete years, per station",
+            "stations": rows, "provenance": {"sources": catalog_provenance},
+            "notes": ["Each row is one station's own 1991–2020 record. Stations are not averaged or combined.",
+                      f"At most {MAX_COMPARISON_STATIONS} stations are listed because each requires a separate NOAA download.",
+                      "Elevation, urban and siting differences between stations can explain differing frequencies."]}
+
+
+def heat_at(lat, lon):
+    day = int(datetime.now(timezone.utc).timestamp() // 86400)
+    within, catalog_provenance = _nearby(lat, lon, day)
+    candidates = within[:MAX_CANDIDATES]
     if not candidates:
-        raise ModelUnavailable("No US GHCN-Daily TMAX station with inventory spanning 1991–2020 is within 100 km. Historical heat coverage is unavailable.")
+        raise ModelUnavailable(NO_STATION_REASON)
     checked = []
     for station in candidates:
         years, daily_provenance = station_years(station["id"], day)

@@ -6,16 +6,17 @@ import math
 from urllib.parse import parse_qs
 from address_lookup import geocode_address, normalize_address
 
+from custom_trigger import custom_trigger_level, custom_trigger_note
 from area_hazard import SITE_CLASSES, area_disaster, validate_area
 from disaster_data import disaster_at
 from hazard_engine import coordinates
 from monitoring_stations import nearest_hazard_stations, nearest_station, nearest_stations, station_count
 from fire_history import nearest_fire
-from fire_proximity import fire_proximity
+from fire_proximity import MAX_DISTANCE_KM, distance_curve, fire_proximity
 from risk_context import (active_weather_alerts, elevation_context, flood_zone_context,
                           national_risk_index, recent_earthquakes)
 
-VERSION = "1.13.0"
+VERSION = "1.15.0"
 # Hazards the public API offers. Wildfire uses the nearby reported-fire method (fire size in acres
 # within a radius, share of years), the same one the map's trigger controls use. The older wildfire
 # models (FSim flame length, fireline intensity, potential intensity) are not offered.
@@ -125,13 +126,48 @@ def payout_parameter(query):
         raise InvalidRequest("payout_usd must be between 0 and 1,000,000,000,000 USD, with at most two decimal places.") from exc
 
 
-def comparison(curve, payout):
-    """Mirror the map's exact source-level grouping; never fill missing levels."""
+def threshold_parameter(query):
+    if "threshold" not in query:
+        return None
+    value = number(query, "threshold")
+    if value < 0:
+        raise InvalidRequest("threshold must be a non-negative number in the hazard's units.")
+    return value
+
+
+def money(probability, payout):
+    return float((Decimal(str(probability)) / 100 * payout).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
+def custom_trigger(rows, threshold, payout, unit, extrapolate=True):
+    """Estimate a caller-chosen threshold from the source rows, exactly as the map does."""
+    levels = [{"severity": row["severity"], **row["frequency_pct"]} for row in rows]
+    level = custom_trigger_level(levels, threshold, extrapolate)
+    if "error" in level:
+        return {"status": "unavailable", "threshold": threshold, "reason": level["error"]}
+    return {"status": "available", "threshold": threshold, "estimate": level["method"] != "source",
+            "method": level["method"], "direction": level["direction"], "bound": level["bound"],
+            "basis_severities": level["basis"],
+            "reach_segment_widths": None if level["reach"] is None else round(level["reach"], 4),
+            "frequency_pct": {"minimum": level["minimum"], "maximum": level["maximum"]},
+            "expected_annual_contribution_usd": {"minimum": money(level["minimum"], payout), "maximum": money(level["maximum"], payout)},
+            "note": custom_trigger_note(level, unit)}
+
+
+def comparison(curve, payout, threshold=None):
+    """Mirror the map's exact source-level grouping; never fill missing levels.
+
+    A caller-chosen threshold is returned separately as custom_trigger, labeled as an
+    estimate; the comparison rows remain source levels only.
+    """
     if curve.get("annual_probability_available") is False:
-        return {**curve, "status": "unavailable", "payout_usd": float(payout), "comparisons": [],
+        result = {**curve, "status": "unavailable", "payout_usd": float(payout), "comparisons": [],
                 "frequency_basis": "unavailable", "calculation": "Unavailable: source supplies no annual probabilities.",
                 "assumptions": [curve["trigger_unavailable_reason"]],
                 "reason": curve.get("reason") or curve["trigger_unavailable_reason"]}
+        if threshold is not None:
+            result["custom_trigger"] = {"status": "unavailable", "threshold": threshold, "reason": result["reason"]}
+        return result
     groups = {}
     if curve.get("status") == "available":
         for point in curve.get("points", []):
@@ -144,10 +180,8 @@ def comparison(curve, payout):
     rows = []
     for severity, values in sorted(groups.items()):
         low, high = min(values), max(values)
-        def contribution(probability):
-            return float((Decimal(str(probability)) / 100 * payout).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
         rows.append({"severity": severity, "frequency_pct": {"minimum": low, "maximum": high},
-                     "expected_annual_contribution_usd": {"minimum": contribution(low), "maximum": contribution(high)}})
+                     "expected_annual_contribution_usd": {"minimum": money(low, payout), "maximum": money(high, payout)}})
     result = {**curve, "payout_usd": float(payout), "comparisons": rows,
               "frequency_basis": {"cyclone": "historical_annual_frequency", "heat": "historical_annual_frequency", "wildfire": "historical_annual_frequency"}.get(curve["peril"], "modeled_annual_probability"),
               "calculation": "(annual exceedance percentage / 100) * fixed payout",
@@ -165,6 +199,17 @@ def comparison(curve, payout):
             "The percentage is the observed share of archive years that had one, not a Poisson rate. "
             "Sizes never reported within the radius are not offered; zero observed years is not zero future risk. "
             "Historical illustration, not a forward-looking price or a property loss probability.")
+    if threshold is not None:
+        observed = curve["peril"] == "wildfire"
+        result["custom_trigger"] = custom_trigger(rows, threshold, payout, curve.get("unit"), extrapolate=not observed)
+        if observed and result["custom_trigger"]["status"] == "available" and result["custom_trigger"]["estimate"]:
+            result["assumptions"].append(
+                "Wildfire custom_trigger is interpolated between observed sizes (log-probability) and never extrapolated: "
+                "above the largest observed size it is an upper bound, below the smallest a lower bound.")
+        elif result["custom_trigger"]["status"] == "available" and result["custom_trigger"]["estimate"]:
+            result["assumptions"].append(
+                "custom_trigger is estimated from the source levels (log-probability interpolation between levels; "
+                "exponential-tail extrapolation beyond them). It is not a source value; extrapolations are highly uncertain.")
     return result
 
 
@@ -175,9 +220,9 @@ def fire_radius(query):
         radius = float(query["radius_km"])
     except ValueError:
         radius = None
-    if radius not in FIRE_RADII_KM:
-        raise InvalidRequest("radius_km must be 5, 10 or 20 for wildfire.")
-    return int(radius)
+    if radius is None or not math.isfinite(radius) or not 0 < radius <= MAX_DISTANCE_KM:
+        raise InvalidRequest(f"radius_km must be greater than 0 and at most {MAX_DISTANCE_KM} km for wildfire.")
+    return int(radius) if radius.is_integer() else radius
 
 
 def wildfire_curve(lat, lon, radius_km):
@@ -192,10 +237,11 @@ def wildfire_curve(lat, lon, radius_km):
               "notes": ["Each point: the share of archive years with at least one reported wildfire of at least that many acres within the radius.",
                         "Sizes never reported within the radius are left out, not given 0%; zero observed years is not zero future risk.",
                         "Historical reported fires, not a forecast, burn probability for this property or a loss estimate. Full detail: /api/v1/fire-proximity."]}
-    curves = ((proximity.get("size_exceedance") or {}).get("area_exceedance") or {}).get("curves") or []
-    curve = next((item for item in curves if item.get("radius_km") == radius_km), None)
     baseline = proximity.get("baseline") or {}
-    if proximity.get("status") != "available" or curve is None:
+    sized = (proximity.get("size_exceedance") or {}).get("sized_fires")
+    curve = (distance_curve(sized["rows"], baseline["year_count"], radius_km)
+             if proximity.get("status") == "available" and sized and baseline.get("year_count") else None)
+    if curve is None:
         result["reason"] = proximity.get("reason") or "Nearby-fire records are unavailable for this location."
         return result
     result["record_period"] = {"start_year": baseline.get("start_year"), "end_year": baseline.get("end_year"),
@@ -393,7 +439,7 @@ def dispatch(path, raw_query):
             request = dict(zip(keys, bounds), peril=peril, site_class=site_class)
             return 200, envelope(area_disaster(*bounds, peril, site_class), request)
         required = ("payout_usd",) if resource == "trigger-comparisons" else ()
-        allowed = ("lat", "lon", "address", "site_class", "radius_km") + (("payout_usd",) if required else ())
+        allowed = ("lat", "lon", "address", "site_class", "radius_km") + (("payout_usd", "threshold") if required else ())
         query = parameters(raw_query, allowed, required)
         if "radius_km" in query and peril != "wildfire":
             raise InvalidRequest("radius_km applies to wildfire only.")
@@ -402,6 +448,7 @@ def dispatch(path, raw_query):
         if site_class not in SITE_CLASSES:
             raise InvalidRequest("site_class must be A, B, BC, C, CD, D, DE or E.")
         payout = payout_parameter(query) if resource == "trigger-comparisons" else None
+        threshold = threshold_parameter(query)
         lat, lon, location = resolve_location(query)
         request = {"peril": peril, "lat": lat, "lon": lon, "site_class": site_class}
         if location:
@@ -410,6 +457,8 @@ def dispatch(path, raw_query):
             request["payout_usd"] = float(payout)
         if radius is not None:
             request["radius_km"] = radius
+        if threshold is not None:
+            request["threshold"] = threshold
         if peril == "wildfire":
             curve = wildfire_curve(lat, lon, radius)
         elif peril == "auto":
@@ -417,7 +466,7 @@ def dispatch(path, raw_query):
             curve = most_relevant(lat, lon, site_class)
         else:
             curve = disaster_at(peril, lat, lon, site_class)
-        result = comparison(curve, payout) if payout is not None else curve
+        result = comparison(curve, payout, threshold) if payout is not None else curve
         return 200, envelope(result, request, location)
     except InvalidRequest as exc:
         return error_response(400, "invalid_request", str(exc))

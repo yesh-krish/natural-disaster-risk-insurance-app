@@ -202,7 +202,8 @@ def cyclone_catalog(day):
                 continue
             lat = float(row[4][:-1]) * (-1 if row[4][-1] == "S" else 1)
             lon = float(row[5][:-1]) * (-1 if row[5][-1] == "W" else 1)
-            records.append((event_id, year, lat, lon, int(row[6]), tuple(int(v) for v in row[8:20])))
+            # Last field: best-track date (YYYYMMDD, UTC), used for station storm-day matching.
+            records.append((event_id, year, lat, lon, int(row[6]), tuple(int(v) for v in row[8:20]), row[0]))
     if not records or end < 2004:
         raise ModelUnavailable("NOAA wind-radius records are unavailable")
     return records, end, urls
@@ -218,6 +219,27 @@ def distance_bearing(lat1, lon1, lat2, lon2):
     return distance_nm, bearing
 
 
+def cyclone_footprint_days(lat, lon, threshold=34):
+    """UTC dates when (lat, lon) was inside a tropical cyclone's recorded wind radius.
+
+    Same rule as cyclone(): a best-track record with wind ≥ threshold whose quadrant
+    radius for that threshold reaches the point. Used to restrict station wind records
+    to tropical-storm days. Returns (set of ISO dates, last complete year).
+    """
+    records, end, _ = cyclone_catalog(today_key())
+    offset = {34: 0, 50: 1, 64: 2}[threshold]
+    days = set()
+    for _event, _year, track_lat, track_lon, wind, radii, *rest in records:
+        if wind < threshold or not rest:
+            continue
+        distance, bearing = distance_bearing(track_lat, track_lon, lat, lon)
+        radius = radii[offset * 4 + min(3, int(bearing // 90))]
+        if radius > 0 and distance <= radius:
+            stamp = rest[0]
+            days.add(f"{stamp[:4]}-{stamp[4:6]}-{stamp[6:8]}")
+    return days, end
+
+
 def cyclone(lat, lon):
     if not 0 <= lat <= 65 or not -180 <= lon <= 0:
         raise ModelUnavailable("NOAA HURDAT2 covers Atlantic and northeast/central Pacific cyclones; this point is outside the supported viewer region.")
@@ -225,7 +247,7 @@ def cyclone(lat, lon):
     hits = {34: set(), 50: set(), 64: set()}
     events = set()
     missing = 0
-    for event, year, track_lat, track_lon, wind, radii in records:
+    for event, year, track_lat, track_lon, wind, radii, *_ in records:
         distance, bearing = distance_bearing(track_lat, track_lon, lat, lon)
         quadrant = min(3, int(bearing // 90))  # NOAA order: NE, SE, SW, NW
         for offset, threshold in enumerate(hits):
@@ -252,12 +274,14 @@ def cyclone(lat, lon):
     return result
 
 
-def disaster_at(peril, lat, lon, site_class="BC"):
+def disaster_at(peril, lat, lon, site_class="BC", radius_km=None):
     coordinates(lat, lon)
     from fireline_intensity import fireline_intensity
     from historical_heat import heat_at
     from potential_fire import potential_fire_at
-    handlers = {"earthquake": lambda: earthquake(lat, lon, site_class), "flood": lambda: flood(lat, lon),
+    from satellite_fire_history import DEFAULT_RADIUS_KM, satellite_fire_curve
+    handlers = {
+                "satellite_fire": lambda: satellite_fire_curve(lat, lon, radius_km or DEFAULT_RADIUS_KM),"earthquake": lambda: earthquake(lat, lon, site_class), "flood": lambda: flood(lat, lon),
                 "wildfire": lambda: wildfire(lat, lon), "cyclone": lambda: cyclone(lat, lon),
                 "fireline_intensity": lambda: fireline_intensity(lat, lon),
                 "potential_fire_intensity": lambda: potential_fire_at(lat, lon),

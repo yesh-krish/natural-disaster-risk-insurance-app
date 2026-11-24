@@ -72,6 +72,31 @@ async function resolve(request, value = {data}, ok = true) { request.resolve({ok
   assert.equal([...layers][0].options.radius, 5000);
   assert.equal(layers.size, 1);
   assert.equal(node('fire-proximity-rows').children[0].dataset.selected, 'true');
+  // Any trigger distance up to 20 km: computed from sized_fires rows, never interpolated between radii.
+  const curves = [];
+  context.FireProximity.onCurve(detail => curves.push(detail));
+  data.size_exceedance.sized_fires = {fields: ['year', 'distance_km', 'reported_acres'], max_distance_km: 20,
+    rows: [[2000, 2, 0.5], [2000, 4, 150], [2001, 7, 40], [2002, 18, 6000]]};
+  assert.equal(context.FireProximity.setDistance(7.5), null);
+  assert.equal(context.FireProximity.distance, 7.5);
+  assert.equal([...layers][0].options.radius, 7500, 'ring follows the trigger distance');
+  assert.equal(node('fire-proximity-value').textContent, '6.1%');
+  assert.match(node('fire-proximity-calculation').textContent, /2 of 33 .*within 7\.5 km/);
+  assert.ok([...node('fire-proximity-rows').children].every(row => row.dataset.selected === 'false'), 'no preset row matches 7.5 km');
+  const custom = curves.at(-1).curve;
+  assert.equal(custom.radius_km, 7.5);
+  assert.equal(custom.fire_count, 3);
+  assert.equal(JSON.stringify(custom.points.map(p => [p.min_acres, Number(p.empirical_years_pct.toFixed(2))])), JSON.stringify(
+    [[0.1, 6.06], [0.3, 6.06], [1, 6.06], [3, 6.06], [10, 6.06], [30, 6.06], [100, 3.03], [300, 0]]));
+  assert.match(node('fire-proximity-curve-summary').textContent, /Within 7\.5 km: 3 reported fires/);
+  assert.equal(context.FireProximity.setDistance(20), null);
+  assert.equal(node('fire-proximity-radius').value, '20', 'preset distances sync the radius menu');
+  assert.equal(curves.at(-1).curve.largest_reported_acres, 6000);
+  for (const bad of [0, -2, 20.5, NaN]) assert.match(context.FireProximity.setDistance(bad), /above 0 and up to 20 km/);
+  assert.equal(context.FireProximity.distance, 20, 'invalid distances are not applied');
+  node('fire-proximity-radius').value = '5'; node('fire-proximity-radius').change();
+  assert.equal(curves.at(-1).curve.radius_km, 5);
+  assert.equal(context.FireProximity.distance, 5);
   node('fire-proximity-show').click();
   assert.equal(map.bounds.radius, 5000);
   node('fire-proximity-export').click();
@@ -115,5 +140,5 @@ async function resolve(request, value = {data}, ok = true) { request.resolve({ok
   const count = pending.length;
   events.visibilitychange();
   assert.equal(pending.length, count);
-  console.log('Annual fire proximity: year counts, frequencies, reference intervals, radius rings, chart, safe auditable CSV, stale responses, provider failure, unavailable coverage, timeout and clearing passed.');
+  console.log('Annual fire proximity: year counts, frequencies, reference intervals, radius rings, any trigger distance up to 20 km, chart, safe auditable CSV, stale responses, provider failure, unavailable coverage, timeout and clearing passed.');
 })().catch(error => {console.error(error); process.exitCode = 1;});

@@ -49,6 +49,26 @@ class SatelliteFireTests(unittest.TestCase):
         self.assertEqual([s["status"] for s in result["sources"]], ["ok", "ok"])
         self.assertTrue(any("not a confirmed wildfire" in note for note in result["notes"]))
 
+    def test_frp_summary_is_an_exceedance_share_of_detections(self):
+        rows = "".join(row(29.43, -98.49, 1, frp=value) for value in ("2.0", "8.0", "8.0", "40.5", ""))
+        with patch.object(sat, "_download", side_effect=files(n21=rows)):
+            result = sat.satellite_fire_detections(LAT, LON, 25)
+        summary = result["frp_summary"]
+        self.assertEqual((summary["unit"], summary["detections_with_frp"], summary["detections_without_frp"]), ("MW", 4, 1))
+        self.assertEqual((summary["minimum_mw"], summary["median_mw"], summary["maximum_mw"]), (2.0, 8.0, 40.5))
+        self.assertEqual([(p["frp_mw"], p["detections_at_or_above"], p["share_pct"]) for p in summary["exceedance"]],
+                         [(40.5, 1, 25.0), (8.0, 3, 75.0), (2.0, 4, 100.0)], "missing FRP is excluded, ties count once")
+        self.assertIn("not an annual probability", summary["basis"])
+
+    def test_frp_curve_is_thinned_but_keeps_both_ends(self):
+        summary = sat.frp_summary([{"frp_mw": float(v)} for v in range(1, 301)])
+        points = summary["exceedance"]
+        self.assertEqual(len(points), sat.FRP_CURVE_POINTS)
+        self.assertEqual((points[0]["frp_mw"], points[0]["share_pct"]), (300.0, round(100 / 300, 4)))
+        self.assertEqual((points[-1]["frp_mw"], points[-1]["share_pct"]), (1.0, 100.0))
+        empty = sat.frp_summary([{"frp_mw": None}])
+        self.assertEqual((empty["detections_with_frp"], empty["median_mw"], empty["exceedance"]), (0, None, []))
+
     def test_no_detection_is_not_no_fire(self):
         with patch.object(sat, "_download", side_effect=files(n20=row(35, -100))):
             result = sat.satellite_fire_detections(LAT, LON, 10)
@@ -126,7 +146,7 @@ class SatelliteFireTests(unittest.TestCase):
         self.assertTrue(all(url.endswith("_24h.csv") for url in requested[2:]))
         self.assertEqual(len(requested), 4, "each window is cached separately")
         self.assertEqual((week["window"], day["window"]), ("7d", "24h"))
-        self.assertIn("7 days", week["window_description"])
+        self.assertIn("7–8 days", week["window_description"])
         self.assertTrue(any("not separate fires" in note for note in week["notes"]))
         self.assertFalse(any("not separate fires" in note for note in day["notes"]))
         with self.assertRaises(ValueError):

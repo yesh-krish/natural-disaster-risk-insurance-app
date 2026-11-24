@@ -46,6 +46,8 @@ function refreshStations() {
   } else {
     loadHazardStation(selectedPoint.lat, selectedPoint.lng, locationVersion, peril);
   }
+  // The monitor table follows "Stations (n)" for every hazard that has one.
+  if (!selectedArea && recordsConfig && RECORD_KINDS[peril]) loadStationRecords(peril, selectedPoint.lat, selectedPoint.lng, locationVersion);
 }
 stationCount.addEventListener("input", refreshStations);
 
@@ -132,6 +134,7 @@ const hazardStationNetworks = {
   rainfall: "USGS precipitation gauges",
   earthquake: "EarthScope seismic stations",
   nearest_fire: "NIFC RAWS fire-weather stations",
+  satellite_fire: "NIFC RAWS fire-weather stations",
   fireline_intensity: "NIFC RAWS fire-weather stations",
   cyclone: "NOAA METAR wind stations",
 };
@@ -216,7 +219,7 @@ async function loadHazardStation(lat, lng, version, peril) {
     hazardStationRetry.hidden = false;
   }, 15000);
   try {
-    const stationPeril = ["nearest_fire", "fireline_intensity"].includes(peril) ? "wildfire" : peril;
+    const stationPeril = ["nearest_fire", "fireline_intensity", "satellite_fire"].includes(peril) ? "wildfire" : peril;
     const params = new URLSearchParams({peril: stationPeril, n: count, lat, lon: lng});
     const response = await fetch(`/api/v1/monitoring-stations?${params}`, {signal: controller.signal});
     if (!current()) return;
@@ -284,6 +287,7 @@ const disasterTypes = {
   auto: { name: "Choose most relevant", metric: "Location-based selection", unit: "", source: "FEMA county context + local government curves", note: "Select a location to choose a disaster using regional hazard data and available local curves." },
   flood: { name: "Flood", metric: "Peak inundation depth", unit: "m", source: "TWDB + FEMA", note: "Flood depths cover installed Texas tiles. FEMA polygons provide flood-zone context; missing data does not establish no flood risk." },
   earthquake: { name: "Earthquake", metric: "Peak ground acceleration", unit: "%g", source: "USGS NSHM", note: "Site class affects modeled shaking. BC is the initial assumption; select the appropriate site class." },
+  satellite_fire: { name: "Wildfire / Satellite fire detections", metric: "Fire intensity of the strongest satellite detection (fire radiative power)", unit: "MW", source: "NASA FIRMS", note: "Share of 2013–2025 years with a NASA satellite fire detection within the chosen radius at or above each fire radiative power. Satellite-only: crop and planned burns are included and some fires are missed." },
   nearest_fire: { name: "Wildfire / Nearby fire frequency", metric: "Reported fire size", unit: "acres", source: "USFS FPA FOD", note: "Annual frequencies count years with at least one reported fire within each radius. The nearest-fire result uses all available history. Distance is to reported incident points; property burn extent is unknown." },
   fireline_intensity: { name: "Wildfire / Fireline intensity", metric: "Fireline intensity", unit: "kW/m", source: "Texas A&M Forest Service / TxWRAP", note: "Native weather-weighted heading fireline intensity for Texas. This is modeled fire behavior, not a live reading or annual exceedance probability. Heat flux at buildings and ember exposure are separate." },
   cyclone: { name: "Wind", metric: "Maximum sustained wind (tropical cyclones)", unit: "kn", source: "NOAA NHC", note: "Tropical-cyclone wind only: NOAA's best-track wind footprints support sustained-wind historical frequencies. This is not an all-wind model; thunderstorms, tornadoes, other windstorms and local peak gusts are not modeled." },
@@ -291,7 +295,6 @@ const disasterTypes = {
   heat: { name: "Heat", metric: "Annual maximum daily air temperature", unit: "°C", source: "NOAA GHCN-Daily", note: "Historical annual heat exceedance at a qualifying nearby US station, 1991–2020. Station distance and complete-year coverage are reported. This measures daily air-temperature extremes; heat-wave duration and construction WBGT require separate inputs." },
 };
 
-const triggerSelect = document.getElementById("trigger-select");
 const triggerHelp = document.getElementById("trigger-help");
 const triggerResult = document.getElementById("trigger-result");
 const triggerProbability = document.getElementById("trigger-probability");
@@ -300,81 +303,45 @@ const triggerPayout = document.getElementById("trigger-payout");
 const poolContribution = document.getElementById("pool-contribution");
 const poolCalculation = document.getElementById("pool-calculation");
 const poolCurrency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const triggerThreshold = document.getElementById("trigger-threshold");
+const triggerThresholdHelp = document.getElementById("trigger-threshold-help");
+const triggerDistance = document.getElementById("trigger-distance");
+const triggerDistanceHelp = document.getElementById("trigger-distance-help");
+const DISTANCE_HELP = triggerDistanceHelp.textContent;
 let triggerData = null;
+// Source levels the typed threshold is estimated from; never listed as choices.
 let triggerLevels = [];
+// A typed threshold keeps its meaning only within one hazard's units.
+let thresholdPeril = null;
+
+// The active trigger: the typed threshold, as a source value or an estimate.
+function activeTriggerLevel() {
+  if (!triggerData || triggerThreshold.value.trim() === "") return null;
+  // Reported-fire curves are observed counts: past the record they are bounded, never extrapolated.
+  return hazardCustomTriggerLevel(triggerLevels, triggerThreshold.valueAsNumber, { extrapolate: !["nearest_fire", "satellite_fire"].includes(triggerData.peril) });
+}
+
+function formatTriggerProbability(level) {
+  const approx = level.custom && level.method !== "source" ? (level.bound === "upper" ? "≤ " : level.bound === "lower" ? "≥ " : "≈ ") : "";
+  return approx + (level.minimum !== level.maximum
+    ? `${formatHazardNumber(level.minimum)}–${formatHazardNumber(level.maximum)}%`
+    : `${formatHazardNumber(level.minimum)}%`);
+}
+
+function updateThresholdHelp() {
+  triggerThresholdHelp.hidden = !triggerData;
+  if (!triggerData) return;
+  const unit = triggerData.unit || disasterTypes[triggerData.peril].unit;
+  const lowest = triggerLevels[0].severity, highest = triggerLevels[triggerLevels.length - 1].severity;
+  const level = activeTriggerLevel();
+  triggerThreshold.setAttribute("aria-invalid", String(!!level?.error || triggerThreshold.validity.badInput));
+  triggerThresholdHelp.textContent = level?.error
+    ? level.error
+    : level ? hazardCustomTriggerNote(level, unit)
+    : `Enter a threshold in ${unit}. Source levels run from ${formatHazardNumber(lowest)} to ${formatHazardNumber(highest)} ${unit}; values between them are interpolated and values outside are ${triggerData.peril === "nearest_fire" ? "shown as bounds, not extrapolated" : "extrapolated"}.`;
+}
 let intensityData = null;
 let historicalHeatData = null;
-
-function renderTriggerComparison(payout) {
-  const rows = document.getElementById("comparison-rows");
-  const content = document.getElementById("comparison-content");
-  const status = document.getElementById("comparison-status");
-  rows.replaceChildren();
-  content.hidden = !triggerData || !triggerLevels.length;
-  if (content.hidden) {
-    status.textContent = triggerHelp.textContent;
-    return;
-  }
-  const data = triggerData, type = disasterTypes[data.peril];
-  const basis = hazardTriggerBasis(data.peril);
-  const unit = data.unit || type.unit;
-  const hasPayout = payout !== null;
-  const hasSelection = triggerSelect.value !== "";
-  status.textContent = `${triggerLevels.length} supported threshold${triggerLevels.length === 1 ? "" : "s"} for the same ${data.area ? "area" : "location"}. ` +
-    (triggerLevels.length === 1 ? "Only one threshold is available here. " : "Compare each option, then select your active trigger. ") +
-    (hasPayout ? `Every row uses the same ${poolCurrency.format(payout)} payout.` : "Enter a valid payout above to compare annual contributions.");
-  document.getElementById("comparison-context").textContent = `${type.name} · ${data.area ? "Area centered at" : "Location"} ${selectedPoint.lat.toFixed(5)}, ${selectedPoint.lng.toFixed(5)}` +
-    `${data.peril === "earthquake" ? ` · Site class ${siteClassSelect.value}` : ""} · Source: ${data.source_name || type.source}`;
-  document.getElementById("comparison-severity").textContent = `${data.metric || type.metric} threshold (${unit})`;
-  document.getElementById("comparison-frequency").textContent = `${data.area ? "Average sampled " : ""}${basis.label.toLowerCase()} (%)`;
-  document.getElementById("comparison-coverage").hidden = !data.area;
-  document.getElementById("comparison-note").textContent =
-    (data.area ? `${data.area.method} Each row averages available grid-point probabilities at that severity; coverage may differ between rows. This is not the probability of an event anywhere in the area. ` : "Only supplied source levels are compared; missing levels are omitted. ") +
-    (data.area && !data.peril === "cyclone" ? "Modeled one-year exceedance probabilities. " : basis.note + " ") +
-    "Contribution = (annual exceedance percentage ÷ 100) × fixed payout, assuming one payout in a year; excludes fees and other pricing adjustments. Ranges preserve differing source frequencies at the same rounded threshold. Each row is an alternative; contributions are not added together.";
-  triggerLevels.forEach((level, index) => {
-    const row = document.createElement("tr");
-    const selected = hasSelection && Number(triggerSelect.value) === index;
-    row.dataset.selected = String(selected);
-    const threshold = document.createElement("th");
-    threshold.scope = "row";
-    threshold.textContent = `≥ ${formatHazardNumber(level.severity)} ${unit}`;
-    row.append(threshold);
-    const range = level.minimum !== level.maximum;
-    const contribution = hasPayout ? hazardPoolContribution(level, payout) : null;
-    const values = [
-      range ? `${formatHazardNumber(level.minimum)}–${formatHazardNumber(level.maximum)}%` : `${formatHazardNumber(level.minimum)}%`,
-      hasPayout ? poolCurrency.format(payout) : "—",
-      contribution ? (contribution.minimum !== contribution.maximum ? `${poolCurrency.format(contribution.minimum)}–${poolCurrency.format(contribution.maximum)}` : poolCurrency.format(contribution.minimum)) : "—",
-    ];
-    if (data.area) {
-      const points = data.points.filter(point => point.severity === level.severity && Number.isFinite(point.frequency_pct));
-      const coverage = [...new Set(points.map(point => `${point.evaluated_samples}/${data.area.sample_count} used; ${point.missing_samples} unavailable; ${point.interpolated_samples} interpolated`))];
-      values.push(coverage.join(" / "));
-    }
-    for (const value of values) {
-      const cell = document.createElement("td");
-      cell.textContent = value;
-      row.append(cell);
-    }
-    const action = document.createElement("td");
-    const button = document.createElement("button");
-    button.id = `compare-trigger-${index}`;
-    button.type = "button";
-    button.className = "scenario-button";
-    button.textContent = selected ? "Selected" : "Use trigger";
-    button.setAttribute("aria-pressed", String(selected));
-    button.setAttribute("aria-label", `${selected ? "Selected trigger" : "Use trigger"}: at or above ${formatHazardNumber(level.severity)} ${unit}`);
-    button.addEventListener("click", () => {
-      triggerSelect.value = String(index);
-      renderTriggerResult();
-      document.getElementById(`compare-trigger-${index}`).focus({ preventScroll: true });
-    });
-    action.append(button);
-    row.append(action);
-    rows.append(row);
-  });
-}
 
 function renderPoolContribution() {
   poolContribution.textContent = "—";
@@ -382,9 +349,13 @@ function renderPoolContribution() {
   const payout = triggerPayout.valueAsNumber;
   const valid = !empty && triggerPayout.validity.valid && Number.isFinite(payout) && payout >= 0;
   triggerPayout.setAttribute("aria-invalid", String(!valid && (!empty || triggerPayout.validity.badInput)));
-  renderTriggerComparison(valid ? payout : null);
-  if (!triggerData || triggerSelect.value === "") {
-    poolCalculation.textContent = "Select a location and supported trigger level to calculate the contribution.";
+  if (!triggerData) {
+    poolCalculation.textContent = "Select a location and enter an intensity to calculate the contribution.";
+    return;
+  }
+  const level = activeTriggerLevel();
+  if (!level || level.error) {
+    poolCalculation.textContent = level?.error || "Enter an intensity to calculate the contribution.";
     return;
   }
   if (!valid) {
@@ -393,20 +364,21 @@ function renderPoolContribution() {
       : "Enter a non-negative payout in USD with no more than two decimal places.";
     return;
   }
-  const level = triggerLevels[Number(triggerSelect.value)];
   const contribution = hazardPoolContribution(level, payout);
   if (!contribution) {
     poolCalculation.textContent = "A valid trigger probability is required to calculate the contribution.";
     return;
   }
-  const range = level.minimum !== level.maximum;
   poolContribution.textContent = contribution.minimum !== contribution.maximum
     ? `${poolCurrency.format(contribution.minimum)}–${poolCurrency.format(contribution.maximum)}`
     : poolCurrency.format(contribution.minimum);
-  const probability = range
-    ? `${formatHazardNumber(level.minimum)}–${formatHazardNumber(level.maximum)}%`
-    : `${formatHazardNumber(level.minimum)}%`;
+  const probability = formatTriggerProbability(level);
+  const estimated = level.custom && level.method !== "source";
+  if (estimated) poolContribution.textContent = probability.slice(0, 2) + poolContribution.textContent;
   poolCalculation.textContent = `${probability} × ${poolCurrency.format(payout)} = ${poolContribution.textContent} per year.${triggerData.area ? " Based on the average of available grid-point probabilities." : ""}`;
+  if (estimated) poolCalculation.textContent += level.method === "bounded"
+    ? ` Uses ${level.bound === "upper" ? "an upper" : "a lower"}-bound frequency, not a source value or an estimate.`
+    : ` Uses an ${level.method} probability, not a source value.`;
   if (["cyclone", "heat", "nearest_fire"].includes(triggerData.peril)) poolCalculation.textContent += " Uses observed annual frequency.";
   if (triggerData.peril === "nearest_fire") poolCalculation.textContent += ` Historical ${triggerData.baseline_label} reported-fire illustration; not a forward-looking price.`;
   if (triggerData.peril === "heat") poolCalculation.textContent += " Historical 1991–2020 station-proxy illustration; not a forward-looking price.";
@@ -416,8 +388,8 @@ function resetTrigger(message, state = "idle") {
   clearAreaSamples();
   triggerData = null;
   triggerLevels = [];
-  triggerSelect.replaceChildren(new Option(state === "loading" ? "Loading trigger levels…" : "No trigger levels loaded", ""));
-  triggerSelect.disabled = true;
+  triggerThreshold.disabled = true;
+  updateThresholdHelp();
   triggerHelp.textContent = message;
   triggerResult.dataset.state = state;
   triggerProbability.textContent = "—";
@@ -444,48 +416,52 @@ function loadTriggerLevels(data) {
   triggerData = data;
   triggerLevels = levels;
   const type = disasterTypes[data.peril];
-  triggerSelect.replaceChildren(new Option("Select a trigger level", ""));
-  levels.forEach((level, index) => {
-    const unit = data.unit || type.unit;
-    let label = `${formatHazardNumber(level.severity)} ${unit}`;
-    triggerSelect.append(new Option(label, String(index)));
-  });
-  triggerSelect.disabled = false;
-  if (data.peril === "nearest_fire") {
-    const previous = data.preferred_severity;
-    const match = levels.findIndex(level => level.severity === previous);
-    if (match >= 0) triggerSelect.value = String(match);
+  const unit = data.unit || type.unit;
+  document.getElementById("trigger-threshold-unit").textContent = unit;
+  triggerThreshold.disabled = false;
+  // Open with a probability showing: keep the user's threshold within the same hazard,
+  // otherwise start from the source level with the highest probability.
+  let prefilled = false;
+  if (thresholdPeril !== data.peril || triggerThreshold.value.trim() === "") {
+    const start = levels.reduce((best, level) => level.maximum > best.maximum ? level : best, levels[0]);
+    triggerThreshold.value = String(start.severity);
+    thresholdPeril = data.peril;
+    prefilled = true;
   }
   const missing = data.points.filter(point => !Number.isFinite(point.severity)).length;
-  triggerHelp.textContent = `${type.metric} · ${levels.length} supported level${levels.length === 1 ? "" : "s"}. ${missing ? `${missing} missing source level${missing === 1 ? " is" : "s are"} omitted. ` : ""}${data.area ? "Average probabilities at the same severity across 25 grid samples; valid brackets use log-probability interpolation." : data.peril === "heat" ? "Only observed annual-maximum temperature levels can be selected; no extrapolated tails." : data.peril === "nearest_fire" ? `Trigger: a reported fire of at least the selected size within ${data.radius_km} km in a year. Change the radius in the fire panel below. Sizes never reported within this radius are not offered.` : "Only supplied model levels can be selected."}`;
-  if (data.peril === "nearest_fire" && triggerSelect.value !== "") { renderTriggerResult(); return; }
-  triggerResult.dataset.state = "ready";
-  document.getElementById("trigger-result-label").textContent = hazardTriggerBasis(data.peril).label;
-  triggerExplanation.textContent = "Choose a trigger level to see its exceedance result.";
-  renderPoolContribution();
+  triggerHelp.textContent = `${type.metric} · estimated from ${levels.length} source level${levels.length === 1 ? "" : "s"}. ${missing ? `${missing} missing source level${missing === 1 ? " is" : "s are"} omitted. ` : ""}` +
+    (data.area ? "Probabilities are averaged at each severity across 25 grid samples. " : "") +
+    (data.peril === "nearest_fire" ? `Trigger: a reported fire of at least the entered size within ${formatHazardNumber(data.radius_km)} km in a year. Change the distance above (up to 20 km). ` : "") +
+    (prefilled ? `Started at ${formatHazardNumber(triggerThreshold.valueAsNumber)} ${unit}, the source level with the highest ${data.area ? "average " : ""}probability; enter any threshold.` : "");
+  renderTriggerResult();
+  // The monitor table's "Your point" row repeats this result; trigger levels can arrive after the table.
+  renderStationRecords();
 }
 
 function renderTriggerResult() {
   clearAreaSamples();
   renderPoolContribution();
   if (!triggerData) return;
-  const level = triggerSelect.value === "" ? null : triggerLevels[Number(triggerSelect.value)];
+  updateThresholdHelp();
+  const level = activeTriggerLevel();
   triggerProbability.textContent = "—";
   for (const id of ["trigger-location", "trigger-source", "trigger-method"]) document.getElementById(id).hidden = !level;
   document.getElementById("trigger-result-label").textContent = hazardTriggerBasis(triggerData.peril).label;
-  if (!level) {
+  if (!level || level.error) {
+    for (const id of ["trigger-location", "trigger-source", "trigger-method"]) document.getElementById(id).hidden = true;
     triggerResult.dataset.state = "ready";
-    triggerExplanation.textContent = "Choose a trigger level to see its exceedance result.";
+    triggerExplanation.textContent = level?.error || "Enter an intensity to see its exceedance probability.";
     return;
   }
   const data = triggerData, type = disasterTypes[data.peril];
   const basis = hazardTriggerBasis(data.peril);
   const range = level.minimum !== level.maximum;
+  const estimated = level.custom && level.method !== "source";
   triggerResult.dataset.state = "available";
-  triggerProbability.textContent = range
-    ? `${formatHazardNumber(level.minimum)}–${formatHazardNumber(level.maximum)}%`
-    : `${formatHazardNumber(level.minimum)}%`;
-  triggerExplanation.textContent = `${type.name}: ${data.metric || type.metric} at or above ${formatHazardNumber(level.severity)} ${data.unit || type.unit}.`;
+  triggerProbability.textContent = formatTriggerProbability(level);
+  triggerExplanation.textContent = `${type.name}: ${data.metric || type.metric} at or above ${formatHazardNumber(level.severity)} ${data.unit || type.unit}.` +
+    (!estimated ? "" : level.method === "bounded" ? ` ${level.bound === "upper" ? "Upper" : "Lower"} bound from the observed record, not an estimate.`
+      : ` ${level.method[0].toUpperCase() + level.method.slice(1)} estimate.`);
   const location = document.getElementById("trigger-location");
   location.textContent = `${selectedArea ? "Selected area centroid" : "Location"}: ${selectedPoint.lat.toFixed(5)}, ${selectedPoint.lng.toFixed(5)}${data.peril === "earthquake" ? ` · Site class ${siteClassSelect.value}` : ""}`;
   const source = document.getElementById("trigger-source");
@@ -498,7 +474,12 @@ function renderTriggerResult() {
     link.rel = "noopener noreferrer";
     source.append(link);
   } else source.append(data.source_name || type.source);
-  document.getElementById("trigger-method").textContent = basis.note + (range ? " Multiple source frequencies share this rounded level, so their range is shown; a unique probability is unavailable." : "");
+  document.getElementById("trigger-method").textContent = (estimated ? hazardCustomTriggerNote(level, data.unit || type.unit) + " " : "") +
+    basis.note + (range ? " Multiple source frequencies share this rounded level, so their range is shown; a unique probability is unavailable." : "");
+  if (estimated) {
+    if (data.area) document.getElementById("trigger-method").textContent += " For an area, the estimate is taken from the averaged curve; per-sample values are only shown for supplied levels.";
+    return;
+  }
   if (data.peril === "heat" && data.station) {
     location.textContent += ` · Historical station: ${data.station.name} (${data.station.id}), ${data.station.distance_km.toFixed(2)} km away. ${data.baseline?.complete_years} included years, 1991–2020.`;
   }
@@ -542,8 +523,265 @@ function clearAreaSamples() {
   document.getElementById("export-area").disabled = true;
 }
 
-triggerSelect.addEventListener("change", renderTriggerResult);
+triggerThreshold.addEventListener("input", () => {
+  renderTriggerResult();
+  renderStationRecords();
+});
 triggerPayout.addEventListener("input", renderPoolContribution);
+
+// Section 4 monitor table, shared by Heat, Rainfall, Wind and Flood. Each row is one
+// monitor's own annual maxima (NOAA temperature/rain/gust stations, USGS river gauges);
+// rows are never averaged and do not change the main curve or trigger. Row count
+// follows "Stations (n)", capped by the server at 10. A first row repeats the main
+// result at the point, and numbered map pins match the rows.
+const RECORD_KINDS = {
+  // fromTrigger converts the main trigger threshold into the table's unit. Flood has
+  // none: the trigger is water depth at the point, the gauges record river flow.
+  heat: { kind: "heat", endpoint: "/api/heat-stations", title: "Temperature stations: hottest day of each year, 1991–2020", label: "Temperature threshold (°C)",
+    fromTrigger: value => value,
+    linkedHelp: "Uses the intensity above. A heat year counts only when every day has a valid reading, stricter than the other monitor tables.",
+    compareNote: "from the station marked “used for main curve”",
+    format: value => `${formatHazardNumber(Math.round(value * 10) / 10)} °C / ${formatHazardNumber(Math.round((value * 9 / 5 + 32) * 10) / 10)} °F`, round: value => Math.round(value) },
+  rainfall: { kind: "rainfall", title: "Rain gauges: wettest day of each year, 1991–2020", label: "Daily rainfall threshold (mm)",
+    fromTrigger: value => value,
+    linkedHelp: "Uses the intensity above. The main result is NOAA Atlas 14's 24-hour depth; this table compares the same number of mm against calendar-day totals.",
+    compareNote: "NOAA Atlas 14 24-hour rainfall model",
+    format: value => `${formatHazardNumber(Math.round(value * 10) / 10)} mm / ${formatHazardNumber(Math.round(value / 25.4 * 100) / 100)} in`, round: value => Math.round(value) },
+  cyclone: { kind: "wind", title: "Weather stations: strongest sustained wind during tropical storms, 2004–2025", label: "Sustained wind (m/s)",
+    fromTrigger: value => value * 0.514444,
+    linkedHelp: "Uses the intensity above. Like the main result, only tropical storms count: each station's fastest 2-minute sustained wind on days a storm's recorded wind area covered it.",
+    compareNote: "estimated from storm wind areas; the stations below show what was measured",
+    format: value => `${formatHazardNumber(Math.round(value * 1.94384 * 10) / 10)} kn / ${formatHazardNumber(Math.round(value * 10) / 10)} m/s`, round: value => Math.round(value) },
+  // Flood: each NWS gauge is compared with its own official flood stage for the chosen level.
+  flood: { kind: "flood", title: "River gauges (NWS): how often the river reached flood stage", label: "Flood level", levelSelect: true,
+    compareNote: "water depth at your point; the gauges below show how often nearby rivers reached flood stage",
+    ownHelp: "Each gauge has its own official flood stages, set by the National Weather Service. Choose a flood level; each row counts the water years in which that river reached its own stage. Levels come from the linked USGS record.",
+    format: value => `${formatHazardNumber(Math.round(value * 100) / 100)} ft`, round: value => Math.round(value) },
+};
+// Satellite fire: each satellite is a monitor with its own MW record around the point.
+RECORD_KINDS.satellite_fire = { kind: "satellite", endpoint: "/api/satellite-monitors", perSatellite: true,
+  title: "Satellites: strongest fire detection of each year (each satellite separately)", label: "Fire intensity (MW)", compareLabel: "at this fire intensity", emptyPrompt: "a fire intensity above",
+  fromTrigger: value => value,
+  params: () => ({ radius_km: String(satelliteRadiusValue() ?? 25) }),
+  linkedHelp: "Uses the fire intensity and search radius above. Each satellite counts its own years; the main curve uses Suomi NPP only.",
+  compareNote: "from Suomi NPP, the first satellite below",
+  format: value => `${formatHazardNumber(Math.round(value * 100) / 100)} MW`, round: value => Math.round(value) };
+let recordsData = null;
+let recordsConfig = null;
+let recordsPeril = null;
+let recordsMarkers = [];
+let pendingRecords = null;
+const recordsStatus = document.getElementById("records-status");
+const recordsRows = document.getElementById("records-rows");
+const recordsThreshold = document.getElementById("records-threshold");
+recordsThreshold.addEventListener("input", renderStationRecords);
+const recordsLevel = document.getElementById("records-level");
+recordsLevel.addEventListener("change", renderStationRecords);
+const recordsShow = document.getElementById("records-show");
+recordsShow.addEventListener("click", () => {
+  const points = recordsMarkers.map(marker => marker.getLatLng?.()).filter(Boolean);
+  if (points.length && selectedPoint) {
+    map.fitBounds(L.latLngBounds([selectedPoint, ...points]), {padding: [45, 45], maxZoom: 14});
+    document.getElementById("map").scrollIntoView?.({behavior: "smooth", block: "center"});
+  }
+});
+
+function median(values) {
+  if (!values.length) return null;
+  const sorted = [...values].sort((a, b) => a - b), middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+// The heat endpoint predates the shared table; map its rows onto the same shape.
+function normalizeHeatRecords(payload) {
+  return {...payload, kind: "heat", minimum_years: payload.baseline?.minimum_complete_years ?? 20,
+    year_rule: "A calendar year counts only when every day has a valid, unflagged daily maximum temperature.",
+    stations: payload.stations.map(station => {
+      const maxima = Array.isArray(station.annual_maxima_c) ? station.annual_maxima_c : [];
+      return {...station, counted_years: station.complete_years, annual_maxima: maxima, median: median(maxima),
+        highest: station.highest_annual_maximum_c ?? null,
+        period: station.status === "source_unavailable" ? null : {start: payload.baseline?.start_year ?? 1991, end: payload.baseline?.end_year ?? 2020}};
+    })};
+}
+
+function clearStationRecords() {
+  pendingRecords?.abort();
+  pendingRecords = null;
+  recordsData = null;
+  recordsConfig = null;
+  recordsPeril = null;
+  recordsMarkers.forEach(layer => map.removeLayer(layer));
+  recordsMarkers = [];
+  recordsShow.hidden = true;
+  recordsRows.replaceChildren();
+  recordsStatus.textContent = "";
+  recordsThreshold.value = "";
+  document.getElementById("records-frequency-heading").textContent = "Years at or above threshold";
+  document.getElementById("records-notes").replaceChildren();
+  document.getElementById("records-details").hidden = true;
+}
+
+async function loadStationRecords(peril, lat, lng, version) {
+  clearStationRecords();
+  const config = RECORD_KINDS[peril];
+  if (!config) return;
+  recordsConfig = config;
+  recordsPeril = peril;
+  document.getElementById("records-details").hidden = false;
+  document.getElementById("records-summary").textContent = config.title;
+  document.getElementById("records-threshold-label").textContent = config.label;
+  // Heat, rainfall, wind and satellite fire follow the main intensity box; only flood keeps its own.
+  document.getElementById("records-threshold-wrap").hidden = Boolean(config.fromTrigger || config.levelSelect);
+  document.getElementById("records-level-wrap").hidden = !config.levelSelect;
+  document.getElementById("records-threshold-help").textContent = config.fromTrigger ? config.linkedHelp
+    : config.ownHelp;
+  if (!validStationCount()) {
+    recordsStatus.textContent = "Monitor table unavailable: Stations (n) must be an integer from 1 to 50.";
+    return;
+  }
+  const controller = new AbortController();
+  pendingRecords = controller;
+  const current = () => !controller.signal.aborted && version === locationVersion && pendingRecords === controller;
+  const shown = Math.min(Number(stationCount.value), 10);
+  recordsStatus.textContent = config.perSatellite ? "Counting each satellite's detections…" : `Loading records for up to ${shown} nearby ${shown === 1 ? "monitor" : "monitors"}…`;
+  try {
+    const params = new URLSearchParams({ lat: String(lat), lon: String(lng), ...(config.perSatellite ? {} : { n: stationCount.value }), ...(config.params?.() || {}) });
+    if (!config.endpoint) params.set("kind", config.kind);
+    const response = await fetch(`${config.endpoint || "/api/station-records"}?${params}`, { signal: controller.signal });
+    if (!current()) return;
+    if (response.status === 404) throw new Error("Restart the Python server to enable monitor tables.");
+    let payload = await response.json();
+    if (!current()) return;
+    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+    if (!Array.isArray(payload.stations) || (config.kind === "heat" ? payload.peril !== "heat" : payload.kind !== config.kind)) throw new Error("Unexpected monitor record response.");
+    if (config.kind === "heat") payload = normalizeHeatRecords(payload);
+    recordsData = payload;
+    const first = payload.stations.find(station => station.status === "available");
+    if (!config.fromTrigger && !config.levelSelect) recordsThreshold.value = first && Number.isFinite(first.median) ? String(config.round(first.median)) : "";
+    const notes = document.getElementById("records-notes");
+    for (const text of [payload.year_rule, ...(payload.notes || [])]) {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = text;
+      notes.append(paragraph);
+    }
+    for (const [index, station] of payload.stations.entries()) {
+      if (!Number.isFinite(station.latitude) || !Number.isFinite(station.longitude)) continue;
+      const popup = document.createElement("span");
+      popup.textContent = `${index + 1}. ${station.name} (${station.id}) · ${station.distance_km.toFixed(2)} km`;
+      const options = L.divIcon ? {icon: L.divIcon({className: "", html: `<span class="monitor-pin">${index + 1}</span>`, iconSize: [24, 24], iconAnchor: [12, 12]}), title: popup.textContent} : {};
+      recordsMarkers.push(L.marker({lat: station.latitude, lng: station.longitude}, options).addTo(map).bindPopup(popup));
+    }
+    recordsShow.hidden = !recordsMarkers.length;
+    renderStationRecords();
+  } catch (error) {
+    if (error.name !== "AbortError" && current()) recordsStatus.textContent = `Monitor table unavailable: ${error.message}`;
+  } finally {
+    if (pendingRecords === controller) pendingRecords = null;
+  }
+}
+
+function tableCell(value) {
+  const cell = document.createElement("td");
+  cell.textContent = value;
+  return cell;
+}
+
+// Expandable full curve for one monitor: every observed annual maximum and the share
+// of counted years at or above it (an empirical step distribution, no interpolation).
+function monitorCurve(station, config) {
+  const maxima = station.annual_maxima || [];
+  const details = document.createElement("details");
+  details.className = "monitor-curve";
+  const summary = document.createElement("summary");
+  summary.textContent = `Full curve (${maxima.length} ${maxima.length === 1 ? "year" : "years"})`;
+  const table = document.createElement("table");
+  const head = document.createElement("tr");
+  for (const label of ["At least", "Share of years"]) {
+    const cell = document.createElement("th");
+    cell.textContent = label;
+    head.append(cell);
+  }
+  table.append(head);
+  for (const value of [...new Set(maxima)].sort((a, b) => b - a)) {
+    const hits = maxima.filter(item => item >= value).length;
+    const row = document.createElement("tr");
+    row.append(tableCell(config.format(value)), tableCell(`${formatHazardNumber(Math.round(1000 * hits / maxima.length) / 10)}% (${hits}/${maxima.length})`));
+    table.append(row);
+  }
+  details.append(summary, table);
+  return details;
+}
+
+function renderStationRecords() {
+  const data = recordsData, config = recordsConfig;
+  if (!data || !config) return;
+  recordsRows.replaceChildren();
+  const source = config.fromTrigger ? triggerThreshold : recordsThreshold;
+  const threshold = config.fromTrigger ? config.fromTrigger(source.valueAsNumber) : source.valueAsNumber;
+  const hasThreshold = source.value.trim() !== "" && Number.isFinite(threshold) && threshold >= 0;
+  const level = config.levelSelect ? recordsLevel.value : null;
+  const levelName = level ? recordsLevel.selectedOptions?.[0]?.textContent || `${level} flood stage` : "";
+  document.getElementById("records-frequency-heading").textContent = level
+    ? `Years reaching ${levelName.charAt(0).toLowerCase()}${levelName.slice(1)}`
+    : hasThreshold
+    ? `Years with maximum ≥ ${config.format(threshold)}`
+    : `Years at or above threshold (enter ${config.emptyPrompt || (config.fromTrigger ? "an intensity above" : "a threshold")})`;
+  const requested = data.requested_stations, listed = data.stations.length;
+  recordsStatus.textContent = config.perSatellite
+    ? (listed ? `${listed} satellites, each counted separately within ${formatHazardNumber(data.radius_km)} km of your point. Stations (n) does not apply. Rows are not averaged and do not change the result above.`
+      : data.reason || "Satellite archives are unavailable.")
+    : !listed
+    ? `No monitor with at least ${data.minimum_years} years of records is within ${data.radius_km} km. This does not imply low hazard.`
+    : `${listed} of ${data.stations_within_radius} ${data.stations_within_radius === 1 ? "monitor" : "monitors"} within ${data.radius_km} km, nearest first` +
+      `${requested > data.station_limit ? ` (n = ${requested}; this table is capped at ${data.station_limit})` : listed < requested ? ` (n = ${requested}; no more monitors within ${data.radius_km} km)` : ""}. ` +
+      "Each row is that monitor's own record; rows are not averaged and do not change the result above.";
+  // Comparison row: the main result at the selected point, next to the monitors.
+  const probability = document.getElementById("trigger-probability").textContent.trim();
+  const compare = document.createElement("tr");
+  compare.className = "compare-row";
+  compare.append(tableCell(`Your point · main result (${disasterTypes[recordsPeril]?.source || "model"})`), tableCell("—"), tableCell("—"), tableCell("—"), tableCell("—"),
+    tableCell(probability && probability !== "—" ? `${probability} chance per year ${config.compareLabel || "at this intensity"} · ${config.compareNote}` : `— (set ${config.emptyPrompt || "an intensity above"})`));
+  recordsRows.append(compare);
+  for (const [index, station] of data.stations.entries()) {
+    const row = document.createElement("tr");
+    const name = document.createElement("td");
+    const extras = [];
+    if (station.period) extras.push(`${station.period.start}–${station.period.end}`);
+    if (Number.isFinite(station.years_with_detection)) extras.push(`detections in ${station.years_with_detection} of ${station.counted_years} years`);
+    if (station.overpass) extras.push(`passes ${station.overpass}`);
+    if (level && Number.isFinite(station.flood_stages?.[level])) extras.push(`${level} flood stage ${formatHazardNumber(station.flood_stages[level])} ft`);
+    if (station.datum_warning) extras.push(`⚠ NWS and USGS levels differ by up to ${formatHazardNumber(station.datum_check_ft)} ft for the same floods: part of the record may use a different reference height, so treat this row with caution`);
+    for (const [label, count] of Object.entries(station.flagged_peaks || {})) extras.push(`${count} ${count === 1 ? "peak" : "peaks"} coded ${label}`);
+    if (station.rejected_implausible_days) extras.push(`${station.rejected_implausible_days} implausible readings removed`);
+    if (Number.isFinite(station.storm_years)) extras.push(`tropical storm in ${station.storm_years} ${station.storm_years === 1 ? "year" : "years"}`);
+    if (station.storm_years_missing_readings) extras.push(`${station.storm_years_missing_readings} storm ${station.storm_years_missing_readings === 1 ? "year" : "years"} left out: no reading during the storm`);
+    const used = config.kind === "heat" && historicalHeatData?.station?.id === station.id;
+    name.textContent = `${index + 1}. ${station.name}${config.perSatellite ? "" : ` (${station.id})`}${used ? " — used for main curve" : ""}${extras.length ? ` · ${extras.join("; ")}` : ""}`;
+    if ((station.annual_maxima || []).length) name.append(monitorCurve(station, config));
+    row.append(name, tableCell(Number.isFinite(station.distance_km) ? station.distance_km.toFixed(2) : "—"), tableCell(station.counted_years ?? "—"),
+      tableCell(Number.isFinite(station.median) ? config.format(station.median) : "—"),
+      tableCell(Number.isFinite(station.highest) ? config.format(station.highest) : "—"),
+      tableCell(level
+        ? (Number.isFinite(station.flood_stages?.[level])
+          ? stationFrequency(station, station.annual_maxima, true, station.flood_stages[level], data.minimum_years)
+          : (station.status === "source_unavailable" ? station.reason : `No ${level} stage set for this gauge`))
+        : stationFrequency(station, station.annual_maxima, hasThreshold, threshold, data.minimum_years)));
+    recordsRows.append(row);
+  }
+}
+
+// % of a station's counted years at or above the threshold. Records shorter than the
+// app's 20-year minimum still get a %, but labelled unreliable: with few years each
+// year is a large step and a 0% is likely even for events that do happen.
+function stationFrequency(station, maxima, hasThreshold, threshold, minimumYears) {
+  const usable = Array.isArray(maxima) ? maxima : [];
+  const short = station.status === "insufficient_years";
+  if ((station.status !== "available" && !short) || (short && !usable.length)) return station.reason || "Unavailable";
+  if (!hasThreshold) return short ? `— (short record: ${usable.length} ${usable.length === 1 ? "year" : "years"} — unreliable)` : "—";
+  const hits = usable.filter(value => value >= threshold).length;
+  const text = `${formatHazardNumber(Math.round(1000 * hits / usable.length) / 10)}% (${hits}/${usable.length} years)`;
+  return short ? `${text} ⚠ Short record: under ${minimumYears} years — unreliable` : text;
+}
 
 function resetHazardView(message) {
   resetTrigger(message, selectedPoint ? "loading" : "idle");
@@ -558,6 +796,8 @@ function resetHazardView(message) {
   document.getElementById("heat-history-details").hidden = true;
   document.getElementById("heat-history-rows").replaceChildren();
   document.getElementById("export-heat").disabled = true;
+  clearStationRecords();
+  renderSatelliteYears(null);
   document.getElementById("intensity-value").textContent = "—";
   document.getElementById("intensity-preview-value").textContent = "—";
   document.getElementById("intensity-description").textContent = "";
@@ -565,7 +805,7 @@ function resetHazardView(message) {
 }
 
 function isFireHazard(peril) {
-  return ["nearest_fire", "fireline_intensity"].includes(peril);
+  return ["nearest_fire", "fireline_intensity", "satellite_fire"].includes(peril);
 }
 
 function configureDisasterView(peril) {
@@ -574,6 +814,9 @@ function configureDisasterView(peril) {
   document.getElementById("nearest-fire-panel").hidden = !history;
   const satelliteFire = isFireHazard(peril);
   document.getElementById("satellite-fire-panel").hidden = !satelliteFire;
+  document.getElementById("trigger-distance-control").hidden = triggerDistanceHelp.hidden = !history;
+  // Enabled once nearby-fire records load, alongside the size threshold.
+  triggerDistance.disabled = true;
   if (!satelliteFire) globalThis.SatelliteFire?.clear();
   document.getElementById("trigger-workspace").classList.toggle("history-mode", history);
   if (!history) {
@@ -582,28 +825,45 @@ function configureDisasterView(peril) {
   }
   const intensity = peril === "fireline_intensity";
   document.getElementById("heat-observation-panel").hidden = peril !== "heat";
-  document.getElementById("trigger-heading").textContent = intensity ? "Explore fireline intensity" : "Set your trigger and payout";
+  document.getElementById("trigger-heading").textContent = intensity ? "2. Explore fireline intensity" : "2. Set an intensity and see the chance";
   document.getElementById("hazard-selection-description").textContent = intensity
     ? "Select a Texas location to sample the native fireline-intensity model."
-    : "Use a government model’s supported levels for your selected location.";
+    : "Enter any intensity; probabilities are estimated from a government model’s levels for your selected location.";
   if (history) {
-    document.getElementById("trigger-heading").textContent = "Set a nearby-fire trigger and payout";
-    document.getElementById("hazard-selection-description").textContent = "Select a point to see annual nearby-fire frequencies within 5, 10 and 20 km, plus the nearest recorded wildfire. Trigger levels are reported fire sizes within the radius chosen in the fire panel. Results check for updates every 5 minutes while this page is visible.";
+    document.getElementById("trigger-heading").textContent = "2. Set a fire size and see the chance";
+    document.getElementById("hazard-selection-description").textContent = "Select a point to see annual nearby-fire frequencies within 5, 10 and 20 km, plus the nearest recorded wildfire. Triggers combine two measures: a reported fire size (acres) and a distance from the point (any value up to 20 km). Results check for updates every 5 minutes while this page is visible.";
+  }
+  // Satellite fire is set by fire intensity (fire radiative power, MW) rather than a generic "trigger".
+  const intensityInput = peril === "satellite_fire";
+  // Wording: hazard "intensity" (depth, shaking, wind speed, temperature…). Nearby fire is measured in acres, a size.
+  const nearbyFire = peril === "nearest_fire";
+  document.getElementById("trigger-threshold-name").textContent = intensityInput ? "Fire intensity" : nearbyFire ? "Fire size" : "Intensity";
+  document.getElementById("trigger-payout-name").textContent = intensityInput ? "Payout if a fire of at least this intensity is detected (USD)"
+    : nearbyFire ? "Payout if a fire of at least this size is reported (USD)" : "Payout if this intensity is reached (USD)";
+  document.getElementById("payout-help").textContent = intensityInput
+    ? "The fixed payout in a year when a satellite detects a fire at or above this intensity within the radius."
+    : "The fixed payout in a year when the selected intensity is reached or exceeded.";
+  if (intensityInput) {
+    document.getElementById("trigger-heading").textContent = "2. Set a fire intensity and see the chance";
+    document.getElementById("hazard-selection-description").textContent = "Select a point to count NASA satellite fire detections within the chosen radius, 2013–2025. Enter a fire intensity, measured as fire radiative power (MW); the chance is the share of years with a detection at least that intense.";
   }
   if (peril === "heat") document.getElementById("hazard-selection-description").textContent = "Select a point to load historical annual heat exceedance from a qualifying NOAA station. First lookup downloads the historical station inventory.";
   document.getElementById("intensity-preview").hidden = !intensity;
   document.getElementById("hazard-intensity").hidden = !intensity;
   document.getElementById("hazard-curve-layout").hidden = intensity;
   document.getElementById("hazard-axis-note").hidden = intensity;
-  for (const id of ["trigger-level-control", "trigger-payout-control", "payout-help", "trigger-result", "comparison-panel"]) {
+  for (const id of ["trigger-level-control", "trigger-payout-control", "payout-help", "trigger-result"]) {
     document.getElementById(id).hidden = intensity;
   }
   document.getElementById("export-area").hidden = intensity || history || !selectedArea;
   resolvedDisaster = peril === "auto" ? null : peril;
   document.getElementById("flood-panel").hidden = peril !== "flood";
+  // Section 5 only holds live readings (Heat: current station reports; wildfire: satellite detections).
+  document.getElementById("context-section").hidden = !(peril === "heat" || isFireHazard(peril));
   hazardPanel.hidden = peril === "flood" || history;
   if (history && selectedArea) areaSummary.textContent = "Nearest recorded wildfire is measured from the selected area center.";
   document.getElementById("site-class-control").hidden = peril !== "earthquake";
+  document.getElementById("satellite-radius-control").hidden = document.getElementById("satellite-radius-help").hidden = peril !== "satellite_fire";
   document.getElementById("metric-summary").textContent = peril === "auto" ? "Choose most relevant · Select a location to compare hazards" : `${disasterSelect.value === "auto" ? "Automatically selected: " : ""}${type.name} · ${type.metric} (${type.unit}) · ${type.source}`;
   document.getElementById("location-note").textContent = type.note;
   document.getElementById("hazard-heading").textContent = `${type.name} ${intensity ? "hazard" : "hazard curve"}`;
@@ -662,27 +922,56 @@ globalThis.FireProximity?.onCurve?.((detail, message) => {
   if (disasterSelect.value !== "nearest_fire") return;
   if (!detail) {
     resetTrigger(message || "Nearby-fire trigger levels are unavailable.", "unavailable");
+    // With no fire records at all, the distance is as unusable as the size. If records
+    // loaded and only this distance lacks a curve, keep it editable to pick another.
+    triggerDistance.disabled = !globalThis.FireProximity?.loaded;
+    renderStationRecords();
     return;
   }
+  triggerDistance.disabled = false;
   const { curve, baseline } = detail;
-  const preferred = triggerData?.peril === "nearest_fire" && triggerSelect.value !== "" ? triggerLevels[Number(triggerSelect.value)]?.severity : null;
+  const km = formatHazardNumber(curve.radius_km);
+  if (triggerDistance.valueAsNumber !== curve.radius_km) triggerDistance.value = String(curve.radius_km);
+  triggerDistance.setAttribute("aria-invalid", "false");
+  triggerDistanceHelp.textContent = DISTANCE_HELP;
   loadTriggerLevels({
-    status: "available", peril: "nearest_fire", radius_km: curve.radius_km, preferred_severity: preferred,
-    metric: `Reported fire size within ${curve.radius_km} km`, unit: "acres",
+    status: "available", peril: "nearest_fire", radius_km: curve.radius_km,
+    metric: `Reported fire size within ${km} km`, unit: "acres",
     source_name: detail.source_name, source_url: detail.source_url,
     baseline_label: `${baseline.start_year}–${baseline.end_year}`,
-    reason: `No reported fire size within ${curve.radius_km} km has an observed year. Zero observed years does not mean zero future risk.`,
+    reason: `No reported fire within ${km} km has an observed year. Zero observed years does not mean zero future risk; try a larger distance.`,
     // Never-observed sizes are excluded rather than priced at zero.
     points: curve.points.filter(point => point.empirical_years_pct > 0)
       .map(point => ({ severity: point.min_acres, frequency_pct: point.empirical_years_pct })),
   });
 });
+// Custom search radius, 0.5–100 km. "change" fires on Enter or leaving the box, so the
+// curve is not reloaded on every keystroke. An invalid value leaves the last curve alone.
+const satelliteRadius = document.getElementById("satellite-radius");
+const SATELLITE_RADIUS_HELP = document.getElementById("satellite-radius-help").textContent;
+function satelliteRadiusValue() {
+  const value = satelliteRadius.valueAsNumber;
+  return satelliteRadius.value.trim() !== "" && Number.isFinite(value) && value >= 0.5 && value <= 100 ? value : null;
+}
+satelliteRadius.addEventListener("change", () => {
+  const valid = satelliteRadiusValue() !== null;
+  satelliteRadius.setAttribute("aria-invalid", String(!valid));
+  document.getElementById("satellite-radius-help").textContent = valid ? SATELLITE_RADIUS_HELP : "Enter a radius from 0.5 to 100 km.";
+  if (valid && selectedPoint && resolvedDisaster === "satellite_fire") selectLocation(selectedPoint);
+});
 siteClassSelect.addEventListener("change", () => {
   if (selectedPoint && resolvedDisaster === "earthquake") selectLocation(selectedPoint);
 });
+// Second wildfire trigger measure: distance (km). The fire panel recomputes the size curve for it.
+triggerDistance.addEventListener("input", () => {
+  if (triggerDistance.value.trim() === "") return;
+  const error = globalThis.FireProximity?.setDistance(triggerDistance.valueAsNumber);
+  triggerDistance.setAttribute("aria-invalid", String(Boolean(error)));
+  triggerDistanceHelp.textContent = error || DISTANCE_HELP;
+});
 
 
-async function loadSelectedHazard(lat, lng, version, preferredSeverity = null) {
+async function loadSelectedHazard(lat, lng, version) {
   const peril = disasterSelect.value;
   let type = disasterTypes[peril];
   if (peril === "nearest_fire") {
@@ -699,6 +988,10 @@ async function loadSelectedHazard(lat, lng, version, preferredSeverity = null) {
   status.textContent = peril === "auto" ? "Choosing a relevant disaster for this location…" : `Loading ${type.name.toLowerCase()} model…`;
   try {
     const params = new URLSearchParams({ peril, lat: String(lat), lon: String(lng), site_class: siteClassSelect.value });
+    if (peril === "satellite_fire" && !selectedArea) {
+      if (satelliteRadiusValue() === null) satelliteRadius.value = "25";  // never send a radius the box doesn't show
+      params.set("radius_km", String(satelliteRadiusValue()));
+    }
     if (selectedArea) {
       params.set("south", selectedArea.getSouth());
       params.set("west", selectedArea.getWest());
@@ -749,22 +1042,13 @@ async function loadSelectedHazard(lat, lng, version, preferredSeverity = null) {
       }
       if (data.area) areaSummary.textContent = data.reason;
     }
+    if (!data.area && RECORD_KINDS[data.peril]) loadStationRecords(data.peril, lat, lng, version);
+    if (data.peril === "satellite_fire") renderSatelliteYears(data);
     if (data.area && !["fireline_intensity", "heat"].includes(data.peril)) {
       document.getElementById("hazard-heading").textContent = `${type.name} · average sampled exceedance curve`;
       hazardPanel.hidden = false;
       document.getElementById("coverage-column").hidden = false;
       areaSummary.textContent = `Selected area centroid: ${data.area.centroid.latitude.toFixed(6)}, ${data.area.centroid.longitude.toFixed(6)}. ${data.area.available_samples || 0}/${data.area.sample_count} grid locations have usable curves. Each curve point averages available probabilities at the same severity. Change the trigger to inspect all sample values below. This uses a 5×5 grid inside and on the boundary, not every raster cell. Automatic hazard selection uses county context at the area centroid.`;
-    }
-    // Points and areas both open with a trigger selected, so the probability shows immediately:
-    // keep the user's previous level when it still exists, otherwise the most frequent level.
-    if (triggerData === data && triggerLevels.length) {
-      let index = triggerLevels.findIndex(level => level.severity === preferredSeverity);
-      if (index < 0) {
-        index = triggerLevels.reduce((best, level, i, levels) => level.maximum > levels[best].maximum ? i : best, 0);
-        triggerHelp.textContent += ` Initially selected the level with the highest ${data.area ? "average " : ""}probability; you can change it.`;
-      }
-      triggerSelect.value = String(index);
-      renderTriggerResult();
     }
     if (data.peril === "flood") {
       // Keep the trigger tied to unedited government data, independently of
@@ -843,6 +1127,28 @@ async function loadSelectedHazard(lat, lng, version, preferredSeverity = null) {
     }
   } finally {
     if (pendingHazardRequest === controller) pendingHazardRequest = null;
+  }
+}
+
+// Year-by-year satellite record behind the satellite-fire curve: each year counts once,
+// at its strongest detection within the radius. Years without detections stay visible.
+function renderSatelliteYears(data) {
+  const details = document.getElementById("satellite-years-details");
+  const rows = document.getElementById("satellite-years-rows");
+  rows.replaceChildren();
+  const years = Array.isArray(data?.annual_detections) ? data.annual_detections : [];
+  details.hidden = !years.length;
+  if (!years.length) return;
+  const active = years.filter(year => year.detections > 0).length;
+  document.getElementById("satellite-years-context").textContent = `${active} of ${years.length} years had at least one presumed vegetation-fire detection within ${data.radius_km} km (Suomi NPP VIIRS only). Dates are the satellite overpass date in UTC.`;
+  for (const year of years) {
+    const row = document.createElement("tr");
+    for (const value of [year.year, year.detections.toLocaleString(), Number.isFinite(year.max_frp_mw) ? formatHazardNumber(year.max_frp_mw) : "—", year.max_date || "—"]) {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.append(cell);
+    }
+    rows.append(row);
   }
 }
 
@@ -1084,7 +1390,7 @@ function csvCell(value) {
 }
 
 document.getElementById("export-area").addEventListener("click", () => {
-  if (!triggerData?.area || triggerSelect.value === "") return;
+  if (!triggerData?.area || !activeTriggerLevel()) return;
   const area = triggerData.area;
   const header = ["hazard", "severity", "unit", "row_type", "latitude", "longitude", "exceedance_pct", "sample_method", "frequency_basis",
     "south", "west", "north", "east", "area_centroid_latitude", "area_centroid_longitude",
@@ -1182,7 +1488,6 @@ async function loadTwdbDepths(lat, lng, version) {
 
 async function selectLocation(latlng) {
   const { lat, lng } = latlng;
-  const preferredSeverity = triggerSelect.value === "" ? null : triggerLevels[Number(triggerSelect.value)]?.severity ?? null;
   pendingRequest?.abort();
   pendingDepthRequest?.abort();
   pendingHazardRequest?.abort();
@@ -1208,7 +1513,7 @@ async function selectLocation(latlng) {
   results.replaceChildren();
   marker.bindPopup(`${disasterTypes[disasterSelect.value].name}: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
   loadHazardStation(lat, lng, version, disasterSelect.value);
-  loadSelectedHazard(lat, lng, version, preferredSeverity);
+  loadSelectedHazard(lat, lng, version);
   if (disasterSelect.value === "heat") loadHeatStations(lat, lng, version);
   if (isFireHazard(disasterSelect.value)) globalThis.SatelliteFire?.load(map, { lat, lng }, Boolean(selectedArea));
 }

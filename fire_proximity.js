@@ -47,18 +47,55 @@ globalThis.FireProximity = (() => {
     status.textContent = message;
   }
 
+  // Trigger distance: any value above 0 up to MAX_DISTANCE km. Every fire within that distance is already
+  // in the response, so frequencies are computed directly, never interpolated between 5, 10 and 20 km.
+  const MAX_DISTANCE = 20, CURVE_ACRES = [0.1, 0.3, 1, 3, 10, 30, 100, 300, 1000, 3000, 10000, 30000, 100000];
+  let distance = 10;
+
+  // Mirrors distance_curve in fire_proximity.py. rows: [year, distance_km, reported_acres].
+  function distanceCurve(rows, totalYears, radiusKm) {
+    const fires = rows.filter(row => row[1] <= radiusKm + 1e-8);
+    const points = [];
+    for (const acres of CURVE_ACRES) {
+      const hits = fires.filter(row => row[2] >= acres);
+      const rate = hits.length / totalYears, probability = 1 - Math.exp(-rate);
+      points.push({min_acres: acres, fires_at_or_above: hits.length, expected_annual_exceedances: rate,
+        annual_probability_pct: probability * 100, empirical_years_pct: new Set(hits.map(row => row[0])).size / totalYears * 100,
+        return_period_years: probability > 0 ? 1 / probability : null});
+      if (!hits.length) break;
+    }
+    return {radius_km: radiusKm, fire_count: fires.length, total_years: totalYears,
+      largest_reported_acres: fires.length ? Math.max(...fires.map(row => row[2])) : null,
+      expected_annual_reported_acres: fires.reduce((sum, row) => sum + row[2], 0) / totalYears, points};
+  }
+
+  function curveAt(radiusKm) {
+    const sized = data?.size_exceedance?.sized_fires;
+    if (sized && Array.isArray(sized.rows)) return distanceCurve(sized.rows, data.baseline.year_count, radiusKm);
+    // Older servers only publish 5, 10 and 20 km curves.
+    return data?.size_exceedance?.area_exceedance?.curves?.find(item => item.radius_km === radiusKm) || null;
+  }
+
   function selectedRadius() {
     if (!data || !selection) return;
-    const selected = data.frequencies.find(item => item.radius_km === Number(radius.value));
-    if (!selected) return;
+    const yearsWithFire = data.annual_records.filter(row => Number.isFinite(row.nearest_distance_within_20_km) &&
+      row.nearest_distance_within_20_km <= distance + 1e-8).length, total = data.baseline.year_count;
     if (ring) map.removeLayer(ring);
-    ring = L.circle(selection, { radius: selected.radius_km * 1000, color: "#2563eb", weight: 2, fillColor: "#60a5fa", fillOpacity: 0.08, interactive: false }).addTo(map);
-    document.getElementById("fire-proximity-value").textContent = `${selected.frequency_pct.toFixed(1)}%`;
-    document.getElementById("fire-proximity-calculation").textContent = `${selected.years_with_fire} of ${selected.total_years} baseline years had at least one reported wildfire within ${selected.radius_km} km of ${selection.area ? "the area center" : "your point"}. Each year counts once.`;
-    for (const row of rows.children) row.dataset.selected = String(row.dataset.radius === radius.value);
-    renderCurve(selected.radius_km);
-    notifyCurve(data.size_exceedance?.area_exceedance?.curves?.find(item => item.radius_km === selected.radius_km) || null,
-      "Burned-area trigger levels are unavailable for this radius.");
+    ring = L.circle(selection, { radius: distance * 1000, color: "#2563eb", weight: 2, fillColor: "#60a5fa", fillOpacity: 0.08, interactive: false }).addTo(map);
+    if ([5, 10, 20].includes(distance)) radius.value = String(distance);
+    document.getElementById("fire-proximity-value").textContent = `${(yearsWithFire / total * 100).toFixed(1)}%`;
+    document.getElementById("fire-proximity-calculation").textContent = `${yearsWithFire} of ${total} baseline years had at least one reported wildfire within ${number(distance, 2)} km of ${selection.area ? "the area center" : "your point"}. Each year counts once.`;
+    for (const row of rows.children) row.dataset.selected = String(Number(row.dataset.radius) === distance);
+    renderCurve(distance);
+    notifyCurve(curveAt(distance), `Burned-area trigger levels are unavailable for ${number(distance, 2)} km. Restart the Python server to use distances other than 5, 10 and 20 km.`);
+  }
+
+  // Returns an error message, or null when the distance was applied.
+  function setDistance(value) {
+    if (!Number.isFinite(value) || value <= 0 || value > MAX_DISTANCE) return `Enter a distance above 0 and up to ${MAX_DISTANCE} km.`;
+    distance = value;
+    selectedRadius();
+    return null;
   }
 
   function curveSVG(points) {
@@ -86,13 +123,13 @@ globalThis.FireProximity = (() => {
   function renderCurve(distance) {
     curveRows.replaceChildren();
     curveChart.replaceChildren();
-    const curve = data?.size_exceedance?.area_exceedance?.curves?.find(item => item.radius_km === distance);
+    const curve = curveAt(distance);
     const summary = document.getElementById("fire-proximity-curve-summary");
     if (!curve || !Array.isArray(curve.points) || !curve.points.length) { summary.textContent = "Burned-area exceedance is unavailable."; return; }
-    document.getElementById("fire-proximity-curve-caption").textContent = `Reported fires of at least each size within ${distance} km, ${data.baseline.start_year}–${data.baseline.end_year}`;
+    document.getElementById("fire-proximity-curve-caption").textContent = `Reported fires of at least each size within ${number(distance, 2)} km, ${data.baseline.start_year}–${data.baseline.end_year}`;
     summary.textContent = curve.fire_count
-      ? `Within ${distance} km: ${number(curve.fire_count)} reported fires, about ${number(curve.expected_annual_reported_acres, 1)} reported acres per year on average. Largest: ${number(curve.largest_reported_acres, 1)} acres.`
-      : `No reported fires with a size within ${distance} km.`;
+      ? `Within ${number(distance, 2)} km: ${number(curve.fire_count)} reported fires, about ${number(curve.expected_annual_reported_acres, 1)} reported acres per year on average. Largest: ${number(curve.largest_reported_acres, 1)} acres.`
+      : `No reported fires with a size within ${number(distance, 2)} km.`;
     for (const point of curve.points) {
       const row = document.createElement("tr");
       cells(row, [`${number(point.min_acres, 1)} acres`, number(point.fires_at_or_above), point.expected_annual_exceedances.toFixed(3),
@@ -206,7 +243,7 @@ globalThis.FireProximity = (() => {
     }
   }
 
-  radius.addEventListener("change", selectedRadius);
+  radius.addEventListener("change", () => setDistance(Number(radius.value)));
   refresh.addEventListener("click", request);
   fit.addEventListener("click", () => { if (ring) map.fitBounds(ring.getBounds(), {padding: [35, 35]}); });
   exportButton.addEventListener("click", () => {
@@ -231,7 +268,7 @@ globalThis.FireProximity = (() => {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
   document.addEventListener("visibilitychange", () => { if (!document.hidden && selection && !controller) request(); });
-  return {clear, onCurve(listener) { curveListener = listener; }, load(leafletMap, point, area = false) {
+  return {clear, setDistance, maxDistance: MAX_DISTANCE, get distance() { return distance; }, get loaded() { return data !== null; }, onCurve(listener) { curveListener = listener; }, load(leafletMap, point, area = false) {
     clear();
     map = leafletMap;
     selection = {lat: point.lat, lng: point.lng, area};

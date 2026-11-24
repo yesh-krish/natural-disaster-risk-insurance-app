@@ -88,6 +88,79 @@ class APIV1Tests(unittest.TestCase):
         zero = comparison(source, Decimal("0"))
         self.assertTrue(all(row["expected_annual_contribution_usd"] == {"minimum": 0, "maximum": 0} for row in zero["comparisons"]))
 
+    def test_custom_threshold_interpolates_extrapolates_and_validates(self):
+        source = curve("earthquake")  # levels 1 -> 10%, 3 -> 1%
+        with patch("api_v1.disaster_at", return_value=source):
+            status, payload = dispatch("/api/v1/trigger-comparisons/earthquake", "lat=29&lon=-98&payout_usd=50000&threshold=2")
+        self.assertEqual(status, 200)
+        custom = payload["data"]["custom_trigger"]
+        self.assertEqual(custom["method"], "interpolated")
+        self.assertAlmostEqual(custom["frequency_pct"]["minimum"], 10 ** 0.5)
+        self.assertEqual(custom["expected_annual_contribution_usd"]["minimum"], 1581.14)
+        self.assertEqual(custom["basis_severities"], [1, 3])
+        self.assertEqual([row["severity"] for row in payload["data"]["comparisons"]], [1, 3], "rows stay source-only")
+        self.assertEqual(payload["meta"]["request"]["threshold"], 2)
+        self.assert_contract(payload, "/api/v1/trigger-comparisons/{peril}")
+        with patch("api_v1.disaster_at", return_value=source):
+            _, payload = dispatch("/api/v1/trigger-comparisons/earthquake", "lat=29&lon=-98&payout_usd=50000&threshold=7")
+        custom = payload["data"]["custom_trigger"]
+        self.assertEqual((custom["method"], custom["direction"]), ("extrapolated", "above"))
+        self.assertAlmostEqual(custom["frequency_pct"]["minimum"], 0.01)
+        self.assertEqual(custom["reach_segment_widths"], 2)
+        self.assertIn("highly uncertain", custom["note"])
+        self.assert_contract(payload, "/api/v1/trigger-comparisons/{peril}")
+        with patch("api_v1.disaster_at", return_value=source):
+            _, payload = dispatch("/api/v1/trigger-comparisons/earthquake", "lat=29&lon=-98&payout_usd=50000&threshold=3")
+        self.assertEqual((payload["data"]["custom_trigger"]["method"], payload["data"]["custom_trigger"]["estimate"]), ("source", False))
+        with patch("api_v1.disaster_at", return_value=source):
+            _, payload = dispatch("/api/v1/trigger-comparisons/earthquake", "lat=29&lon=-98&payout_usd=50000")
+        self.assertNotIn("custom_trigger", payload["data"])
+        missing = {"peril": "flood", "status": "unavailable", "points": [], "reason": "No installed tile"}
+        with patch("api_v1.disaster_at", return_value=missing):
+            status, payload = dispatch("/api/v1/trigger-comparisons/flood", "lat=0&lon=0&payout_usd=1&threshold=1")
+        self.assertEqual(status, 200)
+        self.assertEqual(payload["data"]["custom_trigger"]["status"], "unavailable")
+        self.assert_contract(payload, "/api/v1/trigger-comparisons/{peril}")
+        with patch("api_v1.disaster_at") as provider:
+            for bad in ["-1", "nan", "abc", "inf"]:
+                self.assertEqual(dispatch("/api/v1/trigger-comparisons/flood", f"lat=0&lon=0&payout_usd=1&threshold={bad}")[0], 400, bad)
+            self.assertEqual(dispatch("/api/v1/hazards/flood", "lat=0&lon=0&threshold=1")[0], 400, "threshold is for comparisons only")
+        provider.assert_not_called()
+
+    def test_custom_threshold_matches_map_javascript(self):
+        import shutil, subprocess
+        from custom_trigger import custom_trigger_level
+        if not shutil.which("node"):
+            self.skipTest("node is not installed")
+        cases = [
+            ([[1, 10, 10], [2, 1, 1], [4, .1, .1]], [0, .5, 1.5, 2, 3, 6, 10]),
+            ([[1, 4, 16], [3, 1, 1]], [0, 2, 5]),
+            ([[1, 2, 2], [3, 0, 0]], [0.5, 2, 5]),
+            ([[1, 5, 5], [2, 5, 5]], [0, 3]),
+            ([[1, 5, 5]], [1, 3]),
+            # Observed-record (wildfire) curves: bounded past the data.
+            ([[0.1, 9.09, 9.09], [0.3, 6.06, 6.06], [1, 6.06, 6.06], [3, 3.03, 3.03]], [0.05, 2, 3, 100], False),
+            ([[1, 5, 5]], [1, 3], False),
+        ]
+        script = ("const {hazardCustomTriggerLevel: f} = require('./hazard_trigger.js');"
+                  "const cases = JSON.parse(process.argv[1]);"
+                  "console.log(JSON.stringify(cases.map(([levels, xs, extrapolate = true]) => xs.map(x => f(levels.map(([severity, minimum, maximum]) => ({severity, minimum, maximum})), x, {extrapolate})))))")
+        js = json.loads(subprocess.run(["node", "-e", script, json.dumps(cases)], capture_output=True, text=True, check=True,
+                                       cwd=Path(__file__).resolve().parents[1]).stdout)
+        for case, js_results in zip(cases, js):
+            levels, xs, extrapolate = (*case, True)[:3]
+            levels = [{"severity": a, "minimum": b, "maximum": c} for a, b, c in levels]
+            for x, expected in zip(xs, js_results):
+                with self.subTest(levels=levels, threshold=x, extrapolate=extrapolate):
+                    actual = custom_trigger_level(levels, x, extrapolate)
+                    self.assertEqual("error" in actual, "error" in expected)
+                    if "error" in actual:
+                        continue
+                    self.assertEqual(actual["method"], expected["method"])
+                    self.assertEqual(actual["bound"], expected.get("bound"))
+                    self.assertAlmostEqual(actual["minimum"], expected["minimum"], places=12)
+                    self.assertAlmostEqual(actual["maximum"], expected["maximum"], places=12)
+
     def test_contributions_round_half_up_and_omit_invalid_source_values(self):
         source = curve("wildfire")
         source["points"] = [{"severity": 1, "frequency_pct": .005}, {"severity": True, "frequency_pct": 1},
@@ -98,33 +171,37 @@ class APIV1Tests(unittest.TestCase):
         self.assertEqual(result["frequency_basis"], "historical_annual_frequency")
 
     def fire_proximity_fixture(self):
-        def area_curve(radius, rows):
-            return {"radius_km": radius, "fire_count": 40, "total_years": 33, "largest_reported_acres": 250,
-                    "expected_annual_reported_acres": 12.5,
-                    "points": [{"min_acres": acres, "empirical_years_pct": pct, "annual_probability_pct": pct + 5}
-                               for acres, pct in rows]}
+        # 33 baseline years: ten 50-acre fires at 3 km, five 500-acre fires at 8 km, two 2,000-acre fires at 15 km.
+        rows = ([[year, 3.0, 50] for year in range(1992, 2002)] + [[year, 8.0, 500] for year in range(2002, 2007)]
+                + [[year, 15.0, 2000] for year in (2007, 2008)])
         return {"status": "available", "source_name": "USFS FPA FOD", "source_url": "https://example.org/fpa",
-                "baseline": {"start_year": 1992, "end_year": 2024},
-                "size_exceedance": {"area_exceedance": {"curves": [
-                    area_curve(5, [(0.1, 30.3), (10, 6.1), (100, 0)]),
-                    area_curve(10, [(0.1, 51.5), (10, 21.2), (100, 3.0), (1000, 0)]),
-                    area_curve(20, [(0.1, 90.9), (10, 63.6), (100, 12.1)])]}}}
+                "baseline": {"start_year": 1992, "end_year": 2024, "year_count": 33},
+                "size_exceedance": {"sized_fires": {"fields": ["year", "distance_km", "reported_acres"],
+                                                    "max_distance_km": 20, "rows": rows}}}
 
     def test_wildfire_uses_nearby_fire_sizes_and_observed_years(self):
-        with patch("api_v1.fire_proximity", return_value=self.fire_proximity_fixture()) as provider, \
-             patch("api_v1.disaster_at") as old_model:
+        share = lambda years: years / 33 * 100
+        with patch("api_v1.fire_proximity", return_value=self.fire_proximity_fixture()) as provider,              patch("api_v1.disaster_at") as old_model:
             status, payload = dispatch("/api/v1/hazards/wildfire", "lat=30.6&lon=-96.3")
             self.assertEqual(status, 200)
             data = payload["data"]
             self.assertEqual((data["peril"], data["unit"], data["radius_km"]), ("wildfire", "acres", 10))
             # Sizes never observed within the radius are left out rather than priced at 0%.
-            self.assertEqual([(p["severity"], p["frequency_pct"]) for p in data["points"]], [(0.1, 51.5), (10, 21.2), (100, 3.0)])
+            expected = [(acres, share(15)) for acres in (0.1, 0.3, 1, 3, 10, 30)] + [(100, share(5)), (300, share(5))]
+            self.assertEqual([(p["severity"], p["frequency_pct"]) for p in data["points"]], expected)
             self.assertEqual(data["record_period"], {"start_year": 1992, "end_year": 2024, "years": 33})
             self.assert_contract(payload, "/api/v1/hazards/{peril}")
+            # Any distance up to 20 km is computed from the records, not interpolated between radii.
+            status, between = dispatch("/api/v1/hazards/wildfire", "lat=30.6&lon=-96.3&radius_km=7.5")
+            self.assertEqual((status, between["data"]["radius_km"]), (200, 7.5))
+            self.assertEqual([(p["severity"], p["frequency_pct"]) for p in between["data"]["points"]][-1], (30, share(10)))
+            self.assertIn("within 7.5 km", between["data"]["metric"])
+            self.assert_contract(between, "/api/v1/hazards/{peril}")
             status, compared = dispatch("/api/v1/trigger-comparisons/wildfire", "lat=30.6&lon=-96.3&radius_km=20&payout_usd=10000")
             self.assertEqual(status, 200)
             self.assertEqual(compared["data"]["frequency_basis"], "historical_annual_frequency")
-            self.assertEqual(compared["data"]["comparisons"][1]["expected_annual_contribution_usd"]["minimum"], 6360)
+            self.assertEqual(compared["data"]["comparisons"][-1]["severity"], 1000)
+            self.assertAlmostEqual(compared["data"]["comparisons"][-1]["expected_annual_contribution_usd"]["minimum"], 606.06)
             self.assertIn("observed share of archive years", compared["data"]["assumptions"][-1])
             self.assert_contract(compared, "/api/v1/trigger-comparisons/{peril}")
             status, area = dispatch("/api/v1/areas/wildfire", "south=30&west=-97&north=31&east=-96&radius_km=5")
@@ -135,11 +212,27 @@ class APIV1Tests(unittest.TestCase):
         provider.assert_called_with(30.5, -96.5)
         old_model.assert_not_called()
 
+    def test_wildfire_custom_threshold_is_bounded_not_extrapolated(self):
+        with patch("api_v1.fire_proximity", return_value=self.fire_proximity_fixture()):
+            status, payload = dispatch("/api/v1/trigger-comparisons/wildfire",
+                                       "lat=30.6&lon=-96.3&radius_km=10&payout_usd=10000&threshold=5000")
+            custom = payload["data"]["custom_trigger"]
+            self.assertEqual((status, custom["method"], custom["bound"], custom["direction"]), (200, "bounded", "upper", "above"))
+            self.assertEqual(custom["basis_severities"], [300])
+            self.assertAlmostEqual(custom["frequency_pct"]["maximum"], 5 / 33 * 100)
+            self.assertIn("upper bound", custom["note"])
+            self.assertTrue(any("never extrapolated" in text for text in payload["data"]["assumptions"]))
+            self.assert_contract(payload, "/api/v1/trigger-comparisons/{peril}")
+            status, inside = dispatch("/api/v1/trigger-comparisons/wildfire",
+                                      "lat=30.6&lon=-96.3&radius_km=10&payout_usd=10000&threshold=50")
+            self.assertEqual(inside["data"]["custom_trigger"]["method"], "interpolated")
+        with patch("api_v1.disaster_at", return_value=curve("flood")):
+            status, flood = dispatch("/api/v1/trigger-comparisons/flood", "lat=30&lon=-97&payout_usd=1&threshold=99")
+        self.assertNotEqual(flood["data"]["custom_trigger"].get("method"), "bounded", "other hazards keep their tail rule")
+
     def test_wildfire_without_reported_fires_is_unavailable_not_zero(self):
-        empty = self.fire_proximity_fixture()
-        empty["size_exceedance"]["area_exceedance"]["curves"][1]["points"] = [{"min_acres": 0.1, "empirical_years_pct": 0}]
-        with patch("api_v1.fire_proximity", return_value=empty):
-            status, payload = dispatch("/api/v1/trigger-comparisons/wildfire", "lat=30.6&lon=-96.3&payout_usd=10000")
+        with patch("api_v1.fire_proximity", return_value=self.fire_proximity_fixture()):
+            status, payload = dispatch("/api/v1/trigger-comparisons/wildfire", "lat=30.6&lon=-96.3&radius_km=2&payout_usd=10000")
         self.assertEqual(status, 200)
         self.assertEqual(payload["data"]["status"], "unavailable")
         self.assertEqual(payload["data"]["comparisons"], [])
@@ -152,7 +245,10 @@ class APIV1Tests(unittest.TestCase):
                                 ("/api/v1/trigger-comparisons/fireline_intensity", "lat=30&lon=-97&payout_usd=1"),
                                 ("/api/v1/areas/potential_fire_intensity", "south=30&west=-97&north=31&east=-96"),
                                 ("/api/v1/monitoring-stations", "peril=fireline_intensity&lat=30&lon=-97"),
-                                ("/api/v1/hazards/wildfire", "lat=30&lon=-97&radius_km=15"),
+                                ("/api/v1/hazards/wildfire", "lat=30&lon=-97&radius_km=0"),
+                                ("/api/v1/hazards/wildfire", "lat=30&lon=-97&radius_km=20.5"),
+                                ("/api/v1/hazards/wildfire", "lat=30&lon=-97&radius_km=nan"),
+                                ("/api/v1/hazards/wildfire", "lat=30&lon=-97&radius_km=inf"),
                                 ("/api/v1/hazards/flood", "lat=30&lon=-97&radius_km=10")]:
                 with self.subTest(path=path, query=query):
                     status, payload = dispatch(path, query)

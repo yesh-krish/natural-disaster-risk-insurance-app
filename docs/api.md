@@ -1,6 +1,27 @@
 # NDApp Research API v1
 
-The current contract is **1.13.0**. Version 1.13.0 makes `wildfire` in
+The current contract is **1.15.0**. Version 1.15.0 adds `frp_summary` to
+`/api/v1/satellite-fires`: FRP (MW) minimum, median and maximum over every
+detection in the radius, plus an empirical FRP exceedance curve (share of those
+detections at or above each MW value). It is a share of detections, not an
+annual probability, and each overpass of a burning fire counts separately.
+For `wildfire`, `radius_km` now takes any distance above 0 up to 20 km (it
+was 5, 10 or 20), so a trigger combines two measures: fire size (acres) and
+distance (km). The share of years is counted directly from the reported fires
+within that distance; nothing is interpolated between distances. Beyond 20 km is
+rejected because fires farther away are not retrieved. `/api/v1/fire-proximity`
+adds `size_exceedance.sized_fires`: every sized baseline fire within 20 km as
+`[year, distance_km, reported_acres]`, so clients can do the same.
+A wildfire `threshold` is never extrapolated: above the largest observed size
+`custom_trigger` returns the frequency at that size as an upper bound
+(`method: bounded`, `bound: upper`), and below the smallest a lower bound. Other
+hazards still extrapolate as described under [Custom thresholds](#custom-thresholds).
+Version 1.14.0 adds an optional `threshold`
+to `/api/v1/trigger-comparisons`: the response gains `custom_trigger`, an
+estimated exceedance frequency and contribution for any threshold, using the same
+method as the map's custom-threshold option (see
+[Custom thresholds](#custom-thresholds)). The comparison rows are unchanged and
+remain source levels only. Version 1.13.0 makes `wildfire` in
 `/api/v1/hazards`, `/api/v1/trigger-comparisons` and `/api/v1/areas` use the
 nearby reported-fire method, the same one the map uses: each point is a fire
 size in acres and the share of record years (FPA FOD, currently 1992–2024) with
@@ -74,12 +95,12 @@ Use `server.py --port 8001` to run a separate instance on another port.
 | `/api/v1/weather-alerts` | `address` OR both `lat`, `lon` | Actual active NWS point-alert products with agency text, timestamps and verified point coverage |
 | `/api/v1/flood-zone-context` | `address` OR both `lat`, `lon` | All intersecting FEMA NFHL flood-zone attributes, source units and elevation datum; no polygon means unavailable coverage |
 | `/api/v1/assessment` | `address` OR both `lat`, `lon`; optional `hazards` (comma list of `flood`, `earthquake`, `wildfire`; default all) | Full agent evidence screening: facts with evidence IDs and JSON Pointers, `hazard_status`, gaps, evidence sources and SHA-256 fingerprints. `assessment_status` is complete, partial, unavailable, awaiting_input or failed. Typically 10–40 s; needs `requirements-agent.txt` on the server |
-| `/api/v1/satellite-fires` | `address` OR both `lat`, `lon`; optional `radius_km` (1–100, default 25), `window` (`24h` default, `48h`, `7d`) | NASA FIRMS VIIRS (NOAA-20, NOAA-21) detections in the chosen rolling US file, nearest first, with time, age, confidence, FRP (MW) and per-satellite status. Thermal anomalies, not confirmed fires; none found is not "no fire"; contiguous US and Hawaii only |
+| `/api/v1/satellite-fires` | `address` OR both `lat`, `lon`; optional `radius_km` (1–100, default 25), `window` (`24h` default, `48h`, `7d`) | NASA FIRMS VIIRS (NOAA-20, NOAA-21) detections in the chosen rolling US file, nearest first, with time, age, confidence, FRP (MW) and per-satellite status; `frp_summary` gives FRP min/median/max and the share of detections at or above each MW value. Thermal anomalies, not confirmed fires; none found is not "no fire"; contiguous US and Hawaii only |
 | `/api/v1/elevation-context` | `address` OR both `lat`, `lon` | USGS 3DEP bare-earth elevation in meters (datum not stated by the service); no-data returns unavailable; upstream can take up to 30 s |
 | `/api/v1/recent-earthquakes` | `address` OR both `lat`, `lon`; optional `radius_km` (1–300, default 100), `days` (1–3650, default 365), `min_magnitude` (0–9.5, default 2.5) | Full USGS ComCat count plus up to the 100 largest events with epicentral distances; historical catalog, not a probability |
 | `/api/v1/risk-index` | `address` OR both `lat`, `lon` | FEMA National Risk Index ratings, scores and expected annual loss for the intersecting census tract; tract-wide relative index, not property risk |
-| `/api/v1/hazards/{peril}` | `address` OR both `lat`, `lon`; `radius_km` (5, 10, 20) for wildfire | Source severity–frequency points, units, sources and model details. Wildfire: fire size (acres) vs share of years with such a fire nearby |
-| `/api/v1/trigger-comparisons/{peril}` | `payout_usd`, plus `address` OR both `lat`, `lon`; `radius_km` for wildfire | Alternative supported point thresholds and annual contributions |
+| `/api/v1/hazards/{peril}` | `address` OR both `lat`, `lon`; `radius_km` for wildfire (any distance above 0 up to 20 km, default 10) | Source severity–frequency points, units, sources and model details. Wildfire: fire size (acres) vs share of years with such a fire nearby |
+| `/api/v1/trigger-comparisons/{peril}` | `payout_usd`, plus `address` OR both `lat`, `lon`; `radius_km` for wildfire; optional `threshold` | Alternative supported point thresholds and annual contributions; with `threshold`, a `custom_trigger` estimate for that value |
 | `/api/v1/areas/{peril}` | `south`, `west`, `north`, `east`; `radius_km` for wildfire | 25-point grid means and per-threshold/per-sample coverage. Wildfire: the nearby-fire curve at the area's center |
 | `/api/v1/monitoring-stations` | `address` OR both `lat`, `lon`; optional `n`, and either `peril` or `network=awc_metar` | `peril` + `n` (1.10.0): nearest n stations in that hazard's own network (USGS stream or precipitation gauges, EarthScope seismic, NIFC RAWS, METAR wind for cyclone). `network=awc_metar` (or neither): nearest n METAR weather stations with observations. `peril` alone: legacy single station |
 
@@ -212,8 +233,9 @@ keep their original formats for compatibility.
 
 This row is illustrative, not a measured site result. Equal minimum and maximum
 values indicate a single source frequency. Multiple source frequencies at the
-same rounded severity retain their range. No unsupported threshold is created,
-interpolated or extrapolated. `payout_usd` is required, accepts zero, has at most
+same rounded severity retain their range. The `comparisons` rows never contain
+an unsupported, interpolated or extrapolated threshold; estimates for other values
+are returned separately in `custom_trigger` (below). `payout_usd` is required, accepts zero, has at most
 two decimal places, and is limited to 1 trillion USD. Contributions are rounded
 to cents using half-up rounding.
 
@@ -226,6 +248,39 @@ Cyclone `frequency_basis` is `historical_annual_frequency`, not calibrated futur
 probability. Wildfire uses `research_estimate`; other supported hazards use
 `modeled_annual_probability`. Original provider notes remain in the result.
 Zero historical observations do not establish zero future risk.
+
+## Custom thresholds
+
+Add `threshold` (a non-negative number in the hazard's unit: m, %g, kn, mm, °C or
+acres; for `auto`, the unit of the hazard selected) to a trigger-comparisons
+request to price a threshold the source does not list:
+
+```bash
+curl "http://127.0.0.1:8000/api/v1/trigger-comparisons/earthquake?lat=29.4241&lon=-98.4936&payout_usd=50000&threshold=10"
+```
+
+`data.custom_trigger` then holds:
+
+| Field | Meaning |
+| --- | --- |
+| `method` | `source` (matches a supplied level, used directly), `interpolated`, `extrapolated`, or `bounded` (wildfire only: outside the observed sizes, so the edge frequency is returned as a bound and nothing is extrapolated) |
+| `estimate` | `false` only for `source` |
+| `frequency_pct`, `expected_annual_contribution_usd` | `{minimum, maximum}`, as in the rows; duplicate rounded levels carry their range through |
+| `basis_severities` | The source levels the value was derived from |
+| `direction` | `above` or `below` the supplied range when extrapolated, otherwise null |
+| `bound` | `upper` or `lower` when the source gives no slope at that edge, so the edge frequency is returned as a bound, not an estimate (a 0% top level gives 0% as an upper bound) |
+| `reach_segment_widths` | Extrapolation distance past the data in widths of the fitted segment; above 1 is highly uncertain |
+| `note` | Plain-language description of how the value was obtained |
+
+Method: between two source levels, exceedance is interpolated linearly in
+log-probability (linearly if either level is 0%). Beyond the supplied range, the
+log-probability slope of the nearest segment is extended (an exponential tail),
+capped at 100%. Real tails, especially for earthquake shaking and wind, may be
+heavier, so far extrapolations can understate the probability. With only one
+source level, or when the source has no annual probabilities, `custom_trigger`
+has `status: unavailable` and a `reason`; the request itself still succeeds.
+A negative or non-numeric `threshold` returns 400. The map and API share this
+method (`hazard_trigger.js` and `custom_trigger.py`) and give the same numbers.
 
 Area analysis averages available grid-point probabilities at each severity,
 using the map's existing interpolation rules. It reports evaluated, missing,

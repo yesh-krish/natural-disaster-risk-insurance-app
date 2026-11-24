@@ -69,7 +69,7 @@ The fireline-intensity, **potential intensity (kW/m)** and **flame length (FSim)
 wildfire options have been removed from the map (the last two on November 10,
 2026), and "Choose most relevant" no longer selects flame length. Since API 1.13.0
 the public API no longer offers them either: its `wildfire` hazard uses the nearby
-reported-fire method (acres within 5, 10 or 20 km, share of years). Their research
+reported-fire method (acres within a chosen distance up to 20 km, share of years). Their research
 notes remain ([TxWRAP record](docs/fireline-intensity.md),
 [potential intensity method](docs/potential-fire-intensity.md)).
 

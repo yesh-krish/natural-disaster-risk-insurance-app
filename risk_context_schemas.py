@@ -50,6 +50,17 @@ def context_schemas():
                                "detection_count": {"type": "integer", "minimum": 0},
                                "returned_count": {"type": "integer", "minimum": 0, "maximum": 200},
                                "nearest_km": number, "newest_age_hours": number,
+                               "frp_summary": {"type": "object", "required": ["unit", "detections_with_frp", "exceedance", "basis"],
+                                   "properties": {"unit": {"const": "MW"},
+                                       "detections_with_frp": {"type": "integer", "minimum": 0},
+                                       "detections_without_frp": {"type": "integer", "minimum": 0},
+                                       "minimum_mw": number, "median_mw": number, "maximum_mw": number,
+                                       "basis": {"type": "string"},
+                                       "exceedance": {"type": "array", "maxItems": 50, "items": {
+                                           "type": "object", "required": ["frp_mw", "detections_at_or_above", "share_pct"],
+                                           "properties": {"frp_mw": {"type": "number", "minimum": 0},
+                                               "detections_at_or_above": {"type": "integer", "minimum": 1},
+                                               "share_pct": {"type": "number", "minimum": 0, "maximum": 100}}}}}},
                                "sources": {"type": "array", "items": satellite_source},
                                "detections": {"type": "array", "maxItems": 200, "items": {
                                    "type": "object", "required": list(detection_fields), "properties": detection_fields}}}},

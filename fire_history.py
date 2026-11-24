@@ -34,16 +34,45 @@ class TooManyRecords(OSError):
     """The search envelope holds more records than the page budget allows."""
 
 
-def _json(url, params, deadline):
-    remaining = deadline - time.monotonic()
-    if remaining <= 0:
-        raise OSError("Fire-history lookup timed out")
+RETRY_ATTEMPTS = 4
+RETRY_DELAYS = (0.3, 0.8, 1.5)  # seconds before attempts 2, 3 and 4
+
+
+def _json_once(url, params, remaining):
     request = urllib.request.Request(url + "?" + urlencode(params), headers={"User-Agent": "NDApp-fire-history/1.0", "Accept": "application/json"})
     with urllib.request.urlopen(request, timeout=min(12, remaining)) as response:
         data = json.load(response)
     if not isinstance(data, dict) or "error" in data:
         raise OSError("Fire-history provider returned an error")
     return data
+
+
+def _json(url, params, deadline):
+    """ArcGIS JSON request, retried within the caller's deadline.
+
+    The USFS FPA FOD service intermittently answers a valid request with an
+    in-body {"error": {"code": 404, "message": "Layer not found"}} (observed
+    2026-11-22, roughly half of requests), apparently from some servers behind
+    its load balancer. Provider errors, network failures and malformed JSON are
+    retried; a failure on every attempt still raises, so no data is invented.
+    """
+    last = None
+    for attempt in range(RETRY_ATTEMPTS):
+        if attempt:
+            delay = RETRY_DELAYS[min(attempt, len(RETRY_DELAYS)) - 1]
+            if deadline - time.monotonic() <= delay:
+                break
+            time.sleep(delay)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        try:
+            return _json_once(url, params, remaining)
+        except (OSError, ValueError) as exc:  # URLError/HTTPError/timeouts are OSError; bad JSON is ValueError
+            last = exc
+    if last is None:
+        raise OSError("Fire-history lookup timed out")
+    raise OSError(f"Fire-history provider failed after retries: {last}") from last
 
 
 def envelopes(lat, lon, radius):

@@ -192,6 +192,65 @@ class Handler(SimpleHTTPRequestHandler):
                 print(f"Area government lookup failed: {type(exc).__name__}: {exc}")
                 return self.send_json(502, {"error": "Area hazard lookup failed. Try again shortly."})
             return self.send_json(200, payload)
+        if url.path == "/api/heat-stations":
+            from historical_heat import station_comparison
+            from hazard_engine import coordinates
+            query = parse_qs(url.query)
+            try:
+                lat, lon = float(query["lat"][0]), float(query["lon"][0])
+                coordinates(lat, lon)
+                raw_count = query.get("n", ["5"])[0]
+                if not raw_count.isdigit():
+                    raise ValueError("n")
+                count = int(raw_count)
+                if not 1 <= count <= 50:
+                    raise ValueError("n")
+            except (KeyError, IndexError, ValueError):
+                return self.send_json(400, {"error": "Supply valid lat, lon and n (1–50)."})
+            try:
+                return self.send_json(200, station_comparison(lat, lon, count))
+            except PROVIDER_ERRORS as exc:
+                print(f"Historical heat station comparison failed: {type(exc).__name__}: {exc}")
+                return self.send_json(502, {"error": "NOAA historical station data are unavailable. Try again shortly."})
+        if url.path == "/api/satellite-monitors":
+            from satellite_fire_history import DEFAULT_RADIUS_KM, satellite_monitor_records, valid_radius
+            from hazard_engine import ModelUnavailable, coordinates
+            query = parse_qs(url.query)
+            try:
+                lat, lon = float(query["lat"][0]), float(query["lon"][0])
+                coordinates(lat, lon)
+                radius_km = valid_radius(query.get("radius_km", [str(DEFAULT_RADIUS_KM)])[0])
+            except (KeyError, IndexError, ValueError):
+                return self.send_json(400, {"error": "Supply valid lat, lon and radius_km (0.5–100)."})
+            try:
+                return self.send_json(200, satellite_monitor_records(lat, lon, radius_km))
+            except ModelUnavailable as exc:
+                return self.send_json(200, {"kind": "satellite", "status": "unavailable", "reason": str(exc), "stations": [],
+                                            "requested_stations": 0, "station_limit": 0, "stations_within_radius": 0,
+                                            "radius_km": radius_km, "minimum_years": 20, "notes": []})
+            except PROVIDER_ERRORS as exc:
+                print(f"Satellite monitor records failed: {type(exc).__name__}: {exc}")
+                return self.send_json(502, {"error": "Satellite fire archives could not be read."})
+        if url.path == "/api/station-records":
+            from station_records import KINDS, station_records
+            from hazard_engine import coordinates
+            query = parse_qs(url.query)
+            try:
+                kind = query["kind"][0]
+                if kind not in KINDS:
+                    raise ValueError("kind")
+                lat, lon = float(query["lat"][0]), float(query["lon"][0])
+                coordinates(lat, lon)
+                raw_count = query.get("n", ["5"])[0]
+                if not raw_count.isdigit() or not 1 <= int(raw_count) <= 50:
+                    raise ValueError("n")
+            except (KeyError, IndexError, ValueError):
+                return self.send_json(400, {"error": "Supply kind (rainfall, wind or flood), valid lat, lon and n (1–50)."})
+            try:
+                return self.send_json(200, station_records(kind, lat, lon, int(raw_count)))
+            except PROVIDER_ERRORS as exc:
+                print(f"Station records ({kind}) failed: {type(exc).__name__}: {exc}")
+                return self.send_json(502, {"error": "Station record service is unavailable. Try again shortly."})
         if url.path == "/api/disaster":
             from disaster_data import disaster_at
             from hazard_engine import coordinates
@@ -200,19 +259,25 @@ class Handler(SimpleHTTPRequestHandler):
                 lat, lon = float(query["lat"][0]), float(query["lon"][0])
                 coordinates(lat, lon)
                 peril = query["peril"][0]
-                if peril not in {"auto", "earthquake", "flood", "wildfire", "fireline_intensity", "potential_fire_intensity", "cyclone", "rainfall", "heat"}:
+                if peril not in {"auto", "earthquake", "flood", "wildfire", "fireline_intensity", "potential_fire_intensity", "cyclone", "rainfall", "heat", "satellite_fire"}:
                     raise ValueError("Unknown disaster")
                 site_class = query.get("site_class", ["BC"])[0]
                 if site_class not in {"A", "B", "BC", "C", "CD", "D", "DE", "E"}:
                     raise ValueError("Unknown site class")
+                radius_km = None
+                if "radius_km" in query:
+                    from satellite_fire_history import valid_radius
+                    if peril != "satellite_fire":
+                        raise ValueError("radius_km")
+                    radius_km = valid_radius(query["radius_km"][0])
             except (KeyError, IndexError, ValueError):
-                return self.send_json(400, {"error": "Supply valid lat, lon, peril and site_class."})
+                return self.send_json(400, {"error": "Supply valid lat, lon, peril and site_class (radius_km from 0.5 to 100 km, satellite fire only)."})
             try:
                 if peril == "auto":
                     from hazard_relevance import most_relevant
                     payload = most_relevant(lat, lon, site_class)
                 else:
-                    payload = disaster_at(peril, lat, lon, site_class)
+                    payload = disaster_at(peril, lat, lon, site_class, radius_km=radius_km)
             except PROVIDER_ERRORS as exc:
                 print(f"{peril} government lookup failed: {type(exc).__name__}: {exc}")
                 return self.send_json(502, {"error": "Government data service is unavailable. Try again shortly."})

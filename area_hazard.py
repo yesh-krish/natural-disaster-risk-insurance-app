@@ -5,7 +5,7 @@ import math
 from disaster_data import disaster_at
 from hazard_engine import coordinates
 
-PERILS = {"auto", "earthquake", "flood", "wildfire", "fireline_intensity", "potential_fire_intensity", "cyclone", "rainfall", "heat"}
+PERILS = {"auto", "earthquake", "flood", "wildfire", "fireline_intensity", "potential_fire_intensity", "cyclone", "rainfall", "heat", "satellite_fire"}
 SITE_CLASSES = {"A", "B", "BC", "C", "CD", "D", "DE", "E"}
 
 
@@ -76,6 +76,11 @@ def area_disaster(south, west, north, east, peril, site_class="BC", *, provider=
         reason = "Historical heat uses a qualifying station record as a point proxy. Select Point mode; an area heat curve is not available and stations are not averaged across a rectangle."
         area.update(available_samples=0, method=reason)
         return {"peril": "heat", "status": "unavailable", "points": [], "area": area,
+                "reason": reason, "frequency_basis": "historical_annual_frequency"}
+    if peril == "satellite_fire":
+        reason = "Satellite fire exceedance counts detections within a radius of one point. Select Point mode; grid-point probabilities of overlapping circles are not averaged."
+        area.update(available_samples=0, method=reason)
+        return {"peril": "satellite_fire", "status": "unavailable", "points": [], "area": area,
                 "reason": reason, "frequency_basis": "historical_annual_frequency"}
     locations = [(south + (north - south) * row / 4, west + (east - west) * col / 4)
                  for row in range(5) for col in range(5)]

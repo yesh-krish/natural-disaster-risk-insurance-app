@@ -1,4 +1,4 @@
-"""Satellite active-fire observations near a point: NASA FIRMS VIIRS, last ~24 hours.
+"""Satellite active-fire observations near a point: NASA FIRMS VIIRS, last ~1–8 days.
 
 A detection is a thermal anomaly seen in a ~375 m pixel at an overpass. It is
 not a confirmed wildfire (prescribed burns, flares and industry also appear), and
@@ -19,7 +19,9 @@ from hazard_engine import coordinates
 
 HOST = "firms.modaps.eosdis.nasa.gov"
 # FIRMS publishes the same rolling US files in three lengths; all checked live on 2026-11-10.
-WINDOWS = {"24h": "about the last 24 hours", "48h": "about the last 48 hours", "7d": "about the last 7 days"}
+# Files hold whole UTC days, so each reaches back further than its name (checked
+# 2026-11-22: "24h" up to ~46 h old, "48h" ~71 h, "7d" ~196 h).
+WINDOWS = {"24h": "about the last 1–2 days", "48h": "about the last 2–3 days", "7d": "about the last 7–8 days"}
 DEFAULT_WINDOW = "24h"
 _FILES = {"NOAA-20": ("noaa-20-viirs-c2", "J1"), "NOAA-21": ("noaa-21-viirs-c2", "J2")}
 
@@ -142,6 +144,33 @@ def _source(satellite, url, now):
     return entry
 
 
+FRP_CURVE_POINTS = 50
+FRP_BASIS = ("Share of this window's detections within the radius whose FRP is at or above each value. It is conditional "
+             "on a detection, counts every overpass of a burning fire separately, and is not an annual probability, "
+             "a fire-intensity exceedance or the chance of fire at this location.")
+
+
+def frp_summary(detections):
+    """Empirical FRP (MW) distribution of the detections: an exceedance share, not an annual probability."""
+    values = sorted((d["frp_mw"] for d in detections if d.get("frp_mw") is not None), reverse=True)
+    n = len(values)
+    summary = {"unit": "MW", "detections_with_frp": n, "detections_without_frp": len(detections) - n,
+               "minimum_mw": values[-1] if n else None, "maximum_mw": values[0] if n else None,
+               "median_mw": round((values[(n - 1) // 2] + values[n // 2]) / 2, 3) if n else None,
+               "basis": FRP_BASIS, "exceedance": []}
+    # One point per distinct value (count of detections at or above it), largest first.
+    distinct = []
+    for index, value in enumerate(values):
+        if index + 1 == n or values[index + 1] != value:
+            distinct.append((value, index + 1))
+    if len(distinct) > FRP_CURVE_POINTS:
+        step = (len(distinct) - 1) / (FRP_CURVE_POINTS - 1)
+        distinct = [distinct[round(i * step)] for i in range(FRP_CURVE_POINTS)]
+    summary["exceedance"] = [{"frp_mw": value, "detections_at_or_above": count,
+                              "share_pct": round(100 * count / n, 4)} for value, count in distinct]
+    return summary
+
+
 def satellite_fire_detections(lat, lon, radius_km=DEFAULT_RADIUS_KM, window=DEFAULT_WINDOW):
     coordinates(lat, lon)
     if isinstance(radius_km, bool) or not isinstance(radius_km, (int, float)) or not 1 <= radius_km <= MAX_RADIUS_KM:
@@ -181,6 +210,7 @@ def satellite_fire_detections(lat, lon, radius_km=DEFAULT_RADIUS_KM, window=DEFA
             "returned_count": min(len(found), MAX_RETURNED), "detections": found[:MAX_RETURNED],
             "nearest_km": found[0]["distance_km"] if found else None,
             "newest_age_hours": min((d["age_hours"] for d in found), default=None),
+            "frp_summary": frp_summary(found),
             "sources": sources,
             "reason": (f"Partial: {', '.join(failed)} could not be retrieved; detections from other satellites shown. " if failed else "")
                       + ("" if found else "No satellite detections in this window and radius. This does not mean there is no fire.")

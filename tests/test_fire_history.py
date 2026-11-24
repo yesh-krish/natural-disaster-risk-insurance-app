@@ -17,6 +17,26 @@ class FireHistoryTests(unittest.TestCase):
     def setUp(self):
         history._cache.clear()
 
+    def test_provider_errors_are_retried_within_the_deadline(self):
+        import time
+        flaky = OSError("Fire-history provider returned an error")  # e.g. intermittent "Layer not found"
+        with patch.object(history, "_json_once", side_effect=[flaky, ValueError("bad JSON"), {"name": "layer"}]) as fetch, \
+             patch.object(history.time, "sleep") as sleep:
+            self.assertEqual(history._json("https://x", {}, time.monotonic() + 60), {"name": "layer"})
+        self.assertEqual(fetch.call_count, 3)
+        self.assertEqual([c.args[0] for c in sleep.call_args_list], [0.3, 0.8])
+        with patch.object(history, "_json_once", side_effect=flaky) as fetch, patch.object(history.time, "sleep"), \
+             self.assertRaisesRegex(OSError, "failed after retries"):
+            history._json("https://x", {}, time.monotonic() + 60)
+        self.assertEqual(fetch.call_count, history.RETRY_ATTEMPTS, "every attempt failing still raises; nothing is invented")
+        with patch.object(history, "_json_once", side_effect=flaky) as fetch, patch.object(history.time, "sleep") as sleep, \
+             self.assertRaises(OSError):
+            history._json("https://x", {}, time.monotonic() + 0.1)
+        self.assertEqual((fetch.call_count, sleep.call_count), (1, 0), "no retry sleeps past the caller's deadline")
+        with patch.object(history, "_json_once") as fetch, self.assertRaisesRegex(OSError, "timed out"):
+            history._json("https://x", {}, time.monotonic() - 1)
+        fetch.assert_not_called()
+
     def test_older_nearer_record_beats_recent_fire_across_sources(self):
         def records(source, lat, lon, radius, deadline, max_pages=100):
             return [feature(source, 1, -98.001 if source["id"] == "fpa_fod" else -98.01,

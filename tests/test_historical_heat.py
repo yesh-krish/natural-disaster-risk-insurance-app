@@ -145,6 +145,45 @@ class HistoricalHeatTests(unittest.TestCase):
         Draft202012Validator({**schema, "components": spec["components"]}, format_checker=FormatChecker()).validate(payload)
         self.assertEqual(dispatch("/api/v1/monitoring-stations", "peril=heat&lat=29.4&lon=-98.5")[0], 400)
 
+    def test_station_comparison_lists_each_station_separately_and_caps_at_ten(self):
+        stations = [station(f"USW{index:08d}", lon=-98.5 - index * 0.01) for index in range(12)]
+        short = heat.annual_maxima(record(range(1991, 2001)), ID)
+        def years(identifier, day):
+            if identifier.endswith("01"):
+                raise OSError("NOAA offline")
+            return (short if identifier.endswith("02") else self.years), SOURCE
+        with patch.object(heat, "station_catalog", return_value=(stations, [SOURCE])), \
+             patch.object(heat, "station_years", side_effect=years) as provider:
+            result = heat.station_comparison(29.4, -98.5, 50)
+            self.assertEqual(provider.call_count, 10)
+            self.assertEqual(len(heat.station_comparison(29.4, -98.5, 3)["stations"]), 3)
+        self.assertEqual((result["requested_stations"], result["station_limit"], result["stations_within_radius"]), (50, 10, 12))
+        rows = result["stations"]
+        self.assertEqual([row["id"] for row in rows], [row["id"] for row in stations[:10]], "nearest first")
+        self.assertEqual(rows[0]["status"], "available")
+        self.assertEqual(rows[0]["annual_maxima_c"].count(40), 10)
+        self.assertAlmostEqual({p["severity"]: p for p in rows[0]["points"]}[40]["frequency_pct"], 100/3)
+        self.assertEqual(rows[1]["status"], "source_unavailable", "a download failure is not reported as missing coverage")
+        self.assertIsNone(rows[1]["complete_years"])
+        self.assertEqual((rows[2]["status"], rows[2]["complete_years"], rows[2]["points"]), ("insufficient_years", 10, []))
+        self.assertNotIn("frequency_pct", result, "stations are never averaged")
+        json.dumps(result, allow_nan=False)
+        for bad in (0, 51, True, "5"):
+            with self.assertRaises(ValueError):
+                heat.station_comparison(29.4, -98.5, bad)
+
+    def test_station_comparison_endpoint_validates_n(self):
+        from tests.test_api_v1 import http_request
+        with patch.object(heat, "station_catalog", return_value=([station()], [SOURCE])), \
+             patch.object(heat, "station_years", return_value=(self.years, SOURCE)):
+            status, _, body = http_request("/api/heat-stations?lat=29.4&lon=-98.5&n=12")
+            self.assertEqual(status, 200)
+            self.assertEqual(json.loads(body)["stations"][0]["id"], ID)
+            for query in ("lat=29.4&lon=-98.5&n=0", "lat=29.4&lon=-98.5&n=51", "lat=29.4&lon=-98.5&n=2.5", "lat=91&lon=0"):
+                self.assertEqual(http_request("/api/heat-stations?" + query)[0], 400, query)
+        with patch.object(heat, "station_catalog", side_effect=OSError("NOAA offline")):
+            self.assertEqual(http_request("/api/heat-stations?lat=29.4&lon=-98.5")[0], 502)
+
     def test_catalog_metadata_inventory_units_and_baseline_screen(self):
         def metadata(identifier):
             return f"{identifier} {29.4:8.4f} {-98.5:9.4f} {100:6.1f} TX {'Test airport':30s} GSN     \n"
@@ -153,6 +192,7 @@ class HistoricalHeatTests(unittest.TestCase):
         raw_metadata = metadata(ID) + metadata("USW00000002")
         raw_inventory = inventory(ID) + inventory("USW00000002", start=1992)
         heat.station_catalog.cache_clear()
+        heat.ghcn_index.cache_clear()
         try:
             with patch.object(heat, "_resource", side_effect=lambda name, limit: (raw_inventory if "inventory" in name else raw_metadata, SOURCE)):
                 stations, provenance = heat.station_catalog(0)
@@ -161,6 +201,7 @@ class HistoricalHeatTests(unittest.TestCase):
             self.assertEqual(len(provenance), 2)
         finally:
             heat.station_catalog.cache_clear()
+            heat.ghcn_index.cache_clear()
 
 
 if __name__ == "__main__":

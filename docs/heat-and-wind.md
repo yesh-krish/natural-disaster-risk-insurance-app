@@ -89,6 +89,24 @@ illustration, not a forward-looking price. `cyclone` keys/formulas and all other
 hazard computations are preserved. Heat does not enter automatic county hazard
 ranking or the separate research-engine bundle/schema.
 
+**Per-station table (added November 22, 2026).** Below the annual-maxima table,
+Point mode lists each nearby baseline-spanning station's own exceedance, nearest
+first, via `GET /api/heat-stations?lat=…&lon=…&n=…` (`station_comparison` in
+`historical_heat.py`). The row count follows the viewer's **Stations (n)** box
+(1–50 accepted) but is capped at **10**, because each station is a separate NOAA
+daily-record download (the station-record cache holds 16). Only stations within
+100 km are listed, so fewer than `n` rows can appear. Each available row uses the
+same complete-year rule and 20-year minimum as the main curve; the "years at or
+above threshold" column is recomputed in the browser from that station's annual
+maxima for the current trigger temperature. Rows with fewer than 20 complete years
+still show their % with the year count, labelled as an unreliable short record (rows
+with zero complete years show the reason). The main curve still requires 20
+complete years. A download failure is labelled as a source failure, not missing
+coverage. Stations are never averaged or combined, and the main curve, trigger and
+contribution still use the single nearest qualifying station (marked in the
+table). This route is internal to the viewer; the public `/api/v1` contract is
+unchanged.
+
 This first historical release supports **Point mode** using a station proxy.
 Area requests explicitly return unavailable rather than averaging repeated
 copies of one station record over a grid. A one-day annual maximum does not
